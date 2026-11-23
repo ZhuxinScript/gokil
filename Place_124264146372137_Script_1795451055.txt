@@ -1,0 +1,160 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishingReelFocus
+-- Took 1.46s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReelFocus = game:GetService("ReplicatedStorage"):WaitForChild("FishingReelEffects"):WaitForChild("ReelFocus")
+local MaxSize = ReelFocus:GetAttribute("MaxSize")
+local FadeInSeconds = ReelFocus:GetAttribute("FadeInSeconds")
+local r5 = ReelFocus:IsA("BlurEffect") and (typeof(MaxSize) == "number" and MaxSize > 0 and typeof(FadeInSeconds) == "number" and FadeInSeconds > 0)
+assert(r5, "FishingReelEffects.ReelFocus must be a BlurEffect with positive MaxSize and FadeInSeconds")
+local LocalPlayer = Players.LocalPlayer
+Players = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("FishingReelFocusGui")
+r5 = Players:WaitForChild("Subjects")
+local World = r5:WaitForChild("World")
+local FocusCamera = Instance.new("Camera")
+FocusCamera.Name = "FocusCamera"
+FocusCamera.Parent = r5
+r5.CurrentCamera = FocusCamera
+r5 = {
+    "LuaSourceContainer", "JointInstance", "WeldConstraint", "Constraint", "Animator", "Sound", "LayerCollector",
+    "ParticleEmitter", "Trail", "Beam", "Light", "ForceField", "ProximityPrompt", "ClickDetector"
+}
+local r8 = {}
+local r9
+local function pairChildren(r0: userdata, r1: userdata, r2: { any }) -- Line: 114 | Name: pairChildren | Upvalues: ("pairChildren" (copy))
+    local Children = r1:GetChildren()
+    local r4 = 1
+    local Children_2, r6, r7 = r0:GetChildren()
+    for r8, r9 in Children_2, r6, r7 do
+        if r9.Archivable then
+            local r10 = Children[r4]
+            r4 += 1
+            if r10 == nil or r10.Name ~= r9.Name or r10.ClassName ~= r9.ClassName then return false end
+            if r9:IsA("BasePart") then
+                table.insert(r2.parts, {source = r9, copy = r10})
+            elseif r9:IsA("Bone") then
+                table.insert(r2.bones, {source = r9, copy = r10})
+            end
+            if not pairChildren(r9, r10, r2) then return false end
+        end
+    end
+    return true
+end
+local function prepareCopy(r0: userdata) -- Line: 143 | Name: prepareCopy | Upvalues: ("r5" (copy))
+    local Descendants, r2, r3 = r0:GetDescendants()
+    for r4, r5_p1 in Descendants, r2, r3 do
+        local r6 = false
+        for r10, r11 in r5 do
+            if not r5_p1:IsA(r11) then continue end
+            r5_p1:Destroy()
+            r6 = true
+            break
+        end
+        if r6 then
+        elseif r5_p1:IsA("BasePart") then
+            r5_p1.Anchored = true
+            r5_p1.CanCollide = false
+            r5_p1.CanTouch = false
+            r5_p1.CanQuery = false
+            r5_p1.CastShadow = false
+        elseif not r5_p1:IsA("Humanoid") then
+        else
+            r5_p1.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            r5_p1.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+            r5_p1.RequiresNeck = false
+            r5_p1.BreakJointsOnDeath = false
+            r5_p1.EvaluateStateMachine = false
+        end
+    end
+end
+local function copySubject(r0: userdata) -- Line: 175 | Name: copySubject | Upvalues: ("pairChildren" (copy), "prepareCopy" (copy), "World" (copy))
+    local Archivable = r0.Archivable
+    r0.Archivable = true
+    local r2 = r0:Clone()
+    r0.Archivable = Archivable
+    if r2 == nil then
+        warn("FishingReelFocus could not copy " .. r0:GetFullName())
+        return nil
+    end
+    Archivable = {copy = r2, parts = {}, bones = {}}
+    if not pairChildren(r0, r2, Archivable) then
+        warn("FishingReelFocus copy of " .. r0:GetFullName() .. " did not match its source; some pieces will not follow it")
+    end
+    prepareCopy(r2)
+    r2.Parent = World
+    return Archivable
+end
+local function mirrorSubject(r0: { any }) -- Line: 198 | Name: mirrorSubject
+    for r4, r5 in r0.parts do
+        r5.copy.CFrame = r5.source.CFrame
+        if r5.copy.Transparency ~= r5.source.Transparency then
+            r5.copy.Transparency = r5.source.Transparency
+        end
+    end
+    for r4, r5 in r0.bones do
+        r5.copy.Transform = r5.source.Transform
+    end
+end
+local function isClearOfWater(r0: userdata) -- Line: 213 | Name: isClearOfWater
+    local Parent = r0.Parent
+    local r2 = if Parent then Parent:GetAttribute("WaterSurfacePosition") else nil
+    if typeof(r2) ~= "Vector3" then return true end
+    local BoundingBox, r4 = r0:GetBoundingBox()
+    local r7, r9 = math.abs(BoundingBox.RightVector.Y) * r4.X, math.abs(BoundingBox.UpVector.Y)
+    Parent = (r7 + r9 * r4.Y + math.abs(BoundingBox.LookVector.Y) * r4.Z) * 0.5
+    return r2.Y <= BoundingBox.Position.Y - Parent
+end
+local function engage(r0_p5: { any }) -- Line: 232 | Name: engage | Upvalues: ("ReelFocus" (copy), "copySubject" (copy), "LocalPlayer" (copy), "Players" (copy))
+    local r1 = ReelFocus:Clone()
+    r1.Size = 0
+    r1.Parent = r0_p5.camera
+    r0_p5.blur = r1
+    r1 = copySubject(r0_p5.fish)
+    if r1 then table.insert(r0_p5.subjects, r1) end
+    r1 = LocalPlayer.Character
+    if r1 and r1.Parent then
+        local r2_p5 = copySubject(r1)
+        if r2_p5 then table.insert(r0_p5.subjects, r2_p5) end
+    end
+    r0_p5.guiWasEnabled = Players.Enabled
+    Players.Enabled = true
+    r0_p5.focusedSeconds = 0
+end
+function r8.Stop() -- Line: 259 | Name: Stop | Upvalues: ("r9" (ref), "Players" (copy))
+    local __up0 = r9
+    r9 = nil
+    if not __up0 then return end
+    if __up0.blur then __up0.blur:Destroy() end
+    for r4, r5 in __up0.subjects do
+        r5.copy:Destroy()
+    end
+    if __up0.focusedSeconds ~= nil then Players.Enabled = __up0.guiWasEnabled end
+end
+function r8.Update(r0_p7: userdata, r1_p7: userdata, r2: number) -- Line: 281 | Name: Update | Upvalues: ("r9" (ref), "r8" (copy), "Players" (copy), "isClearOfWater" (copy), "engage" (copy), "FadeInSeconds" (copy), "MaxSize" (copy), "FocusCamera" (copy), "mirrorSubject" (copy))
+    local __up0 = r9
+    if not __up0 or __up0.fish ~= r1_p7 or __up0.camera ~= r0_p7 then
+        r8.Stop()
+        __up0 = {
+            camera = r0_p7, fish = r1_p7, subjects = {},
+            guiWasEnabled = Players.Enabled
+        }
+        r9 = __up0
+    end
+    if __up0.focusedSeconds == nil then
+        if not isClearOfWater(r1_p7) then return end
+        engage(__up0)
+    end
+    local r4 = __up0.focusedSeconds + math.max(0, r2)
+    __up0.focusedSeconds = r4
+    local r5 = math.clamp(r4 / FadeInSeconds, 0, 1)
+    r4 = __up0.blur
+    r4.Size = MaxSize * r5 * r5 * (3 - r5 * 2)
+    FocusCamera.FieldOfView = r0_p7.FieldOfView
+    FocusCamera.CFrame = r0_p7.CFrame
+    for r9_p7, r10 in __up0.subjects do
+        mirrorSubject(r10)
+    end
+end
+return r8

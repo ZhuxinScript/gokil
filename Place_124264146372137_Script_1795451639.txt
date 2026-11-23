@@ -1,0 +1,367 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishingLandingVFX
+-- Took 2.08s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+local Ripple = ReplicatedStorage:WaitForChild("FishingLandingEffects"):WaitForChild("Ripple")
+assert(Ripple:IsA("Model") and Ripple.PrimaryPart ~= nil, "FishingLandingEffects.Ripple must be a Model with a PrimaryPart")
+local Breach = ReplicatedStorage:WaitForChild("FishingLandingEffects"):WaitForChild("Breach")
+assert(Breach:IsA("Model") and Breach.PrimaryPart ~= nil, "FishingLandingEffects.Breach must be a Model with a PrimaryPart")
+ReplicatedStorage = {Landed = true, Floating = true}
+local r6 = {Struck = true, Submerged = true, Hooked = true}
+local r7 = {}
+local r8
+local r9 = {}
+local FishingLandingVisuals = Instance.new("Folder")
+FishingLandingVisuals.Name = "FishingLandingVisuals"
+FishingLandingVisuals.Parent = Workspace
+local function readPositiveNumber(r0: userdata, r1: string) -- Line: 106 | Name: readPositiveNumber
+    local r2 = r0:GetAttribute(r1)
+    local r4 = typeof(r2) == "number" and r2 > 0
+    assert(r4, r0:GetFullName() .. " requires positive attribute " .. r1)
+    return r2
+end
+local function findEmitter(r0: userdata, r1: string, r2: string) -- Line: 115 | Name: findEmitter
+    local r3 = r0.PrimaryPart:FindFirstChild(r1)
+    local r4 = r3 and r3:FindFirstChild(r2)
+    assert(r4 ~= nil and r4:IsA("ParticleEmitter"), r0:GetFullName() .. " is missing " .. r1 .. "." .. r2)
+    return r4
+end
+local function vfxEnabled() -- Line: 126 | Name: vfxEnabled | Upvalues: ("PlayerSettings" (copy), "Players" (copy))
+    return PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled")
+end
+local function emitAuthored(r0: userdata) -- Line: 131 | Name: emitAuthored | Upvalues: ("PlayerSettings" (copy), "Players" (copy))
+    if PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then
+        local EmitCount = r0:GetAttribute("EmitCount")
+        local r5 = typeof(EmitCount) == "number" and EmitCount > 0
+        assert(r5, r0:GetFullName() .. " requires positive attribute " .. "EmitCount")
+        r0:Emit(EmitCount)
+    end
+end
+local function emitBurst(r0: userdata, r1: userdata) -- Line: 140 | Name: emitBurst | Upvalues: ("PlayerSettings" (copy), "Players" (copy))
+    local BurstSpacingSeconds = r1:GetAttribute("BurstSpacingSeconds")
+    if typeof(BurstSpacingSeconds) ~= "number" then
+        if PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then
+            local EmitCount_2 = r1:GetAttribute("EmitCount")
+            local r7 = typeof(EmitCount_2) == "number" and EmitCount_2 > 0
+            assert(r7, r1:GetFullName() .. " requires positive attribute " .. "EmitCount")
+            r1:Emit(EmitCount_2)
+        end
+        return
+    end
+    local EmitCount = r1:GetAttribute("EmitCount")
+    local r5 = typeof(EmitCount) == "number" and EmitCount > 0
+    assert(r5, r1:GetFullName() .. " requires positive attribute " .. "EmitCount")
+    task.spawn(function() -- Line: 149 | Upvalues: ("EmitCount" (copy), "r0" (copy), "PlayerSettings" (upval), "Players" (upval), "r1" (copy), "BurstSpacingSeconds" (copy))
+        for i_0 = 1, EmitCount do
+            if r0.Parent == nil or not PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then return end
+            r1:Emit(1)
+            if i_0 < EmitCount then task.wait(BurstSpacingSeconds) end
+        end
+    end)
+end
+local function computeDrainSeconds(r0: userdata) -- Line: 165 | Name: computeDrainSeconds
+    local r1 = 0
+    local Descendants, r3, r4 = r0:GetDescendants()
+    for r5, r6 in Descendants, r3, r4 do
+        if r6:IsA("ParticleEmitter") then
+            local BurstSpacingSeconds = r6:GetAttribute("BurstSpacingSeconds")
+            local EmitCount = r6:GetAttribute("EmitCount")
+            local r10 = typeof(EmitCount) == "number" and EmitCount > 0
+            assert(r10, r6:GetFullName() .. " requires positive attribute " .. "EmitCount")
+            local r9 = if typeof(BurstSpacingSeconds) == "number" then BurstSpacingSeconds * (EmitCount - 1) else 0
+            r1 = math.max(r1, r6.Lifetime.Max + r9)
+        end
+    end
+    return r1
+end
+local r17 = computeDrainSeconds(Ripple)
+local r18 = computeDrainSeconds(Breach)
+local ReferenceFishLengthStuds = Breach:GetAttribute("ReferenceFishLengthStuds")
+local r20 = typeof(ReferenceFishLengthStuds) == "number" and ReferenceFishLengthStuds > 0
+assert(r20, Breach:GetFullName() .. " requires positive attribute " .. "ReferenceFishLengthStuds")
+local Surface = Ripple.PrimaryPart:FindFirstChild("Surface")
+r20 = Surface and Surface:FindFirstChild("IdleRings")
+assert(r20 ~= nil and r20:IsA("ParticleEmitter"), Ripple:GetFullName() .. " is missing " .. "Surface" .. "." .. "IdleRings")
+local PulseInterval = r20:GetAttribute("PulseInterval")
+local r22 = typeof(PulseInterval) == "number" and PulseInterval > 0
+assert(r22, r20:GetFullName() .. " requires positive attribute " .. "PulseInterval")
+local function createEffect(r0: { any }) -- Line: 192 | Name: createEffect | Upvalues: ("Ripple" (copy), "FishingLandingVisuals" (copy))
+    local WaterSurfacePosition = r0.model:GetAttribute("WaterSurfacePosition")
+    if typeof(WaterSurfacePosition) ~= "Vector3" then return nil end
+    local r2 = Ripple:Clone()
+    local r5 = CFrame.new(WaterSurfacePosition + vector.create(0, 0.029999999329447746, 0))
+    r2:PivotTo(r5)
+    r2.Parent = FishingLandingVisuals
+    r0.effect = r2
+    return r2
+end
+local function playLandingBurst(r0: userdata) -- Line: 208 | Name: playLandingBurst | Upvalues: ("emitBurst" (copy))
+    local Splash = r0.PrimaryPart:FindFirstChild("Splash")
+    local SplashBurst = Splash and Splash:FindFirstChild("SplashBurst")
+    assert(SplashBurst ~= nil and SplashBurst:IsA("ParticleEmitter"), r0:GetFullName() .. " is missing " .. "Splash" .. "." .. "SplashBurst")
+    emitBurst(r0, SplashBurst)
+    Splash = r0.PrimaryPart:FindFirstChild("Splash")
+    SplashBurst = Splash and Splash:FindFirstChild("Droplets")
+    assert(SplashBurst ~= nil and SplashBurst:IsA("ParticleEmitter"), r0:GetFullName() .. " is missing " .. "Splash" .. "." .. "Droplets")
+    emitBurst(r0, SplashBurst)
+    Splash = r0.PrimaryPart:FindFirstChild("Surface")
+    SplashBurst = Splash and Splash:FindFirstChild("Foam")
+    assert(SplashBurst ~= nil and SplashBurst:IsA("ParticleEmitter"), r0:GetFullName() .. " is missing " .. "Surface" .. "." .. "Foam")
+    emitBurst(r0, SplashBurst)
+    Splash = r0.PrimaryPart:FindFirstChild("Surface")
+    SplashBurst = Splash and Splash:FindFirstChild("LandingRings")
+    assert(SplashBurst ~= nil and SplashBurst:IsA("ParticleEmitter"), r0:GetFullName() .. " is missing " .. "Surface" .. "." .. "LandingRings")
+    emitBurst(r0, SplashBurst)
+end
+local function startIdlePulse(r0: { any }, r1: userdata) -- Line: 217 | Name: startIdlePulse | Upvalues: ("PulseInterval" (copy), "PlayerSettings" (copy), "Players" (copy))
+    local Surface = r1.PrimaryPart:FindFirstChild("Surface")
+    local IdleRings = Surface and Surface:FindFirstChild("IdleRings")
+    assert(IdleRings ~= nil and IdleRings:IsA("ParticleEmitter"), r1:GetFullName() .. " is missing " .. "Surface" .. "." .. "IdleRings")
+    r0.idleTask = task.spawn(function() -- Line: 220 | Upvalues: ("r0" (copy), "r1" (copy), "PulseInterval" (upval), "IdleRings" (copy), "PlayerSettings" (upval), "Players" (upval))
+        while true do
+            if r0.effect ~= r1 then break end
+            task.wait(PulseInterval)
+            if r0.effect ~= r1 then return end
+            local __up3 = IdleRings
+            if PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then
+                local EmitCount = __up3:GetAttribute("EmitCount")
+                local r5 = typeof(EmitCount) == "number" and EmitCount > 0
+                assert(r5, __up3:GetFullName() .. " requires positive attribute " .. "EmitCount")
+                __up3:Emit(EmitCount)
+            end
+        end
+    end)
+end
+local function releaseEffect(r0: { any }) -- Line: 233 | Name: releaseEffect | Upvalues: ("r17" (copy))
+    if r0.idleTask then
+        task.cancel(r0.idleTask)
+        r0.idleTask = nil
+    end
+    local effect = r0.effect
+    r0.effect = nil
+    if effect then
+        task.delay(r17, function() -- Line: 242 | Upvalues: ("effect" (copy))
+            effect:Destroy()
+        end)
+    end
+end
+local function stopBreachWatch(r0: { any }) -- Line: 249 | Name: stopBreachWatch
+    if r0.breachConnection then
+        r0.breachConnection:Disconnect()
+        r0.breachConnection = nil
+    end
+end
+local function playBreach(r0: userdata, r1: vector, r2_p15: number) -- Line: 260 | Name: playBreach | Upvalues: ("PlayerSettings" (copy), "Players" (copy), "Breach" (copy), "ReferenceFishLengthStuds" (copy), "FishingLandingVisuals" (copy), "emitBurst" (copy), "r18" (copy))
+    if not PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then return end
+    local FishLengthStuds = r0:GetAttribute("FishLengthStuds")
+    if typeof(FishLengthStuds) ~= "number" or FishLengthStuds <= 0 then
+        local BoundingBox, Descendants_2 = r0:GetBoundingBox()
+        FishLengthStuds = math.max(Descendants_2.X, Descendants_2.Y, Descendants_2.Z)
+    end
+    local r4 = Breach:Clone()
+    r4:ScaleTo(FishLengthStuds / ReferenceFishLengthStuds)
+    local new = CFrame.new
+    r4:PivotTo(new(r1.X, r2_p15 + 0.03, r1.Z))
+    r4.Parent = FishingLandingVisuals
+    local Descendants, r6, new = r4:GetDescendants()
+    for r8, r9 in Descendants, r6, new do
+        if r9:IsA("ParticleEmitter") then emitBurst(r4, r9) end
+    end
+    task.delay(r18, function() -- Line: 281 | Upvalues: ("r4" (copy))
+        r4:Destroy()
+    end)
+end
+local function checkBreach(r0: { any }) -- Line: 290 | Name: checkBreach | Upvalues: ("playBreach" (copy))
+    local HookedFish = r0.model:FindFirstChild("HookedFish")
+    local Lure = r0.model:FindFirstChild("Lure")
+    local WaterSurfacePosition = r0.model:GetAttribute("WaterSurfacePosition")
+    if HookedFish == nil or not HookedFish:IsA("Model") or Lure == nil or not Lure:IsA("BasePart") or typeof(WaterSurfacePosition) ~= "Vector3" then
+        return
+    end
+    if Lure.Position.Y < WaterSurfacePosition.Y then
+        r0.breachSeenBelow = true
+        return
+    end
+    if not r0.breachSeenBelow then return end
+    r0.breached = true
+    if r0.breachConnection then
+        r0.breachConnection:Disconnect()
+        r0.breachConnection = nil
+    end
+    playBreach(HookedFish, Lure.Position, WaterSurfacePosition.Y)
+end
+local function startBreachWatch(r0: { any }) -- Line: 315 | Name: startBreachWatch | Upvalues: ("checkBreach" (copy))
+    if r0.breached or not r0.breachArmed or r0.breachConnection then return end
+    r0.breachConnection = r0.model:GetAttributeChangedSignal("ReturnFishPivot"):Connect(function() -- Line: 319 | Upvalues: ("checkBreach" (upval), "r0" (copy))
+        checkBreach(r0)
+    end)
+    checkBreach(r0)
+end
+local function refresh(r0_p19: { any }) -- Line: 328 | Name: refresh | Upvalues: ("r6" (copy), "startBreachWatch" (copy), "ReplicatedStorage" (copy), "releaseEffect" (copy), "Ripple" (copy), "FishingLandingVisuals" (copy), "playLandingBurst" (copy), "PulseInterval" (copy), "PlayerSettings" (copy), "Players" (copy))
+    local CastState = r0_p19.model:GetAttribute("CastState")
+    if CastState == "Flying" then
+        r0_p19.sawFlying = true
+        return
+    end
+    if typeof(CastState) == "string" and r6[CastState] then r0_p19.breachArmed = true end
+    if CastState == "Retrieving" then
+        startBreachWatch(r0_p19)
+    elseif r0_p19.breachConnection then
+        r0_p19.breachConnection:Disconnect()
+        r0_p19.breachConnection = nil
+    end
+    if typeof(CastState) ~= "string" or not ReplicatedStorage[CastState] then
+        releaseEffect(r0_p19)
+        return
+    end
+    local effect = r0_p19.effect
+    local WaterSurfacePosition, r4_p19
+    if not effect then
+        WaterSurfacePosition = r0_p19.model:GetAttribute("WaterSurfacePosition")
+        if typeof(WaterSurfacePosition) ~= "Vector3" then
+            effect = nil
+        else
+            r4_p19 = Ripple:Clone()
+            local r7 = CFrame.new(WaterSurfacePosition + vector.create(0, 0.029999999329447746, 0))
+            r4_p19:PivotTo(r7)
+            r4_p19.Parent = FishingLandingVisuals
+            r0_p19.effect = r4_p19
+            effect = r4_p19
+        end
+    end
+    if effect == nil then return end
+    if not r0_p19.landed then
+        r0_p19.landed = true
+        if r0_p19.sawFlying then playLandingBurst(effect) end
+    end
+    if CastState == "Floating" and r0_p19.idleTask == nil then
+        local Surface = effect.PrimaryPart:FindFirstChild("Surface")
+        local IdleRings = Surface and Surface:FindFirstChild("IdleRings")
+        assert(IdleRings ~= nil and IdleRings:IsA("ParticleEmitter"), effect:GetFullName() .. " is missing " .. "Surface" .. "." .. "IdleRings")
+        r0_p19.idleTask = task.spawn(function() -- Line: 220 | Upvalues: ("r0_p19" (copy), "effect" (copy), "PulseInterval" (upval), "IdleRings" (copy), "PlayerSettings" (upval), "Players" (upval))
+            while true do
+                if r0_p19.effect ~= effect then break end
+                task.wait(PulseInterval)
+                if r0_p19.effect ~= effect then return end
+                local __up3 = IdleRings
+                if PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then
+                    local EmitCount = __up3:GetAttribute("EmitCount")
+                    local r5 = typeof(EmitCount) == "number" and EmitCount > 0
+                    assert(r5, __up3:GetFullName() .. " requires positive attribute " .. "EmitCount")
+                    __up3:Emit(EmitCount)
+                end
+            end
+        end)
+    end
+end
+local function playTugWave(r0: { any }) -- Line: 365 | Name: playTugWave | Upvalues: ("emitBurst" (copy))
+    local effect = r0.effect
+    if effect then
+        local Surface = effect.PrimaryPart:FindFirstChild("Surface")
+        local LandingRings = Surface and Surface:FindFirstChild("LandingRings")
+        assert(LandingRings ~= nil and LandingRings:IsA("ParticleEmitter"), effect:GetFullName() .. " is missing " .. "Surface" .. "." .. "LandingRings")
+        emitBurst(effect, LandingRings)
+    end
+end
+local function untrackCast(r0: userdata) -- Line: 374 | Name: untrackCast | Upvalues: ("r7" (copy), "releaseEffect" (copy))
+    local r1_0 = r7[r0]
+    if r1_0 == nil then return end
+    r7[r0] = nil
+    for r5, r6 in r1_0.connections do
+        r6:Disconnect()
+    end
+    if r1_0.breachConnection then
+        r1_0.breachConnection:Disconnect()
+        r1_0.breachConnection = nil
+    end
+    releaseEffect(r1_0)
+end
+local function trackCast(r0: userdata) -- Line: 389 | Name: trackCast | Upvalues: ("r7" (copy), "refresh" (copy), "emitBurst" (copy))
+    if not r0:IsA("Model") or r7[r0] then return end
+    local r1 = {
+        model = r0, sawFlying = false, landed = false, breachArmed = false, breached = false, breachSeenBelow = false,
+        connections = {}
+    }
+    r7[r0] = r1
+    table.insert(r1.connections, r0:GetAttributeChangedSignal("CastState"):Connect(function() -- Line: 407 | Upvalues: ("refresh" (upval), "r1" (copy))
+        refresh(r1)
+    end))
+    table.insert(r1.connections, r0:GetAttributeChangedSignal("WaterSurfacePosition"):Connect(function() -- Line: 410 | Upvalues: ("refresh" (upval), "r1" (copy))
+        refresh(r1)
+    end))
+    table.insert(r1.connections, r0:GetAttributeChangedSignal("TugCount"):Connect(function() -- Line: 413 | Upvalues: ("r1" (copy), "emitBurst" (upval))
+        local effect = r1.effect
+        if effect then
+            local Surface = effect.PrimaryPart:FindFirstChild("Surface")
+            local LandingRings = Surface and Surface:FindFirstChild("LandingRings")
+            assert(LandingRings ~= nil and LandingRings:IsA("ParticleEmitter"), effect:GetFullName() .. " is missing " .. "Surface" .. "." .. "LandingRings")
+            emitBurst(effect, LandingRings)
+        end
+    end))
+    refresh(r1)
+end
+local function untrackAll() -- Line: 420 | Name: untrackAll | Upvalues: ("r7" (copy), "untrackCast" (copy))
+    for r3 in r7 do
+        untrackCast(r3)
+    end
+end
+local function bindCastsFolder(r0: userdata) -- Line: 428 | Name: bindCastsFolder | Upvalues: ("r8" (ref), "r9" (ref), "r7" (copy), "untrackCast" (copy), "trackCast" (copy))
+    if r0.Name ~= "FishingCasts" or not r0:IsA("Folder") or r0 == r8 then return end
+    for r4, r5 in r9 do
+        r5:Disconnect()
+    end
+    r9 = {}
+    for r4 in r7 do
+        untrackCast(r4)
+    end
+    r8 = r0
+    table.insert(r9, r0.ChildAdded:Connect(trackCast))
+    table.insert(r9, r0.ChildRemoved:Connect(function(r0: userdata) -- Line: 439 | Upvalues: ("untrackCast" (upval))
+        if r0:IsA("Model") then untrackCast(r0) end
+    end))
+    local Children, r2, r3 = r0:GetChildren()
+    for r4, r5 in Children, r2, r3 do
+        trackCast(r5)
+    end
+end
+local r34 = Workspace.ChildAdded:Connect(bindCastsFolder)
+local r35 = Workspace.ChildRemoved:Connect(function(r0: userdata) -- Line: 452 | Upvalues: ("r8" (ref), "r9" (ref), "r7" (copy), "untrackCast" (copy))
+    if r0 == r8 then
+        for r4, r5 in r9 do
+            r5:Disconnect()
+        end
+        r9 = {}
+        r8 = nil
+        for r4 in r7 do
+            untrackCast(r4)
+        end
+    end
+end)
+local function clearDisabledParticles() -- Line: 467 | Name: clearDisabledParticles | Upvalues: ("PlayerSettings" (copy), "Players" (copy), "FishingLandingVisuals" (copy))
+    if PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then return end
+    local Descendants, r1, r2_p30 = FishingLandingVisuals:GetDescendants()
+    for r3_p30, r4 in Descendants, r1, r2_p30 do
+        if r4:IsA("ParticleEmitter") then r4:Clear() end
+    end
+end
+local r37 = Players.LocalPlayer:GetAttributeChangedSignal(PlayerSettings.AttributeName("VfxEnabled"))
+r37 = r37:Connect(clearDisabledParticles)
+local FishingCasts = Workspace:FindFirstChild("FishingCasts")
+if FishingCasts then bindCastsFolder(FishingCasts) end
+script.Destroying:Connect(function() -- Line: 489 | Upvalues: ("r34" (copy), "r35" (copy), "r37" (copy), "r9" (ref), "r7" (copy), "untrackCast" (copy), "FishingLandingVisuals" (copy))
+    r34:Disconnect()
+    r35:Disconnect()
+    r37:Disconnect()
+    for r3, r4 in r9 do
+        r4:Disconnect()
+    end
+    for r3 in r7 do
+        untrackCast(r3)
+    end
+    FishingLandingVisuals:Destroy()
+end)

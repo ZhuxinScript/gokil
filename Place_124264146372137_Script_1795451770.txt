@@ -1,0 +1,409 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.CatchRewardsController
+-- Took 1.08s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local GuiService = game:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
+local CatchRewardsConfig = require(ReplicatedStorage:WaitForChild("CatchRewardsConfig"))
+local AccessorySlots = require(ReplicatedStorage:WaitForChild("AccessorySlots"))
+local CatchRewardsPresenter = require(script.Parent:WaitForChild("CatchRewardsPresenter"))
+local SoundEffects = require(script.Parent:WaitForChild("SoundEffects"))
+local LocalPlayer = Players.LocalPlayer
+Players = LocalPlayer:WaitForChild("PlayerGui")
+local CatchRewardsGui = Players:WaitForChild("CatchRewardsGui")
+local CatchRewardsPopupGui = Players:WaitForChild("CatchRewardsPopupGui")
+local CatchRewardRevealGui = Players:WaitForChild("CatchRewardRevealGui")
+local MainMenuGui = Players:WaitForChild("MainMenuGui")
+local RewardsButton = MainMenuGui:WaitForChild("MenuPanel"):WaitForChild("RewardsButton")
+ReplicatedStorage:WaitForChild("AccessoryPreviews")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+ReplicatedStorage = Remotes:WaitForChild("CatchRewardsRequest")
+local TackleBoxRequest = Remotes:WaitForChild("TackleBoxRequest")
+Remotes = CatchRewardsPresenter.new(CatchRewardsGui, CatchRewardsPopupGui, CatchRewardRevealGui)
+local r17 = {}
+local r18 = {}
+local r19
+local r20, r21_0, r22_0, r23_0 = true, false, false, false
+local r24_0 = false
+local r25_0
+local r26_0
+local r27
+local r28_0
+local r29_0 = false
+local r30 = Random.new()
+local r31
+local r32
+local function validSnapshot(r0) -- Line: 70 | Name: validSnapshot | Upvalues: ("AccessorySlots" (copy), "CatchRewardsConfig" (copy))
+    if typeof(r0) ~= "table" or typeof(r0.fishCaught) ~= "number" or r0.fishCaught < 0 or r0.fishCaught >= (1/0) or r0.fishCaught % 1 ~= 0 or typeof(r0.claimed) ~= "table" or not AccessorySlots.IsValid(r0.accessorySlots) then
+        return false
+    end
+    for r4, r5_p0 in r0.claimed do
+        if not CatchRewardsConfig.Get(r4) or r5_p0 ~= true then return false end
+    end
+    return r0.readyCount == CatchRewardsConfig.Snapshot(r0.fishCaught, r0.claimed, r0.accessorySlots).readyCount
+end
+local function cancelReminder() -- Line: 83 | Name: cancelReminder | Upvalues: ("r25_0" (ref))
+    if r25_0 then
+        task.cancel(r25_0)
+        r25_0 = nil
+    end
+end
+local function scheduleReminder() -- Line: 89 | Name: scheduleReminder | Upvalues: ("r25_0" (ref), "r20" (ref), "r19" (ref), "r24_0" (ref), "r30" (copy), "CatchRewardsConfig" (copy), "r31" (ref))
+    if r25_0 then
+        task.cancel(r25_0)
+        r25_0 = nil
+    end
+    if not r20 or not r19 or r19.readyCount == 0 then return end
+    r24_0 = false
+    local delay, r1 = task.delay, r30:NextNumber(CatchRewardsConfig.REMINDER_MIN, CatchRewardsConfig.REMINDER_MAX)
+    r25_0 = delay(r1, function() -- Line: 93 | Upvalues: ("r25_0" (upval), "r20" (upval), "r24_0" (upval), "r31" (upval))
+        r25_0 = nil
+        if not r20 then return end
+        r24_0 = true
+        r31()
+    end)
+end
+local function blocked() -- Line: 103 | Name: blocked | Upvalues: ("r29_0" (ref), "MainMenuGui" (copy), "LocalPlayer" (copy), "Players" (copy), "CatchRewardsGui" (copy), "CatchRewardsPopupGui" (copy), "CatchRewardRevealGui" (copy))
+    if r29_0 or MainMenuGui:GetAttribute("Opened") == true or LocalPlayer:GetAttribute("ExerciseActive") == true then
+        return true
+    end
+    local RodState = LocalPlayer:GetAttribute("RodState")
+    local PendingCatchId = LocalPlayer:GetAttribute("PendingCatchId")
+    if RodState ~= nil and RodState ~= "Ready" and RodState ~= "Stored" then return true end
+    if typeof(PendingCatchId) == "string" and PendingCatchId ~= "" then return true end
+    local Children, r3, r4 = Players:GetChildren()
+    for r5, r6 in Children, r3, r4 do
+        if not (not r6:IsA("ScreenGui") or r6 == CatchRewardsGui or r6 == CatchRewardsPopupGui or r6 == CatchRewardRevealGui or not r6.Enabled) then
+            if r6.Name == "AdminConsoleGui" then
+                PendingCatchId = r6:FindFirstChild("Window")
+                if PendingCatchId and PendingCatchId:IsA("GuiObject") and PendingCatchId.Visible then
+                    return true
+                end
+            end
+            for r10_p4, r11_p4 in {"Dimmer", "Overlay", "Card"} do
+                RodState = r6:FindFirstChild(r11_p4)
+                if RodState and RodState:IsA("GuiObject") and RodState.Visible then return true end
+            end
+        end
+    end
+    return false
+end
+r31 = function() -- Line: 128 | Upvalues: ("r20" (ref), "r19" (ref), "r24_0" (ref), "r25_0" (ref), "Remotes" (copy), "r21_0" (ref), "r28_0" (ref), "blocked" (copy), "CatchRewardsPresenter" (copy))
+    if not r20 then return end
+    if not r19 or r19.readyCount == 0 then
+        r24_0 = false
+        if r25_0 then
+            task.cancel(r25_0)
+            r25_0 = nil
+        end
+        Remotes:Popup(false)
+        return
+    end
+    if r21_0 or r28_0 then
+        Remotes:Popup(false)
+        return
+    end
+    if blocked() then
+        if Remotes.popupShown then r24_0 = true end
+        if Remotes.popup.Visible then Remotes:Popup(false, nil, nil, nil, true) end
+        return
+    end
+    if r24_0 and not Remotes.popupShown then
+        local r0 = CatchRewardsPresenter.Next(r19)
+        if r0 and r0.Fish <= r19.fishCaught then
+            r24_0 = false
+            Remotes:Popup(true, r0, r19.fishCaught, r19.readyCount)
+        end
+    end
+end
+local function apply(r0: any, r1: string?) -- Line: 156 | Name: apply | Upvalues: ("validSnapshot" (copy), "CatchRewardsConfig" (copy), "r19" (ref), "Remotes" (copy), "r22_0" (ref), "RewardsButton" (copy), "r25_0" (ref), "r24_0" (ref), "r28_0" (ref), "AccessorySlots" (copy), "r31" (ref))
+    if not validSnapshot(r0) then return false end
+    local r2 = false
+    for r6_p6, r7 in CatchRewardsConfig.GetAll() do
+        if not (r7.Fish <= r0.fishCaught) or r0.claimed[r7.Id] then
+        elseif r19 and not (r19.fishCaught < r7.Fish) and not r19.claimed[r7.Id] then
+        else
+            r2 = true
+        end
+    end
+    r19 = r0
+    Remotes:Render(r19, r22_0, r1)
+    RewardsButton.ReadyBadge.Visible = r19.readyCount > 0
+    RewardsButton.ReadyBadge.Count.Text = tostring(r19.readyCount)
+    if r2 then
+        if r25_0 then
+            task.cancel(r25_0)
+            r25_0 = nil
+        end
+        r24_0 = true
+    end
+    if r28_0 and r28_0.AccessoryId then
+        Remotes:EquipState(AccessorySlots.Mode(r19.accessorySlots, r28_0.AccessoryId), r22_0, nil)
+    end
+    r31()
+    return true
+end
+r32 = function() -- Line: 178 | Upvalues: ("r20" (ref), "r23_0" (ref), "r22_0" (ref), "r26_0" (ref), "LocalPlayer" (copy), "ReplicatedStorage" (copy), "apply" (copy), "r19" (ref), "Remotes" (copy), "r32" (ref))
+    if not r20 then return end
+    r23_0 = true
+    if r22_0 or r26_0 or LocalPlayer:GetAttribute("ProfileLoaded") ~= true then return end
+    r26_0 = task.defer(function() -- Line: 182 | Upvalues: ("r26_0" (upval), "r20" (upval), "r22_0" (upval), "r23_0" (upval), "ReplicatedStorage" (upval), "apply" (upval), "r19" (upval), "Remotes" (upval), "r32" (upval))
+        r26_0 = nil
+        if not r20 or r22_0 or not r23_0 then return end
+        r23_0, r22_0 = false, true
+        local r0, r1_arg1 = pcall(ReplicatedStorage.InvokeServer, ReplicatedStorage, "Get")
+        if not r20 then return end
+        r22_0 = false
+        if r0 and typeof(r1_arg1) == "table" and apply(r1_arg1.snapshot, r1_arg1.message) then
+        else
+            warn("CatchRewards read failed: " .. tostring(r1_arg1))
+            if r19 then Remotes:Render(r19, false, "Could not load rewards. Reopen to try again.") end
+        end
+        if r23_0 then r32() end
+    end)
+end
+local function closeReveal() -- Line: 201 | Name: closeReveal | Upvalues: ("r28_0" (ref), "Remotes" (copy), "LocalPlayer" (copy), "GuiService" (copy), "CatchRewardRevealGui" (copy), "r21_0" (ref), "scheduleReminder" (copy))
+    r28_0 = nil
+    Remotes:HideReveal()
+    LocalPlayer:SetAttribute("CatchRewardRevealOpen", false)
+    if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(CatchRewardRevealGui) then
+        GuiService.SelectedObject = if r21_0 then Remotes.window.CloseButton else nil
+    end
+    if not r21_0 then scheduleReminder() end
+end
+local function setPanel(r0: boolean) -- Line: 213 | Name: setPanel | Upvalues: ("r20" (ref), "r21_0" (ref), "Remotes" (copy), "LocalPlayer" (copy), "r25_0" (ref), "r24_0" (ref), "MainMenuGui" (copy), "UserInputService" (copy), "GuiService" (copy), "r32" (ref), "closeReveal" (copy), "scheduleReminder" (copy))
+    if not r20 then return end
+    r21_0 = r0
+    Remotes:SetPanel(r0)
+    LocalPlayer:SetAttribute("CatchRewardsOpen", r0)
+    Remotes:Popup(false)
+    if r25_0 then
+        task.cancel(r25_0)
+        r25_0 = nil
+    end
+    r24_0 = false
+    if r0 then
+        MainMenuGui.CloseRequested:Fire()
+        if UserInputService.PreferredInput == Enum.PreferredInput.Gamepad then
+            GuiService.SelectedObject = Remotes.window.CloseButton
+        end
+        r32()
+        return
+    end
+    closeReveal()
+    scheduleReminder()
+end
+local function claim(r0: string) -- Line: 232 | Name: claim | Upvalues: ("r20" (ref), "r22_0" (ref), "r19" (ref), "CatchRewardsConfig" (copy), "Remotes" (copy), "ReplicatedStorage" (copy), "apply" (copy), "r28_0" (ref), "r25_0" (ref), "LocalPlayer" (copy), "UserInputService" (copy), "GuiService" (copy), "SoundEffects" (copy), "r23_0" (ref), "r32" (ref))
+    if not r20 or r22_0 or not r19 then return end
+    local r1_p11 = CatchRewardsConfig.Get(r0)
+    if not r1_p11 or r19.claimed[r0] or r19.fishCaught < r1_p11.Fish then return end
+    r22_0 = true
+    Remotes:Render(r19, true, "")
+    local r2, r3_p11 = pcall(ReplicatedStorage.InvokeServer, ReplicatedStorage, "Claim", r0)
+    if not r20 then return end
+    r22_0 = false
+    if r2 and typeof(r3_p11) == "table" and apply(r3_p11.snapshot, r3_p11.message) then
+        if r3_p11.ok == true and r3_p11.result == "Claimed" and r3_p11.claimedId == r0 and r19.claimed[r0] then
+            r28_0 = r1_p11
+            if r25_0 then
+                task.cancel(r25_0)
+                r25_0 = nil
+            end
+            Remotes:Popup(false)
+            Remotes:Reveal(r1_p11, r19.accessorySlots)
+            LocalPlayer:SetAttribute("CatchRewardRevealOpen", true)
+            if UserInputService.PreferredInput == Enum.PreferredInput.Gamepad then
+                GuiService.SelectedObject = if r1_p11.AccessoryId then Remotes.stage.EquipButton else Remotes.stage.ContinueButton
+            end
+            SoundEffects.Play("CatchRewardClaim")
+        end
+    else
+        warn("CatchRewards claim failed: " .. tostring(r3_p11))
+        if r19 then
+            Remotes:Render(r19, false, "Could not confirm the claim. Refresh your rewards before trying again.")
+        end
+        r23_0 = true
+    end
+    if r23_0 then r32() end
+end
+local function equip(r0: boolean) -- Line: 264 | Name: equip | Upvalues: ("r20" (ref), "r22_0" (ref), "r28_0" (ref), "r19" (ref), "AccessorySlots" (copy), "Remotes" (copy), "TackleBoxRequest" (copy), "SoundEffects" (copy), "r32" (ref))
+    if not r20 or r22_0 or not r28_0 or not r28_0.AccessoryId or not r19 then return end
+    local AccessoryId = r28_0.AccessoryId
+    local r2 = AccessorySlots.Mode(r19.accessorySlots, AccessoryId)
+    if r2 == r0 then return end
+    r22_0 = true
+    Remotes:EquipState(r2, true, "")
+    local r3, r4 = pcall(TackleBoxRequest.InvokeServer, TackleBoxRequest, if r0 then "UseAccessorySkin" else "EquipAccessory", AccessoryId)
+    if not r20 then return end
+    r22_0 = false
+    if r28_0 and r28_0.AccessoryId == AccessoryId then
+        r2 = r3
+        if r2 then
+            r2 = false
+            if typeof(r4) == "table" then
+                r2 = false
+                if r4.ok == true then
+                    r2 = false
+                    if typeof(r4.snapshot) == "table" then
+                        r2 = AccessorySlots.IsValid(r4.snapshot.accessorySlots)
+                        if r2 then r2 = AccessorySlots.Mode(r4.snapshot.accessorySlots, AccessoryId) == r0 end
+                    end
+                end
+            end
+        end
+        if r2 then
+            r19.accessorySlots = AccessorySlots.Copy(r4.snapshot.accessorySlots)
+            SoundEffects.Play("Equip")
+        end
+        Remotes:EquipState(AccessorySlots.Mode(r19.accessorySlots, AccessoryId), false, if r2 then if r0 then "Skin only: no bonuses from this accessory." else "Equipped! Other gear categories stay on." else "Could not equip. Try again from RODS & GEAR.")
+    end
+    r32()
+end
+local function layout() -- Line: 288 | Name: layout | Upvalues: ("Workspace" (copy), "Remotes" (copy))
+    if Workspace.CurrentCamera then Remotes:Layout(Workspace.CurrentCamera.ViewportSize) end
+end
+local function bindCamera() -- Line: 293 | Name: bindCamera | Upvalues: ("r27" (ref), "Workspace" (copy), "layout" (copy), "Remotes" (copy))
+    if r27 then
+        r27:Disconnect()
+        r27 = nil
+    end
+    if Workspace.CurrentCamera then
+        r27 = Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+    end
+    if Workspace.CurrentCamera then Remotes:Layout(Workspace.CurrentCamera.ViewportSize) end
+end
+local function watch(r0: userdata) -- Line: 301 | Name: watch | Upvalues: ("r18" (copy), "CatchRewardsGui" (copy), "CatchRewardsPopupGui" (copy), "CatchRewardRevealGui" (copy), "r17" (copy), "r31" (ref))
+    if r18[r0] then return end
+    if r0:IsA("ScreenGui") and r0 ~= CatchRewardsGui and r0 ~= CatchRewardsPopupGui and r0 ~= CatchRewardRevealGui then
+        r18[r0] = true
+        table.insert(r17, r0:GetPropertyChangedSignal("Enabled"):Connect(r31))
+        if r0.Name == "MainMenuGui" then
+            table.insert(r17, r0:GetAttributeChangedSignal("Opened"):Connect(r31))
+            return
+        end
+    elseif r0:IsA("GuiObject") and r0.Parent and r0.Parent:IsA("ScreenGui") and r0.Parent ~= CatchRewardsGui and r0.Parent ~= CatchRewardsPopupGui and r0.Parent ~= CatchRewardRevealGui and (r0.Name == "Dimmer" or r0.Name == "Overlay" or r0.Name == "Card" or r0.Parent.Name == "AdminConsoleGui" and r0.Name == "Window") then
+        r18[r0] = true
+        table.insert(r17, r0:GetPropertyChangedSignal("Visible"):Connect(r31))
+    end
+end
+for r48, r49 in CatchRewardsConfig.GetAll() do
+    local r50_cap0 = r49.Id
+    table.insert(r17, Remotes.cards[r50_cap0].ClaimButton.Activated:Connect(function() -- Line: 319 | Upvalues: ("claim" (copy), "r50_cap0" (copy))
+        task.spawn(claim, r50_cap0)
+    end))
+end
+table.insert(r17, RewardsButton.Activated:Connect(function() -- Line: 321 | Upvalues: ("SoundEffects" (copy), "setPanel" (copy))
+    SoundEffects.Play("UIClick")
+    setPanel(true)
+end))
+table.insert(r17, Remotes.window.CloseButton.Activated:Connect(function() -- Line: 322 | Upvalues: ("r20" (ref), "r21_0" (ref), "Remotes" (copy), "LocalPlayer" (copy), "r25_0" (ref), "r24_0" (ref), "closeReveal" (copy), "scheduleReminder" (copy))
+    if not r20 then return end
+    r21_0 = false
+    Remotes:SetPanel(false)
+    LocalPlayer:SetAttribute("CatchRewardsOpen", false)
+    Remotes:Popup(false)
+    if r25_0 then
+        task.cancel(r25_0)
+        r25_0 = nil
+    end
+    r24_0 = false
+    closeReveal()
+    scheduleReminder()
+end))
+table.insert(r17, Remotes.window.Footer.ClaimNext.Activated:Connect(function() -- Line: 323 | Upvalues: ("r19" (ref), "CatchRewardsPresenter" (copy), "claim" (copy))
+    local r0 = r19 and CatchRewardsPresenter.Next(r19)
+    if r0 then task.spawn(claim, r0.Id) end
+end))
+table.insert(r17, Remotes.popup.ViewRewards.Activated:Connect(function() -- Line: 328 | Upvalues: ("SoundEffects" (copy), "setPanel" (copy))
+    SoundEffects.Play("UIClick")
+    setPanel(true)
+end))
+table.insert(r17, Remotes.popup.CloseButton.Activated:Connect(function() -- Line: 329 | Upvalues: ("Remotes" (copy), "scheduleReminder" (copy))
+    Remotes:Popup(false)
+    scheduleReminder()
+end))
+table.insert(r17, Remotes.stage.ContinueButton.Activated:Connect(closeReveal))
+table.insert(r17, Remotes.stage.EquipButton.Activated:Connect(function() -- Line: 331 | Upvalues: ("equip" (copy))
+    task.spawn(equip, false)
+end))
+table.insert(r17, Remotes.stage.SkinButton.Activated:Connect(function() -- Line: 333 | Upvalues: ("equip" (copy))
+    task.spawn(equip, true)
+end))
+for r48, r49 in {"FishCaught", "CatchRewardClaimsCount", "AccessoryEquipmentRevision", "ProfileLoaded"} do
+    table.insert(r17, LocalPlayer:GetAttributeChangedSignal(r49):Connect(r32))
+end
+for r48, r49 in {"RodState", "PendingCatchId", "ExerciseActive"} do
+    table.insert(r17, LocalPlayer:GetAttributeChangedSignal(r49):Connect(r31))
+end
+local Descendants, r46, r47 = Players:GetDescendants()
+for r48, r49 in Descendants, r46, r47 do
+    watch(r49)
+end
+table.insert(r17, Players.DescendantAdded:Connect(watch))
+table.insert(r17, Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera))
+table.insert(r17, GuiService.MenuOpened:Connect(function() -- Line: 344 | Upvalues: ("r29_0" (ref), "r31" (ref))
+    r29_0 = true
+    r31()
+end))
+table.insert(r17, GuiService.MenuClosed:Connect(function() -- Line: 345 | Upvalues: ("r29_0" (ref), "r31" (ref))
+    r29_0 = false
+    r31()
+end))
+table.insert(r17, UserInputService.InputBegan:Connect(function(r0: userdata) -- Line: 346 | Upvalues: ("r28_0" (ref), "closeReveal" (copy), "r21_0" (ref), "r20" (ref), "Remotes" (copy), "LocalPlayer" (copy), "r25_0" (ref), "r24_0" (ref), "scheduleReminder" (copy))
+    if r0.KeyCode == Enum.KeyCode.Escape or r0.KeyCode == Enum.KeyCode.ButtonB then
+        if r28_0 then
+            closeReveal()
+            return
+        end
+        if r21_0 then
+            if not r20 then return end
+            r21_0 = false
+            Remotes:SetPanel(false)
+            LocalPlayer:SetAttribute("CatchRewardsOpen", false)
+            Remotes:Popup(false)
+            if r25_0 then
+                task.cancel(r25_0)
+                r25_0 = nil
+            end
+            r24_0 = false
+            closeReveal()
+            scheduleReminder()
+        end
+    end
+end))
+script.Destroying:Once(function() -- Line: 352 | Upvalues: ("r20" (ref), "r25_0" (ref), "r26_0" (ref), "r27" (ref), "r17" (copy), "LocalPlayer" (copy), "Remotes" (copy))
+    r20 = false
+    if r25_0 then
+        task.cancel(r25_0)
+        r25_0 = nil
+    end
+    if r26_0 then
+        task.cancel(r26_0)
+        r26_0 = nil
+    end
+    if r27 then r27:Disconnect() end
+    for r3, r4 in r17 do
+        r4:Disconnect()
+    end
+    LocalPlayer:SetAttribute("CatchRewardsOpen", false)
+    LocalPlayer:SetAttribute("CatchRewardRevealOpen", false)
+    Remotes:Destroy()
+end)
+LocalPlayer:SetAttribute("CatchRewardsOpen", false)
+LocalPlayer:SetAttribute("CatchRewardRevealOpen", false)
+Remotes:SetPanel(false)
+Remotes:HideReveal()
+Remotes.popup.Visible = false
+if r27 then
+    r27:Disconnect()
+    r27 = nil
+end
+if Workspace.CurrentCamera then
+    r27 = Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+end
+if Workspace.CurrentCamera then Remotes:Layout(Workspace.CurrentCamera.ViewportSize) end
+r32()

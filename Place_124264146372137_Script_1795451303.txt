@@ -1,0 +1,116 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishPetReactions
+-- Took 1.39s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local r0_0 = {}
+local r1 = Random.new()
+local r2_0 = {"CatchChew", "PerfectHit", "Celebrate"}
+local r3 = {"CatchChew", "TrackTreat", "SnoutBonk"}
+local r4 = {"Enrage", "InkSpit", "CaptureStruggle"}
+local r5 = NumberRange.new(3, 5)
+local r6 = NumberRange.new(10, 18)
+local r7 = NumberRange.new(8, 16)
+function r0_0.new(r0: userdata, r1_p7: userdata?, r2: userdata?) -- Line: 39 | Name: new | Upvalues: ("r5" (copy), "r6" (copy), "r7" (copy), "r1" (copy), "r4" (copy), "r3" (copy), "r2_0" (copy))
+    local r3_p7 = r0:GetAttribute("FishClass") == "SnackBuddy"
+    local r4_p7 = r0:GetAttribute("FishClass") == "WorldBoss"
+    local r5_p7 = {}
+    local r6_p7 = {}
+    local r7_p7 = true
+    local r8_0 = true
+    local r9_0
+    local r10_0
+    local r11_0 = 0
+    local r12
+    local r13_0 = {}
+    local function load(r0_p2: string) -- Line: 62 | Name: load | Upvalues: ("r2" (copy), "r1_p7" (copy), "r3_p7" (copy), "r4_p7" (copy), "r0" (copy), "r5_p7" (copy), "r6_p7" (copy), "r10_0" (ref), "r7_p7" (ref), "r8_0" (ref), "r12" (ref))
+        local r1_p2 = r2 and r2:FindFirstChild(r0_p2)
+        if not r1_p7 or not r1_p2 or not r1_p2:IsA("Animation") or r1_p2.AnimationId == "" then
+            if not r3_p7 and not r4_p7 then return end
+            warn((r4_p7 and "World Boss pet" or "Snack Buddy pet") .. " is missing its animation rig/clip: " .. r0.Name .. "/" .. r0_p2)
+            return
+        end
+        local r2_p2, r3_p2 = pcall(function() -- Line: 73 | Upvalues: ("r1_p7" (upval), "r1_p2" (copy))
+            return r1_p7:LoadAnimation(r1_p2)
+        end)
+        if not r2_p2 then
+            warn("Fish pet reaction failed for " .. r0.Name .. "/" .. r0_p2 .. ": " .. tostring(r3_p2))
+            return
+        end
+        r3_p2.Looped = false
+        r3_p2.Priority = Enum.AnimationPriority.Action
+        table.insert(r5_p7, r3_p2)
+        table.insert(r6_p7, r3_p2.Stopped:Connect(function() -- Line: 84 | Upvalues: ("r10_0" (upval), "r3_p2" (copy), "r7_p7" (upval), "r8_0" (upval), "r12" (upval))
+            if r10_0 ~= r3_p2 then return end
+            r10_0 = nil
+            if r7_p7 and r8_0 then r12(false) end
+        end))
+    end
+    r12 = function(r0_p4: boolean) -- Line: 95 | Upvalues: ("r7_p7" (ref), "r8_0" (ref), "r9_0" (ref), "r10_0" (ref), "r5_p7" (copy), "r3_p7" (copy), "r4_p7" (copy), "r5" (upval), "r6" (upval), "r7" (upval), "r1" (upval), "r0" (copy), "r11_0" (ref))
+        if not r7_p7 or not r8_0 or r9_0 or r10_0 or #r5_p7 == 0 then return end
+        local r1_arg2 = if r3_p7 or r4_p7 then if r0_p4 then r5 else r6 else r7
+        local delay, r3_p4 = task.delay, r1:NextNumber(r1_arg2.Min, r1_arg2.Max)
+        r9_0 = delay(r3_p4, function() -- Line: 99 | Upvalues: ("r9_0" (upval), "r7_p7" (upval), "r8_0" (upval), "r0" (upval), "r10_0" (upval), "r5_p7" (upval), "r1" (upval), "r11_0" (upval), "r4_p7" (upval))
+            r9_0 = nil
+            if not r7_p7 or not r8_0 or not r0.Parent or r10_0 then return end
+            local r0_arg1 = #r5_p7 == 1 and 1 or r1:NextInteger(1, #r5_p7 - (r11_0 > 0 and 1 or 0))
+            if #r5_p7 > 1 and r11_0 > 0 and r11_0 <= r0_arg1 then r0_arg1 += 1 end
+            r11_0 = r0_arg1
+            r10_0 = r5_p7[r0_arg1]
+            r10_0.Looped = false
+            r10_0:Play(r4_p7 and 0.2 or 0.15)
+            r10_0.Looped = false
+        end)
+    end
+    function r13_0.SetEnabled(r0: { any }, r1: boolean) -- Line: 117 | Name: SetEnabled | Upvalues: ("r7_p7" (ref), "r8_0" (ref), "r9_0" (ref), "r10_0" (ref), "r12" (ref))
+        if not r7_p7 or r8_0 == r1 then return end
+        r8_0 = r1
+        if not r8_0 then
+            if r9_0 then
+                task.cancel(r9_0)
+                r9_0 = nil
+            end
+            local __up3 = r10_0
+            r10_0 = nil
+            if __up3 then
+                __up3:Stop(0.15)
+                return
+            end
+        else
+            r12(true)
+        end
+    end
+    function r13_0.Destroy(r0) -- Line: 137 | Name: Destroy | Upvalues: ("r7_p7" (ref), "r9_0" (ref), "r10_0" (ref), "r6_p7" (copy), "r5_p7" (copy))
+        if not r7_p7 then return end
+        r7_p7 = false
+        if r9_0 then
+            task.cancel(r9_0)
+            r9_0 = nil
+        end
+        r10_0 = nil
+        for r4, r5_p6 in r6_p7 do
+            r5_p6:Disconnect()
+        end
+        for r4, r5_p6 in r5_p7 do
+            r5_p6:Stop(0)
+            r5_p6:Destroy()
+        end
+        table.clear(r6_p7)
+        table.clear(r5_p7)
+    end
+    if r4_p7 then
+        for r18, r19 in r4 do
+            load(r19)
+        end
+    elseif r3_p7 then
+        local r15 = if r0:GetAttribute("FishId") == "crystalchompshark" then r3 else r2_0
+        for r19, r20 in r15 do
+            load(r20)
+        end
+    else
+        load("bite")
+    end
+    r12(true)
+    return r13_0
+end
+return table.freeze(r0_0)

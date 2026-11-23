@@ -1,0 +1,33 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersReactions
+-- Took 1.47s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local r0_0 = {
+    Select = function(r0: any, r1: any, r2: number) -- Line: 15 | Name: Select
+        if r0.finish then return r0.place == 1 and "Victory" or "Defeat", r2, false, nil end
+        if r1.phase == "Countdown" then return "StartReady", r2, true, nil end
+        if r1.phase ~= "Racing" then return "Idle", r2, true, nil end
+        if r0.hitAt then
+            local r3 = r2 - r0.hitAt
+            local r4 = math.max(r0.hitAt + 1.42, r0.slowUntil)
+            if r3 >= 0 and r3 < 0.22 then return "Hit", r0.hitAt, false, r0.hitSerial end
+            if r3 >= 0.22 and r3 < 1.42 then return "Spinout", r0.hitAt + 0.22, false, r0.hitSerial end
+            if r0.hitAt + 1.42 <= r2 and r2 < r4 then return "Stunned", r0.hitAt + 1.42, true, r0.hitSerial end
+            if r4 <= r2 and r2 < r4 + 1.2 then return "Recover", r4, false, r0.hitSerial end
+        end
+        if r0.shotAt and r0.shotKind ~= "AquaShield" and r0.shotAt <= r2 and r2 < r0.shotAt + 1 then
+            return "ShootItem", r0.shotAt, false, r0.shotSerial
+        end
+        if r2 < r1.startedAt + 1.2 then return "Launch", r1.startedAt, false, nil end
+        if r2 < r0.jumpUntil then return "Airborne", r0.jumpUntil - 1.15, true, r0.jumpUntil end
+        if r0.jumpUntil > 0 and r2 < r0.jumpUntil + 1 then
+            return "Land", r0.jumpUntil, false, r0.jumpUntil
+        end
+        if r2 < r0.boostUntil then return "Boost", r2, true, nil end
+        if r0.steer > 0.35 then return "TurnLeft", r2, true, nil end
+        if r0.steer < -0.35 then return "TurnRight", r2, true, nil end
+        return r0.speed > 60 and "SwimFast" or "Swim", r2, true, nil
+    end
+}
+return table.freeze(r0_0)

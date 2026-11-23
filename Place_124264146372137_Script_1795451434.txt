@@ -1,0 +1,432 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.CatchRewardsPresenter
+-- Took 2.01s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local CatchRewardsConfig = require(ReplicatedStorage:WaitForChild("CatchRewardsConfig"))
+local AccessorySlots = require(ReplicatedStorage:WaitForChild("AccessorySlots"))
+local PaddedScrollLayout = require(script.Parent:WaitForChild("PaddedScrollLayout"))
+local r6 = {}
+r6.__index = r6
+local r7 = Color3.fromRGB(12, 27, 78)
+local r8 = Color3.fromRGB(49, 239, 255)
+local r9 = Color3.fromRGB(255, 218, 51)
+local r10 = Color3.fromRGB(35, 222, 34)
+local r11 = Color3.fromRGB(36, 72, 127)
+local r12 = {SeabreezeAnglerHat = true, CoralbuddyClownfishHood = true, SunnyquackDuckFloat = true, LilyhopFrogHat = true, ShellwhisperStrawHat = true, CoralclawCrabPal = true, GullbreezeSeagull = true, ReefriderSharkFloat = true}
+local function short(r0: number) -- Line: 37 | Name: short
+    if r0 >= 1000 then return string.format("%gK", r0 / 1000) end
+    return tostring(r0)
+end
+function r6.Next(r0) -- Line: 44 | Name: Next | Upvalues: ("CatchRewardsConfig" (copy))
+    for r4, r5 in CatchRewardsConfig.GetAll() do
+        if not r0.claimed[r5.Id] then return r5 end
+    end
+    return nil
+end
+function r6.BonusText(r0_p2: string) -- Line: 53 | Name: BonusText | Upvalues: ("ReplicatedStorage" (copy))
+    local AccessoryPreviews = ReplicatedStorage:FindFirstChild("AccessoryPreviews")
+    local r2 = AccessoryPreviews and AccessoryPreviews:FindFirstChild(r0_p2)
+    if not r2 then return "FISHING GEAR" end
+    AccessoryPreviews = {}
+    for r6, r7 in {{"LuckBoostPercent", "LUCK"}, {"CastBoostPercent", "CAST"}, {"ReelBoostPercent", "REEL"}} do
+        local r8 = r2:GetAttribute(r7[1])
+        if not (typeof(r8) ~= "number" or not (r8 > 0)) then
+            table.insert(AccessoryPreviews, "+" .. r8 .. "% " .. r7[2])
+        end
+    end
+    return table.concat(AccessoryPreviews, "  ")
+end
+local function animate(r0: any, r1: userdata, r2_p4: number, r3: any, r4: any) -- Line: 70 | Name: animate | Upvalues: ("TweenService" (copy))
+    if r0.tweens[r1] then r0.tweens[r1]:Cancel() end
+    local new, r10 = TweenInfo.new, r4 or Enum.EasingStyle.Quad
+    new = new(r2_p4, r10, Enum.EasingDirection.Out)
+    local r5 = TweenService:Create(r1, new, r3)
+    r0.tweens[r1] = r5
+    r5.Completed:Once(function() -- Line: 75 | Upvalues: ("r0" (copy), "r1" (copy), "r5" (copy))
+        if r0.tweens[r1] == r5 then r0.tweens[r1] = nil end
+    end)
+    r5:Play()
+    return r5
+end
+local function clearPreview(r0: any, r1: userdata) -- Line: 84 | Name: clearPreview
+    local r2_0 = r0.previews[r1]
+    if not r2_0 then return end
+    r2_0.resize:Disconnect()
+    r2_0.model:Destroy()
+    r2_0.camera:Destroy()
+    r1.CurrentCamera = nil
+    r0.previews[r1] = nil
+end
+local function showPreview(r0_p7: any, r1: userdata, r2: string) -- Line: 97 | Name: showPreview | Upvalues: ("ReplicatedStorage" (copy), "r12" (copy))
+    local r3 = r0_p7.previews[r1]
+    if r3 and r3.id == r2 then return r3 end
+    r3 = r0_p7.previews[r1]
+    if r3 then
+        r3.resize:Disconnect()
+        r3.model:Destroy()
+        r3.camera:Destroy()
+        r1.CurrentCamera = nil
+        r0_p7.previews[r1] = nil
+    end
+    local AccessoryPreviews = ReplicatedStorage:FindFirstChild("AccessoryPreviews")
+    local r5 = AccessoryPreviews and AccessoryPreviews:FindFirstChild(r2)
+    if not r5 or not r5:IsA("Model") or not r5.PrimaryPart then return nil end
+    AccessoryPreviews = r5:Clone()
+    r5 = AccessoryPreviews.PrimaryPart
+    assert(r5 and r5:IsA("BasePart"), "Accessory preview requires a primary mesh")
+    r5.Anchored = true
+    r5.CanCollide = false
+    r5.CanTouch = false
+    r5.CanQuery = false
+    local r6 = r12[r2] and 3.141592653589793 or 0
+    local r8 = CFrame.Angles(0, r6, 0)
+    r5.CFrame = r8 * CFrame.Angles(-0.22689280275926285, 0, 0)
+    AccessoryPreviews.Parent = r1:WaitForChild("PreviewWorld")
+    local RewardPreviewCamera = Instance.new("Camera")
+    RewardPreviewCamera.Name = "RewardPreviewCamera"
+    RewardPreviewCamera.FieldOfView = 34
+    RewardPreviewCamera.Parent = r1
+    r1.CurrentCamera = RewardPreviewCamera
+    local function fit() -- Line: 121 | Name: fit | Upvalues: ("r1" (copy), "RewardPreviewCamera" (copy), "r5" (copy))
+        local AbsoluteSize = r1.AbsoluteSize
+        if AbsoluteSize.X <= 0 or AbsoluteSize.Y <= 0 then return end
+        local r1_p6 = AbsoluteSize.X / AbsoluteSize.Y
+        local r3 = math.rad(RewardPreviewCamera.FieldOfView / 2)
+        AbsoluteSize = math.tan(r3)
+        local r2 = (0.9743700647852352 * r5.Size.Y + 0.224951054343865 * r5.Size.Z) * 0.5
+        r3 = (0.224951054343865 * r5.Size.Y + 0.9743700647852352 * r5.Size.Z) * 0.5
+        local r4 = math.sqrt((r5.Size.X * 0.5) ^ 2 + r3 ^ 2)
+        r3 = (math.max(r2 / AbsoluteSize, r4 / (AbsoluteSize * r1_p6)) + r4) * 1.08
+        local lookAt = CFrame.lookAt
+        RewardPreviewCamera.CFrame = lookAt(Vector3.new(0, 0, r3), vector.create(0, 0, 0))
+    end
+    local r10 = {id = r2, model = AccessoryPreviews, mesh = r5, camera = RewardPreviewCamera, resize = r1:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit), yaw = r6, tilt = -0.22689280275926285, angle = 0}
+    r0_p7.previews[r1] = r10
+    fit()
+    return r10
+end
+local function cardVisible(r0: userdata, r1: userdata) -- Line: 147 | Name: cardVisible
+    if not r0.Visible or not r0.Parent.Visible then return false end
+    local AbsolutePosition, AbsoluteSize = r0.AbsolutePosition, r0.AbsoluteSize
+    local AbsolutePosition_2, AbsoluteWindowSize = r1.AbsolutePosition, r1.AbsoluteWindowSize
+    return AbsoluteSize.X > 0 and AbsoluteSize.Y > 0 and AbsolutePosition_2.X < AbsolutePosition.X + AbsoluteSize.X and AbsolutePosition.X < AbsolutePosition_2.X + AbsoluteWindowSize.X and AbsolutePosition_2.Y < AbsolutePosition.Y + AbsoluteSize.Y and AbsolutePosition.Y < AbsolutePosition_2.Y + AbsoluteWindowSize.Y
+end
+local function syncMotion(r0) -- Line: 159 | Name: syncMotion | Upvalues: ("RunService" (copy), "cardVisible" (copy))
+    if not r0.alive or not r0.revealGui.Overlay.Visible and not r0.main.Dimmer.Visible and not r0.popupShown then
+        if r0.motion then
+            r0.motion:Disconnect()
+            r0.motion = nil
+        end
+        return
+    end
+    if r0.motion then return end
+    local r4 = 0
+    r0.motion = RunService.RenderStepped:Connect(function(r0_p9: number) -- Line: 171 | Upvalues: ("r4" (ref), "r0" (copy), "cardVisible" (upval))
+        r4 += r0_p9
+        if r4 < 0.03333333333333333 then return end
+        local __up0 = r4
+        r4 = 0
+        local Visible = r0.revealGui.Overlay.Visible
+        if Visible then r0.stage.Burst.Rotation = (r0.stage.Burst.Rotation + __up0 * 7) % 360 end
+        for r6, r7 in r0.previews do
+            local r8
+            if Visible then
+                r8 = r6 == r0.stage.Preview
+            elseif r0.main.Dimmer.Visible and r0.cardViews[r6] then
+                r8 = cardVisible(r6, r0.window.RewardGrid)
+                if not r8 then
+                    r8 = r0.popupShown
+                    if r8 then r8 = r6 == r0.popup.Preview end
+                end
+            else
+                r8 = r0.popupShown
+                if r8 then r8 = r6 == r0.popup.Preview end
+            end
+            if r8 then
+                r7.angle = (r7.angle + __up0 * math.rad(if Visible then 27 else 18)) % 6.283185307179586
+                local Angles, Angles_2 = CFrame.Angles, CFrame.Angles
+                r7.mesh.CFrame = Angles(0, r7.yaw + r7.angle, 0) * Angles_2(r7.tilt, 0, 0)
+            end
+        end
+    end)
+end
+function r6.new(r0: userdata, r1: userdata, r2: userdata) -- Line: 196 | Name: new | Upvalues: ("r6" (copy), "CatchRewardsConfig" (copy), "showPreview" (copy), "PaddedScrollLayout" (copy))
+    local r3_p11 = setmetatable({
+        main = r0, popupGui = r1, revealGui = r2,
+        window = r0.Dimmer.Window, popup = r1.Popup, stage = r2.Overlay.Stage,
+        previews = {}, tweens = {}, cards = {}, cardViews = {}, popupSerial = 0, popupPosition = r1.Popup.Position,
+        popupShown = false, alive = true
+    }, r6)
+    for r7, r8 in CatchRewardsConfig.GetAll() do
+        local r9 = r3_p11.window.RewardGrid:WaitForChild(r8.Id)
+        r3_p11.cards[r8.Id] = r9
+        local Fish = r8.Fish
+        local r12 = if Fish >= 1000 then string.format("%gK", Fish / 1000) else tostring(Fish)
+        r9.ThresholdChip.Threshold.Text = r12 .. " FISH"
+        r9.Preview.Visible = r8.AccessoryId ~= nil
+        r9.RewardIcon.Visible = r8.AccessoryId == nil
+        if r8.AccessoryId then
+            r3_p11.cardViews[r9.Preview] = true
+            showPreview(r3_p11, r9.Preview, r8.AccessoryId)
+            r9.Bonus.Text = r8.GrandPrize and "GRAND PRIZE" or r6.BonusText(r8.AccessoryId)
+        end
+    end
+    r3_p11.scrollCleanup = PaddedScrollLayout.Bind(r3_p11.window.RewardGrid)
+    return r3_p11
+end
+function r6.Layout(r0: { any }, r1: Vector2) -- Line: 222 | Name: Layout | Upvalues: ("PaddedScrollLayout" (copy))
+    if not r0.alive or r1.X <= 0 or r1.Y <= 0 then return end
+    local r2 = r1.X < r1.Y
+    local r3 = r2 and 0.94 or math.min(0.93, 0.88 * r1.Y * 1.72 / r1.X)
+    r0.window.Size = UDim2.fromScale(r3, if r2 then 0.87 else 0.88)
+    local r5_p12 = math.max(0, - r0.main.AbsolutePosition.Y)
+    local r4 = r5_p12 / math.max(1, r0.main.AbsoluteSize.Y)
+    r0.window.Position = UDim2.fromScale(0.5, r4 + 0.51)
+    r0.stage.Position = UDim2.fromScale(0.5, r4 + 0.5)
+    r4 = if r2 then 0.805 else 0.34
+    local fromScale = UDim2.fromScale
+    local r8 = r2 and 0.22 or r1.Y < 500 and 0.28 or 0.26
+    r0.popup.Size = fromScale(r4, r8)
+    r5_p12 = if r2 then UDim2.fromScale(0.975, 0.345) else UDim2.fromScale(r4 / 2 + 0.5, 0.25)
+    r0.popupPosition = r5_p12
+    if not r0.tweens[r0.popup] then r0.popup.Position = r0.popupPosition end
+    fromScale = if r2 then UDim2.fromScale(0.94, 0.8) else UDim2.fromScale(0.57, 0.86)
+    r0.stage.Size = fromScale
+    r4 = not r2
+    if r4 then r4 = r1.X <= 1000 end
+    r0.window.RewardGrid.Cards.FillDirectionMaxCells = if r2 then 2 else if r4 then 2 else 3
+    r8 = if r4 then UDim2.fromScale(0.49, 0.64) else UDim2.fromScale(0.325, 0.43)
+    r0.window.RewardGrid:SetAttribute("LandscapeCellSize", r8)
+    PaddedScrollLayout.Refresh(r0.window.RewardGrid)
+end
+function r6.Render(r0: { any }, r1: any, r2: boolean, r3_p13: string?) -- Line: 253 | Name: Render | Upvalues: ("CatchRewardsConfig" (copy), "r10" (copy), "r11" (copy), "r7" (copy), "r9" (copy), "r8" (copy), "r6" (copy))
+    if not r0.alive then return end
+    local fishCaught = r1.fishCaught
+    local r6_p13 = if fishCaught >= 1000 then string.format("%gK", fishCaught / 1000) else tostring(fishCaught)
+    r0.window.Counter.Total.Text = r6_p13 .. " FISH CAUGHT"
+    for fishCaught, r8_p13 in CatchRewardsConfig.GetAll() do
+        local r9_p13 = r0.cards[r8_p13.Id]
+        local ClaimButton = r9_p13.ClaimButton
+        local r11_p13 = r1.claimed[r8_p13.Id] == true
+        local r12 = not r11_p13 and r8_p13.Fish <= r1.fishCaught
+        local r13 = math.max(0, r8_p13.Fish - r1.fishCaught)
+        local r15
+        if r11_p13 then
+            r15 = "COLLECTED"
+        elseif r12 then
+            r15 = "READY!  0 FISH TO GO"
+        else
+            local r16 = if r13 >= 1000 then string.format("%gK", r13 / 1000) else tostring(r13)
+            r15 = r16 .. " FISH TO GO"
+        end
+        r9_p13.Remaining.Text = r15
+        r15 = if r11_p13 or r12 then Color3.fromRGB(190, 255, 164) else Color3.fromRGB(234, 248, 255)
+        r9_p13.Remaining.TextColor3 = r15
+        ClaimButton.Caption.Text = if r11_p13 then "CLAIMED" else if r12 then if r2 then "..." else "CLAIM" else "LOCKED"
+        local r14 = if r11_p13 or r12 then r10 else r11
+        ClaimButton.BackgroundColor3 = r14
+        r15 = ColorSequence.new
+        ClaimButton.Gloss.Color = r15(ClaimButton.BackgroundColor3, ClaimButton.BackgroundColor3:Lerp(r7, 0.28))
+        r15 = r11_p13
+        ClaimButton.StateIcon.Visible = r15 or not r12
+        ClaimButton.StateIcon.Image = if r11_p13 then "rbxassetid://89223607853487" else "rbxassetid://119649102513744"
+        r14 = r12
+        ClaimButton.Active = r14 and not r2
+        r14 = r12
+        ClaimButton.Selectable = r14 and not r2
+        r14 = r12
+        ClaimButton.AutoButtonColor = r14 and not r2
+        r15 = if r12 or r8_p13.GrandPrize then r9 else r9_p13:GetAttribute("BorderColor") or r8
+        r9_p13.Outline.Color = r15
+        r9_p13.Outline.Thickness = if r12 then 3 else 2
+        r9_p13.ReadyGlow.Visible = r12
+    end
+    local r4 = r6.Next(r1)
+    local r6_p13 = if r4 then "NEXT: " .. string.upper(r4.Name) else "ALL REWARDS COLLECTED!"
+    r0.window.Footer.Next.Text = r6_p13
+    if r4 then
+        local r8_p13 = math.min(r1.fishCaught, r4.Fish)
+        fishCaught = if r8_p13 >= 1000 then string.format("%gK", r8_p13 / 1000) else tostring(r8_p13)
+        local Fish
+        r8_p13, Fish = " / ", r4.Fish
+        local r9_p13 = if Fish >= 1000 then string.format("%gK", Fish / 1000) else tostring(Fish)
+        r6_p13 = fishCaught .. r8_p13 .. r9_p13
+    else
+        r6_p13 = "16 / 16"
+    end
+    r0.window.Footer.ProgressLabel.Text = r6_p13
+    r6_p13 = UDim2.fromScale
+    fishCaught = if r4 then math.clamp(r1.fishCaught / r4.Fish, 0, 1) else 1
+    r0.window.Footer.Progress.Fill.Size = r6_p13(fishCaught, 1)
+    r0.window.Footer.ClaimNext.Caption.Text = if r2 then "..." else if r4 then "CLAIM REWARD" else "COMPLETE!"
+    r6_p13 = not r2
+    if r6_p13 then r6_p13 = r4 ~= nil and r4.Fish <= r1.fishCaught end
+    r0.window.Footer.ClaimNext.Active = r6_p13
+    r0.window.Footer.ClaimNext.AutoButtonColor = r0.window.Footer.ClaimNext.Active
+    r0.window.Message.Text = r3_p13 or "Every prize is yours to keep. Equip gear alongside your rod!"
+end
+function r6.SetPanel(r0: { any }, r1: boolean) -- Line: 289 | Name: SetPanel | Upvalues: ("animate" (copy), "syncMotion" (copy))
+    r0.main.Dimmer.Visible = r1
+    if r1 then
+        r0.window.MotionScale.Scale = 0.92
+        animate(r0, r0.window.MotionScale, 0.28, {Scale = 1}, Enum.EasingStyle.Back)
+    end
+    syncMotion(r0)
+end
+function r6.Popup(r0: { any }, r1: boolean, r2_p16: any, r3: number?, r4: number?, r5: boolean?) -- Line: 301 | Name: Popup | Upvalues: ("showPreview" (copy), "animate" (copy), "TweenService" (copy), "syncMotion" (copy))
+    r0.popupSerial += 1
+    r0.popupShown = r1 and r2_p16 ~= nil
+    local popupSerial = r0.popupSerial
+    if r0.giftTween then
+        r0.giftTween:Cancel()
+        r0.giftTween = nil
+    end
+    r0.popup.Gift.Position = UDim2.fromScale(0.035, 0.045)
+    local r7
+    local r8
+    if r1 and r2_p16 then
+        r0.popup.Preview.Visible = r2_p16.AccessoryId ~= nil
+        r0.popup.RewardIcon.Visible = r2_p16.AccessoryId == nil
+        r0.popup.RewardIcon.Image = r0.cards[r2_p16.Id].RewardIcon.Image
+        if r2_p16.AccessoryId then
+            showPreview(r0, r0.popup.Preview, r2_p16.AccessoryId)
+        else
+            r7 = r0.popup.Preview
+            r8 = r0.previews[r7]
+            if r8 then
+                r8.resize:Disconnect()
+                r8.model:Destroy()
+                r8.camera:Destroy()
+                r7.CurrentCamera = nil
+                r0.previews[r7] = nil
+            end
+        end
+        local r10 = if (r4 or 0) > 1 then "  +" .. tostring((r4 or 0) - 1) .. " MORE" else ""
+        r0.popup.Prize.Text = r2_p16.Name .. r10
+        r10 = math.min(r3 or 0, r2_p16.Fish)
+        local r9 = if r10 >= 1000 then string.format("%gK", r10 / 1000) else tostring(r10)
+        local Fish = r2_p16.Fish
+        local r11 = if Fish >= 1000 then string.format("%gK", Fish / 1000) else tostring(Fish)
+        r0.popup.Progress.Text = r9 .. " / " .. r11 .. " FISH"
+        r7 = math.clamp((r3 or 0) / r2_p16.Fish, 0, 1)
+        r0.popup.ProgressTrack.Fill.Size = UDim2.fromScale(r7 * 0.96, 0.76)
+        r0.popup.Visible = true
+        r0.popup.GroupTransparency = 1
+        r0.popup.Position = r0.popupPosition + UDim2.fromScale(0.04, 0)
+        r0.popup.MotionScale.Scale = 0.92
+        animate(r0, r0.popup, 0.28, {Position = r0.popupPosition, GroupTransparency = 0})
+        animate(r0, r0.popup.MotionScale, 0.3, {Scale = 1}, Enum.EasingStyle.Back)
+        r11 = TweenInfo.new
+        r11 = r11(1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+        r0.giftTween = TweenService:Create(r0.popup.Gift, r11, {Position = UDim2.fromScale(0.035, 0.025)})
+        r0.giftTween:Play()
+    elseif r0.popup.Visible then
+        if r5 then
+            if r0.tweens[r0.popup] then
+                r0.tweens[r0.popup]:Cancel()
+                r0.tweens[r0.popup] = nil
+            end
+            r0.popup.Visible = false
+            r0.popup.GroupTransparency = 1
+            r0.popup.Position = r0.popupPosition
+        else
+            r7 = animate(r0, r0.popup, 0.18, {GroupTransparency = 1, Position = r0.popupPosition + UDim2.fromScale(0.02, 0)})
+            r7.Completed:Once(function(r0_p15) -- Line: 336 | Upvalues: ("r0" (copy), "popupSerial" (copy))
+                if r0.alive and popupSerial == r0.popupSerial and r0_p15 == Enum.PlaybackState.Completed then
+                    r0.popup.Visible = false
+                end
+            end)
+        end
+        r7 = r0.popup.Preview
+        r8 = r0.previews[r7]
+        if r8 then
+            r8.resize:Disconnect()
+            r8.model:Destroy()
+            r8.camera:Destroy()
+            r7.CurrentCamera = nil
+            r0.previews[r7] = nil
+        end
+    end
+    syncMotion(r0)
+end
+function r6.HideReveal(r0) -- Line: 347 | Name: HideReveal | Upvalues: ("syncMotion" (copy))
+    local Preview = r0.stage.Preview
+    local r2 = r0.previews[Preview]
+    if r2 then
+        r2.resize:Disconnect()
+        r2.model:Destroy()
+        r2.camera:Destroy()
+        Preview.CurrentCamera = nil
+        r0.previews[Preview] = nil
+    end
+    r0.revealGui.Overlay.Visible = false
+    syncMotion(r0)
+end
+function r6.Reveal(r0, r1, r2) -- Line: 355 | Name: Reveal | Upvalues: ("animate" (copy), "r6" (copy), "AccessorySlots" (copy), "showPreview" (copy), "syncMotion" (copy))
+    r0:HideReveal()
+    r0.revealGui.Overlay.Visible = true
+    r0.stage.MotionScale.Scale = 0.65
+    animate(r0, r0.stage.MotionScale, 0.45, {Scale = 1}, Enum.EasingStyle.Back)
+    local Fish = r1.Fish
+    local r5 = if Fish >= 1000 then string.format("%gK", Fish / 1000) else tostring(Fish)
+    r0.stage.Milestone.Text = r5 .. " FISH CAUGHT"
+    r0.stage.PrizeName.Text = r1.Name
+    r0.stage.Bonus.Text = if r1.AccessoryId then r6.BonusText(r1.AccessoryId) else r1.BaitId and r1.Coins > 0 and "25K COINS + 5 GOLDEN MINNOWS" or "ADDED TO YOUR INVENTORY"
+    r0.stage.RewardIcon.Image = r0.cards[r1.Id].RewardIcon.Image
+    r0.stage.RewardIcon.Visible = r1.AccessoryId == nil
+    r0.stage.Preview.Visible = r1.AccessoryId ~= nil
+    r0.stage.EquipButton.Visible = r1.AccessoryId ~= nil
+    r0.stage.SkinButton.Visible = r1.AccessoryId ~= nil
+    r5 = if r1.AccessoryId then AccessorySlots.Mode(r2, r1.AccessoryId) else nil
+    r0:EquipState(r5, false, nil)
+    r0.stage.Message.Text = ""
+    if r1.AccessoryId then showPreview(r0, r0.stage.Preview, r1.AccessoryId) end
+    syncMotion(r0)
+end
+function r6.EquipState(r0: { any }, r1: boolean?, r2: boolean, r3: string?) -- Line: 378 | Name: EquipState
+    r0.stage.EquipButton.Caption.Text = if r2 then "..." else if r1 == false then "EQUIPPED" else "EQUIP"
+    r0.stage.EquipButton.Active = not r2 and not (r1 == false)
+    r0.stage.EquipButton.AutoButtonColor = r0.stage.EquipButton.Active
+    r0.stage.SkinButton.Caption.Text = if r2 then "..." else if r1 == true then "SKIN ACTIVE" else "USE SKIN"
+    r0.stage.SkinButton.Active = not r2 and not (r1 == true)
+    r0.stage.SkinButton.AutoButtonColor = r0.stage.SkinButton.Active
+    r0.stage.Message.Text = r3 or if r1 == true then "Skin only: no bonuses from this accessory." else ""
+end
+function r6.Destroy(r0) -- Line: 389 | Name: Destroy
+    if not r0.alive then return end
+    r0:HideReveal()
+    r0.alive = false
+    if r0.motion then
+        r0.motion:Disconnect()
+        r0.motion = nil
+    end
+    if r0.giftTween then
+        r0.giftTween:Cancel()
+        r0.giftTween = nil
+    end
+    for r4, r5 in r0.tweens do
+        r5:Cancel()
+    end
+    local r1 = {}
+    for r5 in r0.previews do
+        table.insert(r1, r5)
+    end
+    for r5, r6 in r1 do
+        local r7 = r0.previews[r6]
+        if r7 then
+            r7.resize:Disconnect()
+            r7.model:Destroy()
+            r7.camera:Destroy()
+            r6.CurrentCamera = nil
+            r0.previews[r6] = nil
+        end
+    end
+    r0.scrollCleanup()
+    r0.main.Dimmer.Visible = false
+    r0.popup.Visible = false
+end
+return r6

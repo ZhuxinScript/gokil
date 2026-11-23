@@ -1,0 +1,19 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.MainMenuActions
+-- Took 1.68s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local r1 = {
+    Bind = function(r0_p1: string, r1: (...any) -> ...any) -- Line: 22 | Name: Bind | Upvalues: ("Players" (copy))
+        local MainMenuGui = Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MainMenuGui")
+        local r3 = MainMenuGui:WaitForChild("MenuPanel"):WaitForChild("Content"):FindFirstChild(r0_p1)
+        assert(r3 and r3:IsA("GuiButton"), "Unknown main menu action: " .. r0_p1)
+        local CloseRequested = MainMenuGui:WaitForChild("CloseRequested")
+        return r3.Activated:Connect(function() -- Line: 31 | Upvalues: ("CloseRequested" (copy), "r1" (copy))
+            CloseRequested:Fire()
+            r1()
+        end)
+    end
+}
+return table.freeze(r1)

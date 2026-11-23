@@ -1,0 +1,95 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersStandings
+-- Took 1.47s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local r0_0 = {}
+local r1_0 = {"1ST", "2ND", "3RD", "4TH"}
+local r2 = {
+    Color3.fromRGB(255, 219, 67), Color3.fromRGB(218, 235, 249), Color3.fromRGB(245, 167, 99),
+    Color3.fromRGB(247, 254, 255)
+}
+local r3 = Color3.fromRGB(57, 239, 228)
+local function portrait(r0: userdata, r1: userdata, r2: userdata?) -- Line: 33 | Name: portrait
+    r0.World:ClearAllChildren()
+    if not r2 then return end
+    local Parent = r2.Parent
+    local Archivable = Parent.Archivable
+    Parent.Archivable = true
+    local r5 = Parent:Clone()
+    Parent.Archivable = Archivable
+    local Descendants, r7, r8 = r5:GetDescendants()
+    for r9, r10 in Descendants, r7, r8 do
+        if r10:IsA("LuaSourceContainer") or r10:IsA("Humanoid") or r10:IsA("AnimationController") or r10:IsA("Sound") or r10:IsA("ParticleEmitter") or r10:IsA("Trail") or r10:IsA("Beam") then
+            r10:Destroy()
+        elseif not r10:IsA("BasePart") then
+        else
+            r10.Anchored = true
+            r10.CanCollide = false
+            r10.CanTouch = false
+            r10.CanQuery = false
+            r10.LocalTransparencyModifier = 0
+        end
+    end
+    r5.Parent = r0.World
+    r5 = r2.Position + r2.CFrame.UpVector * 0.25
+    Archivable = math.max(4.8, r2.Size.Y * 3)
+    Descendants = CFrame.lookAt
+    r1.CFrame = Descendants(r5 + r2.CFrame.LookVector * Archivable, r5, r2.CFrame.UpVector)
+    r0.CurrentCamera = r1
+end
+function r0_0.new(r0: userdata) -- Line: 68 | Name: new | Upvalues: ("r2" (copy), "r1_0" (copy), "r3" (copy), "portrait" (copy))
+    local r1_0_p3, r2_0 = {}, {}
+    local r3_0 = {}
+    for i_0 = 1, 4 do
+        local r7 = r0.Cards["Racer" .. i_0]
+        r1_0_p3[i_0] = r7
+        r7.Visible = false
+        r7.Portrait.Avatar.World:ClearAllChildren()
+        local PortraitCamera = Instance.new("Camera")
+        PortraitCamera.Name = "PortraitCamera"
+        PortraitCamera.FieldOfView = 32
+        PortraitCamera.Parent = r7.Portrait.Avatar
+        r7.Portrait.Avatar.CurrentCamera = PortraitCamera
+        r3_0[i_0] = PortraitCamera
+    end
+    local r4 = true
+    return {
+        Update = function(r0_p1: { any }, r1: number, r2_arg1: (...any) -> ...any) -- Line: 94 | Name: Update | Upvalues: ("r4" (ref), "r1_0_p3" (copy), "r2" (upval), "r0" (copy), "r1_0" (upval), "r3" (upval), "r2_0" (copy), "portrait" (upval), "r3_0" (copy))
+            if not r4 then return end
+            for r6, r7 in r0_p1 do
+                local r8 = r1_0_p3[r7.index]
+                if not r8 then continue end
+                local r9 = r7.userId == r1
+                local r10 = r2[r6] or r2[4]
+                r8.Position = r0:GetAttribute("Rank" .. r6 .. "Position")
+                r8.Visible = true
+                r8.You.Visible = r9
+                r8.Rank.Text = r1_0[r6] or tostring(r6)
+                r8.Rank.TextColor3 = r10
+                r8.DriverName.Text = r7.name
+                local r12 = if r9 then r3 else r10
+                r8.Portrait.Ring.Color = r12
+                r10 = r2_arg1(r7.index)
+                if r2_0[r7.index] ~= r10 then
+                    portrait(r8.Portrait.Avatar, r3_0[r7.index], r10)
+                    r2_0[r7.index] = r10
+                end
+            end
+        end,
+        Destroy = function() -- Line: 125 | Name: Destroy | Upvalues: ("r4" (ref), "r1_0_p3" (copy), "r3_0" (copy), "r2_0" (copy))
+            if not r4 then return end
+            r4 = false
+            for r3, r4_p2 in r1_0_p3 do
+                r4_p2.Portrait.Avatar.World:ClearAllChildren()
+                r4_p2.Visible = false
+            end
+            for r3, r4_p2 in r3_0 do
+                r4_p2:Destroy()
+            end
+            table.clear(r3_0)
+            table.clear(r2_0)
+        end
+    }
+end
+return r0_0

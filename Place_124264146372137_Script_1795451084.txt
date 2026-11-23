@@ -1,0 +1,167 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishStatsPresenter
+-- Took 0.7s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FishRarity = require(ReplicatedStorage:WaitForChild("FishRarity"))
+local FishRarityStyles = ReplicatedStorage:WaitForChild("FishRarityStyles")
+ReplicatedStorage = require(script.Parent:WaitForChild("ColossalRainbow"))
+local r3 = {
+    FormatWhole = function(r0: number) -- Line: 63 | Name: FormatWhole
+        local r2 = math.floor(r0 + 0.5)
+        r2 = tostring(r2):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+        return r2:gsub("^,", "")
+    end
+}
+local function findLabel(r0: userdata, r1: string) -- Line: 73 | Name: findLabel
+    local r2 = r0:FindFirstChild(r1, true)
+    if r2 and r2:IsA("TextLabel") then return r2 end
+    return nil
+end
+local function setStat(r0: userdata?, r1: string?) -- Line: 81 | Name: setStat
+    if not r0 then return end
+    r0.Text = r1 or ""
+    r0.Visible = not (r1 == nil)
+end
+function r3.ApplyRarityStyle(r0_p3: userdata, r1_p3: string?, r2_p3: boolean?) -- Line: 97 | Name: ApplyRarityStyle | Upvalues: ("FishRarityStyles" (copy), "ReplicatedStorage" (copy), "FishRarity" (copy))
+    local RarityGradient = r0_p3:FindFirstChild("RarityGradient")
+    if not RarityGradient or not RarityGradient:IsA("UIGradient") or not r0_p3:IsA("GuiObject") then
+        return
+    end
+    local r4 = if r1_p3 then FishRarityStyles:FindFirstChild(r1_p3) else nil
+    local r5 = r4 and r4:FindFirstChild(if r2_p3 then "LockedGradient" else "CardGradient")
+    r4 = r5 ~= nil and r5:IsA("UIGradient")
+    local r6 = false
+    local Children, r8, r9 = r0_p3:GetChildren()
+    for r10, r11 in Children, r8, r9 do
+        if not (r4 or r11 == RarityGradient or not r11:IsA("UIGradient") or not r11.Enabled) then
+            r6 = true
+        end
+    end
+    local Children, r8, r9 = r0_p3:GetChildren()
+    for r10, r11 in Children, r8, r9 do
+        if r11 == RarityGradient or not r11:IsA("UIGradient") then
+        elseif r4 then
+            r11.Enabled = false
+            r11:SetAttribute("RarityTurnedOff", true)
+        elseif not r11:GetAttribute("RarityTurnedOff") then
+        else
+            if not r6 then r11.Enabled = r11:GetAttribute("RarityDefaultEnabled") == true end
+            r11:SetAttribute("RarityTurnedOff", nil)
+        end
+    end
+    if r4 then
+        RarityGradient.Color = r5.Color
+        RarityGradient.Transparency = r5.Transparency
+        RarityGradient.Rotation = r5.Rotation
+        RarityGradient.Offset = r5.Offset
+        r0_p3.BackgroundColor3 = Color3.new(1, 1, 1)
+        r0_p3.BackgroundTransparency = 0
+    else
+        r6 = r0_p3:GetAttribute("RarityBaseColor")
+        Children = r0_p3:GetAttribute("RarityBaseTransparency")
+        if typeof(r6) == "Color3" then r0_p3.BackgroundColor3 = r6 end
+        if typeof(Children) == "number" then r0_p3.BackgroundTransparency = Children end
+    end
+    RarityGradient.Enabled = r4
+    r5 = r4
+    r5 = r5 and (if r1_p3 == "Colossal" then not (r2_p3 == true) else false)
+    local Children, r8, r9 = r0_p3:GetDescendants()
+    for r10, r11 in Children, r8, r9 do
+        if not r11:IsA("UIGradient") or r11.Name ~= "ColossalRainbow" then continue end
+        r11.Enabled = r5
+        if r5 then
+            r4 = r11.Parent
+            if r4:IsA("TextLabel") then r4.TextColor3 = Color3.new(1, 1, 1) end
+            ReplicatedStorage.Register(r11, r0_p3)
+        else
+            ReplicatedStorage.Remove(r11)
+        end
+    end
+    if r5 then
+        ReplicatedStorage.Register(RarityGradient, r0_p3)
+    else
+        ReplicatedStorage.Remove(RarityGradient)
+    end
+    r5 = if r1_p3 then FishRarity.Get(r1_p3) else nil
+    RarityGradient = r0_p3:FindFirstChild("RarityStroke")
+    if RarityGradient and RarityGradient:IsA("UIStroke") then
+        RarityGradient.Enabled = not (r5 == nil)
+        if r5 then RarityGradient.Color = r5.Color end
+    end
+end
+function r3.Apply(r0: userdata, r1_p4: { any }?) -- Line: 180 | Name: Apply | Upvalues: ("FishRarity" (copy), "r3" (copy))
+    local r2 = if r1_p4 then FishRarity.Get(r1_p4.rarity) else nil
+    local RarityStroke = r0:FindFirstChild("RarityStroke", true)
+    if RarityStroke and RarityStroke:IsA("UIStroke") then
+        RarityStroke.Enabled = not (r2 == nil)
+        if r2 then RarityStroke.Color = r2.Color end
+    end
+    RarityStroke = r0:FindFirstChild("RarityPill", true)
+    if RarityStroke and RarityStroke:IsA("GuiObject") then
+        RarityStroke.Visible = not (r2 == nil)
+        local PillStroke = RarityStroke:FindFirstChild("PillStroke")
+        if r2 and PillStroke and PillStroke:IsA("UIStroke") then PillStroke.Color = r2.Color end
+    end
+    local RarityLabel = r0:FindFirstChild("RarityLabel", true)
+    RarityStroke = if RarityLabel and RarityLabel:IsA("TextLabel") then RarityLabel else nil
+    RarityLabel = if r2 then string.upper(r2.DisplayName) else nil
+    if RarityStroke then
+        RarityStroke.Text = RarityLabel or ""
+        RarityStroke.Visible = not (RarityLabel == nil)
+    end
+    if RarityStroke and r2 then RarityStroke.TextColor3 = r2.Color end
+    RarityStroke = r0:FindFirstChild("NameLabel", true)
+    RarityLabel = if RarityStroke and RarityStroke:IsA("TextLabel") then RarityStroke else nil
+    if not RarityLabel then
+        local FishNameLabel = r0:FindFirstChild("FishNameLabel", true)
+        RarityLabel = if FishNameLabel and FishNameLabel:IsA("TextLabel") then FishNameLabel else nil
+    end
+    local r5 = if r1_p4 then r1_p4.name else nil
+    if RarityLabel then
+        RarityLabel.Text = r5 or ""
+        RarityLabel.Visible = not (r5 == nil)
+    end
+    r5 = r0:FindFirstChild("ValueLabel", true)
+    RarityLabel = if r5 and r5:IsA("TextLabel") then r5 else nil
+    r5 = if r1_p4 and r1_p4.value then r3.FormatWhole(r1_p4.value) .. " Coins" else nil
+    if RarityLabel then
+        RarityLabel.Text = r5 or ""
+        RarityLabel.Visible = not (r5 == nil)
+    end
+    r5 = r0:FindFirstChild("IncomeLabel", true)
+    RarityLabel = if r5 and r5:IsA("TextLabel") then r5 else nil
+    if r1_p4 and r1_p4.income then
+        r5 = string.format
+        r5 = r5("+%s %s/s in tank", r3.FormatWhole(r1_p4.income), r1_p4.income == 1 and "Coin" or "Coins")
+    else
+        r5 = nil
+    end
+    if RarityLabel then
+        RarityLabel.Text = r5 or ""
+        RarityLabel.Visible = not (r5 == nil)
+    end
+    r5 = r0:FindFirstChild("PondLabel", true)
+    RarityLabel = if r5 and r5:IsA("TextLabel") then r5 else nil
+    if r1_p4 and r1_p4.pondIndex and r1_p4.distanceMeters then
+        r5 = string.format
+        r5 = r5("Pond %d \226\128\162 %sm", r1_p4.pondIndex, r3.FormatWhole(r1_p4.distanceMeters))
+    else
+        r5 = nil
+    end
+    if RarityLabel then
+        RarityLabel.Text = r5 or ""
+        RarityLabel.Visible = not (r5 == nil)
+    end
+    r5 = r0:FindFirstChild("WeightLabel", true)
+    RarityLabel = if r5 and r5:IsA("TextLabel") then r5 else nil
+    r5 = if r1_p4 and r1_p4.pull then "Weight " .. r3.FormatWhole(r1_p4.pull) else nil
+    if RarityLabel then
+        RarityLabel.Text = r5 or ""
+        RarityLabel.Visible = not (r5 == nil)
+    end
+    local r6 = if r2 then r2.Id else nil
+    r3.ApplyRarityStyle(r0, r6)
+end
+return table.freeze(r3)

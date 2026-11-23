@@ -1,0 +1,258 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.CatchRevealController
+-- Took 1.07s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local FishViewportPresenter = require(script.Parent:WaitForChild("FishViewportPresenter"))
+local FishStatsPresenter = require(script.Parent:WaitForChild("FishStatsPresenter"))
+local SoundEffects = require(script.Parent:WaitForChild("SoundEffects"))
+local ColossalCatchCelebration = require(script.Parent:WaitForChild("ColossalCatchCelebration"))
+local LocalPlayer = Players.LocalPlayer
+local CaughtFishDecisionRequest = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CaughtFishDecisionRequest")
+local CatchRevealGui = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("CatchRevealGui")
+local Card = CatchRevealGui:WaitForChild("Card")
+local PopScale = Card:WaitForChild("PopScale")
+local FishViewport = Card:WaitForChild("FishViewport")
+local r13 = ColossalCatchCelebration.New(CatchRevealGui)
+ColossalCatchCelebration = Card.Title.Text
+local RevolutionSeconds = FishViewport:GetAttribute("RevolutionSeconds")
+local ColossalHoldSeconds = Card:GetAttribute("ColossalHoldSeconds")
+local r17 = typeof(ColossalHoldSeconds) == "number" and ColossalHoldSeconds > 0
+assert(r17, "Colossal reveal needs positive hold seconds")
+local RestPosition = Card:GetAttribute("RestPosition")
+r17 = Card:GetAttribute("ExitPosition")
+local HoldSeconds = Card:GetAttribute("HoldSeconds")
+local PopSeconds = Card:GetAttribute("PopSeconds")
+local FlyOutSeconds = Card:GetAttribute("FlyOutSeconds")
+local r22 = typeof(RestPosition) == "UDim2" and typeof(r17) == "UDim2"
+assert(r22, "CatchRevealGui.Card needs UDim2 RestPosition and ExitPosition attributes")
+r22 = typeof(HoldSeconds) == "number" and HoldSeconds > 0 and typeof(PopSeconds) == "number" and PopSeconds > 0 and typeof(FlyOutSeconds) == "number" and FlyOutSeconds > 0
+assert(r22, "CatchRevealGui.Card needs positive HoldSeconds, PopSeconds, and FlyOutSeconds attributes")
+local new_2 = TweenInfo.new
+local Back = Enum.EasingStyle.Back
+new_2 = new_2(PopSeconds, Back, Enum.EasingDirection.Out)
+r22 = TweenInfo.new
+r22 = r22(FlyOutSeconds, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+Back = Card:WaitForChild("NewIndexBadge")
+local BadgeScale = Back:WaitForChild("BadgeScale")
+local Burst = Back:WaitForChild("Burst")
+local Shine = Back:WaitForChild("NewLabel"):WaitForChild("Shine")
+local r27 = {}
+local Children, Rotation, Rotation_2 = Back:WaitForChild("Sparkles"):GetChildren()
+for Offset, r32 in Children, Rotation, Rotation_2 do
+    if r32:IsA("ImageLabel") then
+        table.insert(r27, {sparkle = r32, transparency = r32.ImageTransparency, rotation = r32.Rotation})
+    end
+end
+Children = BadgeScale.Scale
+Rotation = Back.Rotation
+Rotation_2 = Burst.Rotation
+local Offset = Shine.Offset
+local r32 = Vector2.new(- Offset.X, Offset.Y)
+local new_3, Back_2 = TweenInfo.new, Enum.EasingStyle.Back
+new_3 = new_3(0.35, Back_2, Enum.EasingDirection.Out)
+local new_4, Sine_2 = TweenInfo.new, Enum.EasingStyle.Sine
+new_4 = new_4(0.45, Sine_2, Enum.EasingDirection.InOut, -1, true)
+Back_2 = TweenInfo.new
+Back_2 = Back_2(4, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1)
+Sine_2 = TweenInfo.new
+Sine_2 = Sine_2(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, -1, false, 0.5)
+local r37 = 0
+local r38
+local r39
+local r40 = {}
+local r41 = {}
+local function stopBadge() -- Line: 191 | Name: stopBadge | Upvalues: ("r40" (copy), "Back" (copy), "BadgeScale" (copy), "Children" (copy), "Rotation" (copy), "Burst" (copy), "Rotation_2" (copy), "Shine" (copy), "Offset" (copy), "r27" (copy))
+    for r3, r4 in r40 do
+        r4:Cancel()
+    end
+    table.clear(r40)
+    Back.Visible = false
+    BadgeScale.Scale = Children
+    Back.Rotation = Rotation
+    Burst.Rotation = Rotation_2
+    Shine.Offset = Offset
+    for r3, r4 in r27 do
+        r4.sparkle.ImageTransparency = r4.transparency
+        r4.sparkle.Rotation = r4.rotation
+    end
+end
+local function addBadgeTween(r0: userdata, r1: userdata, r2_p1: { any }) -- Line: 209 | Name: addBadgeTween | Upvalues: ("TweenService" (copy), "r40" (copy))
+    local r3 = TweenService:Create(r0, r1, r2_p1)
+    table.insert(r40, r3)
+    return r3
+end
+local function playBadge() -- Line: 219 | Name: playBadge | Upvalues: ("stopBadge" (copy), "BadgeScale" (copy), "Children" (copy), "Back" (copy), "Rotation" (copy), "SoundEffects" (copy), "new_3" (copy), "TweenService" (copy), "r40" (copy), "new_4" (copy), "Burst" (copy), "Back_2" (copy), "Rotation_2" (copy), "Shine" (copy), "Sine_2" (copy), "r32" (copy), "r27" (copy))
+    stopBadge()
+    BadgeScale.Scale = Children * 2.4
+    Back.Rotation = Rotation + -24
+    Back.Visible = true
+    SoundEffects.Play("NewIndexDiscovery")
+    local __up1, __up6, r3 = BadgeScale, new_3, {Scale = Children}
+    local r0 = TweenService:Create(__up1, __up6, r3)
+    table.insert(r40, r0)
+    __up6, r3 = BadgeScale, new_4
+    __up1 = TweenService:Create(__up6, r3, {Scale = Children * 1.08})
+    table.insert(r40, __up1)
+    r0.Completed:Once(function(r0) -- Line: 229 | Upvalues: ("r40" (upval), "__up1" (copy))
+        if r0 == Enum.PlaybackState.Completed and table.find(r40, __up1) then __up1:Play() end
+    end)
+    r0:Play()
+    local r4
+    r3, r4 = Back, new_3
+    __up6 = TweenService:Create(r3, r4, {Rotation = Rotation})
+    table.insert(r40, __up6)
+    __up6:Play()
+    local r5_p3
+    r3, r4, r5_p3 = Burst, Back_2, {Rotation = Rotation_2 + 360}
+    __up6 = TweenService:Create(r3, r4, r5_p3)
+    table.insert(r40, __up6)
+    __up6:Play()
+    r3, r4, r5_p3 = Shine, Sine_2, {Offset = r32}
+    __up6 = TweenService:Create(r3, r4, r5_p3)
+    table.insert(r40, __up6)
+    __up6:Play()
+    for r5_p3, r6 in r27 do
+        local new, Sine = TweenInfo.new, Enum.EasingStyle.Sine
+        local r11, r12, r13 = -1, true, r5_p3 * 0.15
+        r0 = new(0.5, Sine, Enum.EasingDirection.InOut, r11, r12, r13)
+        local sparkle = r6.sparkle
+        Sine = {ImageTransparency = 0.85, Rotation = r6.rotation + 90}
+        new = TweenService:Create(sparkle, r0, Sine)
+        table.insert(r40, new)
+        new:Play()
+    end
+end
+local function stopReveal() -- Line: 250 | Name: stopReveal | Upvalues: ("r38" (ref), "stopBadge" (copy), "r13" (copy), "Card" (copy), "ColossalCatchCelebration" (copy), "FishViewport" (copy), "RevolutionSeconds" (copy), "CatchRevealGui" (copy), "FishViewportPresenter" (copy), "RestPosition" (copy), "PopScale" (copy))
+    if r38 then
+        r38:Cancel()
+        r38 = nil
+    end
+    stopBadge()
+    r13.Stop()
+    Card.Title.Text = ColossalCatchCelebration
+    FishViewport:SetAttribute("RevolutionSeconds", RevolutionSeconds)
+    CatchRevealGui.Enabled = false
+    FishViewportPresenter.Clear(FishViewport)
+    Card.Position = RestPosition
+    PopScale.Scale = 1
+end
+local function playTween(r0: userdata, r1: userdata, r2_p5: { any }) -- Line: 267 | Name: playTween | Upvalues: ("r38" (ref), "TweenService" (copy))
+    if r38 then r38:Cancel() end
+    local r3 = TweenService:Create(r0, r1, r2_p5)
+    r38 = r3
+    r3:Play()
+end
+local function showReveal(r0: any, r1: boolean, r2_p6: number) -- Line: 283 | Name: showReveal | Upvalues: ("stopReveal" (copy), "FishStatsPresenter" (copy), "Card" (copy), "ColossalHoldSeconds" (copy), "HoldSeconds" (copy), "ColossalCatchCelebration" (copy), "FishViewport" (copy), "RevolutionSeconds" (copy), "PopScale" (copy), "CatchRevealGui" (copy), "SoundEffects" (copy), "FishViewportPresenter" (copy), "new_2" (copy), "r38" (ref), "TweenService" (copy), "r37" (ref), "r13" (copy), "PopSeconds" (copy), "playBadge" (copy), "r22" (copy), "r17" (copy), "FlyOutSeconds" (copy))
+    stopReveal()
+    FishStatsPresenter.Apply(Card, r0)
+    local r3_p6 = r0.rarity == "Colossal"
+    local r4_p6 = if r3_p6 then ColossalHoldSeconds else HoldSeconds
+    Card.Title.Text = r3_p6 and "COLOSSAL CAUGHT!" or ColossalCatchCelebration
+    local r8 = if r3_p6 then r4_p6 else RevolutionSeconds
+    FishViewport:SetAttribute("RevolutionSeconds", r8)
+    FishViewport.Visible = true
+    PopScale.Scale = 0.6
+    CatchRevealGui.Enabled = true
+    SoundEffects.Play("CatchCheer")
+    FishViewportPresenter.Show(FishViewport, r0.fishId, true)
+    local __up8, __up12, r7 = PopScale, new_2, {Scale = 1}
+    if r38 then r38:Cancel() end
+    r8 = TweenService:Create(__up8, __up12, r7)
+    r38 = r8
+    r8:Play()
+    __up8 = os.clock()
+    __up12 = FishViewportPresenter.WaitUntilReady(FishViewport, r0.fishId)
+    if r2_p6 ~= r37 then return end
+    if not __up12 then
+        stopReveal()
+        return
+    end
+    __up12 = os.clock()
+    if r3_p6 then r13.Begin(not r1) end
+    if r1 then
+        r3_p6 = PopSeconds + 0.15 - (os.clock() - __up8)
+        if r3_p6 > 0 then
+            task.wait(r3_p6)
+            if r2_p6 ~= r37 then return end
+        end
+        playBadge()
+    end
+    r7 = task.wait
+    local r10_p6 = r4_p6 - (os.clock() - __up12)
+    r7(math.max(0, r10_p6))
+    if r2_p6 ~= r37 then return end
+    SoundEffects.Play("CatchSwipe")
+    r7, r8 = Card, r22
+    local r9_p6 = {Position = r17}
+    if r38 then r38:Cancel() end
+    __up12 = TweenService:Create(r7, r8, r9_p6)
+    r38 = __up12
+    __up12:Play()
+    task.wait(FlyOutSeconds)
+    if r2_p6 ~= r37 then return end
+    stopReveal()
+end
+local function fetchPendingFish(r0: string) -- Line: 342 | Name: fetchPendingFish | Upvalues: ("CaughtFishDecisionRequest" (copy))
+    local r1, r2 = pcall(CaughtFishDecisionRequest.InvokeServer, CaughtFishDecisionRequest, "Get")
+    if not r1 then
+        warn("CatchRevealController could not read the caught fish: " .. tostring(r2))
+        return nil, false
+    end
+    if typeof(r2) ~= "table" or typeof(r2.snapshot) ~= "table" then
+        warn("CatchRevealController received no catch snapshot")
+        return nil, false
+    end
+    r1 = r2.snapshot.pending
+    if typeof(r1) ~= "table" or r1.catchId ~= r0 then return nil, false end
+    if typeof(r1.fishId) ~= "string" or r1.fishId == "" or typeof(r1.name) ~= "string" then
+        warn("CatchRevealController received a malformed caught fish")
+        return nil, false
+    end
+    return r1, r2.snapshot.pendingNewToIndex == true
+end
+local function beginReveal(r0) -- Line: 369 | Name: beginReveal | Upvalues: ("r39" (ref), "r37" (ref), "CatchRevealGui" (copy), "fetchPendingFish" (copy), "showReveal" (copy))
+    if typeof(r0) ~= "string" or r0 == "" or r0 == r39 then return end
+    r39 = r0
+    r37 += 1
+    local __up1 = r37
+    CatchRevealGui:SetAttribute("RevealingCatchId", r0)
+    task.spawn(function() -- Line: 378 | Upvalues: ("fetchPendingFish" (upval), "r0" (copy), "__up1" (copy), "r37" (upval), "showReveal" (upval), "CatchRevealGui" (upval))
+        local r0_p8, r1_p8 = fetchPendingFish(r0)
+        if r0_p8 and (r1_p8 or r0_p8.rarity == "Colossal") and __up1 == r37 then
+            showReveal(r0_p8, r1_p8, __up1)
+        end
+        if __up1 == r37 then CatchRevealGui:SetAttribute("RevealingCatchId", nil) end
+    end)
+end
+local function onReelOutcomeChanged() -- Line: 394 | Name: onReelOutcomeChanged | Upvalues: ("LocalPlayer" (copy), "beginReveal" (copy))
+    if LocalPlayer:GetAttribute("ReelOutcome") == "Caught" then
+        beginReveal(LocalPlayer:GetAttribute("PendingCatchId"))
+    end
+end
+table.insert(r41, LocalPlayer:GetAttributeChangedSignal("ReelOutcome"):Connect(onReelOutcomeChanged))
+table.insert(r41, ReplicatedStorage.Remotes:WaitForChild("ColossalEvent").OnClientEvent:Connect(function(r0: string, r1: any) -- Line: 402 | Upvalues: ("beginReveal" (copy))
+    if r0 == "CaptureEnded" and typeof(r1) == "table" and r1.won == true then
+        beginReveal(r1.catchId)
+    end
+end))
+table.insert(r41, Players.LocalPlayer.CharacterRemoving:Connect(function() -- Line: 408 | Upvalues: ("r37" (ref), "stopReveal" (copy), "CatchRevealGui" (copy))
+    r37 += 1
+    stopReveal()
+    CatchRevealGui:SetAttribute("RevealingCatchId", nil)
+end))
+local r53 = script.Destroying:Connect(function() -- Line: 414 | Upvalues: ("r37" (ref), "stopReveal" (copy), "r13" (copy), "CatchRevealGui" (copy), "r41" (copy))
+    r37 += 1
+    stopReveal()
+    r13.Destroy()
+    CatchRevealGui:SetAttribute("RevealingCatchId", nil)
+    for r3, r4 in r41 do
+        r4:Disconnect()
+    end
+end)
+table.insert(r41, r53)
+stopReveal()
+CatchRevealGui:SetAttribute("RevealingCatchId", nil)

@@ -1,0 +1,131 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersTrackSelection
+-- Took 0.6s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local r0_0 = {
+    new = function(r0: userdata, r1: (...any) -> ...any, r2: (...any) -> ...any) -- Line: 16 | Name: new
+        local Panel = r0.Dimmer.Panel
+        local Cards = Panel.Cards
+        local PlayButton = Panel.PlayButton
+        local r6_0, r7_0
+        local r8_0 = {}
+        local r9_0 = false
+        local r10_0 = true
+        local r11_0 = {}
+        local r12_0 = {}
+        local function layout() -- Line: 32 | Name: layout | Upvalues: ("r0" (copy), "Panel" (copy), "Cards" (copy), "PlayButton" (copy))
+            local r0_p0 = r0.AbsoluteSize.X < r0.AbsoluteSize.Y
+            Panel.Size = UDim2.fromScale(if r0_p0 then 0.94 else 0.88, if r0_p0 then 0.91 else 0.85)
+            Panel.Position = UDim2.fromScale(0.5, 0.52)
+            Panel.Header.Position = UDim2.fromScale(if r0_p0 then 0.05 else 0.18, -0.045)
+            Panel.Header.Size = UDim2.fromScale(if r0_p0 then 0.86 else 0.64, if r0_p0 then 0.15 else 0.19)
+            Panel.CloseButton.Position = UDim2.fromScale(if r0_p0 then 0.9 else 0.936, -0.018)
+            Panel.CloseButton.Size = UDim2.fromScale(if r0_p0 then 0.09 else 0.07, if r0_p0 then 0.065 else 0.105)
+            Cards.Position = UDim2.fromScale(0.025, if r0_p0 then 0.115 else 0.16)
+            Cards.Size = UDim2.fromScale(0.95, if r0_p0 then 0.695 else 0.65)
+            Cards.CanvasSize = UDim2.fromScale(0, if r0_p0 then 1.65 else 0)
+            for i_0 = 1, 2 do
+                local r4 = Cards["Track" .. i_0]
+                local r6 = if r0_p0 then 0.025 else if i_0 == 1 then 0.012 else 0.516
+                local r7 = if r0_p0 then (i_0 - 1) * 0.49 + 0.012 else 0.015
+                r4.Position = UDim2.fromScale(r6, r7)
+                r4.Size = UDim2.fromScale(if r0_p0 then 0.94 else 0.47, if r0_p0 then 0.475 else 0.96)
+            end
+            PlayButton.Size = UDim2.fromScale(if r0_p0 then 0.6 else 0.32, 0.132)
+            Panel.SelectedName.Size = UDim2.fromScale(if r0_p0 then 0.6 else 0.32, 0.034)
+            Panel.SelectedName.Position = UDim2.fromScale(if r0_p0 then 0.2 else 0.34, 0.957)
+            Panel.Hint.Visible = not r0_p0
+        end
+        local function paint() -- Line: 57 | Name: paint | Upvalues: ("Cards" (copy), "r7_0" (ref), "r9_0" (ref), "PlayButton" (copy), "r8_0" (ref), "Panel" (copy))
+            for i_0 = 1, 2 do
+                local r3_p1 = Cards["Track" .. i_0]
+                local r4 = r3_p1:GetAttribute("TrackId") == r7_0
+                local r6 = if r4 then Color3.fromRGB(255, 215, 48) else Color3.fromRGB(20, 224, 255)
+                r3_p1.Outline.Color = r6
+                r6 = if r4 then Color3.fromRGB(255, 205, 20) else Color3.fromRGB(0, 181, 241)
+                r3_p1.SelectButton.BackgroundColor3 = r6
+                r3_p1.SelectButton.Text = if r4 then "SELECTED" else "SELECT"
+                r3_p1.SelectedMark.Visible = r4
+                r3_p1.SelectButton.Active = not r9_0
+                r3_p1.SelectButton.Selectable = not r9_0
+            end
+            PlayButton.Active = not r9_0
+            PlayButton.Selectable = not r9_0
+            PlayButton.Text = r9_0 and "JOINING\226\128\166" or "\240\159\143\129 PLAY"
+            for r3_p1, r4 in r8_0 do
+                if r4.id == r7_0 then
+                    local upper = string.upper
+                    Panel.SelectedName.Text = upper(r4.name)
+                end
+            end
+        end
+        function r12_0.Hide() -- Line: 78 | Name: Hide | Upvalues: ("r0" (copy), "r6_0" (ref), "r9_0" (ref))
+            r0.Enabled = false
+            r6_0 = nil
+            r9_0 = false
+        end
+        function r12_0.Show(r0_p3) -- Line: 84 | Name: Show | Upvalues: ("r10_0" (ref), "r12_0" (copy), "r6_0" (ref), "r8_0" (ref), "r7_0" (ref), "Cards" (copy), "Panel" (copy), "r0" (copy), "layout" (copy), "paint" (copy))
+            local r2 = r10_0 and (typeof(r0_p3) == "table" and typeof(r0_p3.token) == "string" and #r0_p3.tracks == 2)
+            assert(r2, "Invalid track offer")
+            r12_0.Hide()
+            r6_0 = r0_p3.token
+            r8_0 = r0_p3.tracks
+            local r1 = false
+            for r5, r6 in r8_0 do
+                if r6.id == r7_0 then r1 = true end
+            end
+            if not r1 then r7_0 = r8_0[1].id end
+            for r5, r6 in r8_0 do
+                r1 = Cards["Track" .. r5]
+                r1:SetAttribute("TrackId", r6.id)
+                local upper = string.upper
+                r1.NameLabel.Text = upper(r6.name)
+                r1:FindFirstChild("Style").Label.Text = r6.style
+                r1.Laps.Text = tostring(r6.laps) .. " LAPS"
+                r1.Capacity.Text = tostring(r6.capacity) .. " RACERS"
+            end
+            Panel.Status.Text = ""
+            Cards.CanvasPosition = Vector2.zero
+            r0.Enabled = true
+            layout()
+            paint()
+        end
+        function r12_0.Denied(r0: string?) -- Line: 114 | Name: Denied | Upvalues: ("r12_0" (copy))
+            r12_0.Hide()
+            if r0 then warn("FishRiders selection refused: " .. r0) end
+        end
+        for i_0 = 1, 2 do
+            local r18_cap0 = Cards["Track" .. i_0]
+            table.insert(r11_0, r18_cap0.SelectButton.Activated:Connect(function() -- Line: 123 | Upvalues: ("r6_0" (ref), "r9_0" (ref), "r7_0" (ref), "r18_cap0" (copy), "paint" (copy))
+                if not r6_0 or r9_0 then return end
+                r7_0 = r18_cap0:GetAttribute("TrackId")
+                paint()
+            end))
+        end
+        table.insert(r11_0, PlayButton.Activated:Connect(function() -- Line: 130 | Upvalues: ("r6_0" (ref), "r9_0" (ref), "paint" (copy), "r1" (copy), "r7_0" (ref))
+            if not r6_0 or r9_0 then return end
+            r9_0 = true
+            paint()
+            r1(r6_0, r7_0)
+        end))
+        table.insert(r11_0, Panel.CloseButton.Activated:Connect(function() -- Line: 137 | Upvalues: ("r6_0" (ref), "r12_0" (copy), "r2" (copy))
+            if not r6_0 then return end
+            local __up0 = r6_0
+            r12_0.Hide()
+            r2(__up0)
+        end))
+        table.insert(r11_0, r0:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout))
+        function r12_0.Destroy() -- Line: 146 | Name: Destroy | Upvalues: ("r10_0" (ref), "r12_0" (copy), "r11_0" (copy))
+            if not r10_0 then return end
+            r12_0.Hide()
+            r10_0 = false
+            for r3, r4 in r11_0 do
+                r4:Disconnect()
+            end
+            table.clear(r11_0)
+        end
+        return r12_0
+    end
+}
+return table.freeze(r0_0)

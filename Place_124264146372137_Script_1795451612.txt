@@ -1,0 +1,282 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.MainMenuController
+-- Took 0.99s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
+local Workspace = game:GetService("Workspace")
+local SoundEffects = require(script.Parent:WaitForChild("SoundEffects"))
+local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+Players = PlayerGui:WaitForChild("MainMenuGui")
+local MenuButton = Players:WaitForChild("MenuButton")
+local ShopButton = MenuButton:WaitForChild("ShopButton")
+local MenuPanel = Players:WaitForChild("MenuPanel")
+local Content = MenuPanel:WaitForChild("Content")
+local CloseButton = MenuPanel:WaitForChild("CloseButton")
+local MotionScale_2 = MenuPanel:WaitForChild("MotionScale")
+local CloseRequested = Players:WaitForChild("CloseRequested")
+local RewardsButton = MenuPanel:WaitForChild("RewardsButton")
+local MysteryGiftButton = MenuPanel:WaitForChild("MysteryGiftButton")
+local FreeUgcButton = MenuPanel:WaitForChild("FreeUgcButton")
+local ReadyBadge = FreeUgcButton:WaitForChild("ItemImage"):WaitForChild("ReadyBadge")
+local Inner = MenuPanel:WaitForChild("Inner")
+local r19 = {
+    CloseButton, Content, RewardsButton, MysteryGiftButton, FreeUgcButton, Inner:WaitForChild("HeaderIcon"),
+    Inner:WaitForChild("Title"), Inner:WaitForChild("HeaderStuds"), Inner:WaitForChild("Body")
+}
+Inner = {"Base", "Mystery", "Ugc", "UgcMystery"}
+local r20 = {"Landscape", "CompactLandscape", "Portrait"}
+for r24, r25 in Inner do
+    for r29, r30 in r20 do
+        local r32 = typeof(MenuPanel:GetAttribute(r30 .. r25 .. "Size")) == "UDim2"
+        assert(r32, "MainMenuGui.MenuPanel needs the authored " .. r30 .. r25 .. "Size attribute")
+    end
+    for r29, r30 in r19 do
+        local r32 = typeof(r30:GetAttribute("MenuLayout" .. r25 .. "Position")) == "UDim2" and typeof(r30:GetAttribute("MenuLayout" .. r25 .. "Size")) == "UDim2"
+        assert(r32, r30:GetFullName() .. " needs authored MenuLayout" .. r25 .. "Position/Size attributes")
+    end
+end
+r20 = {"Invite", "Pets", "Ideas", "Teleport", "Settings", "Carpet"}
+Inner = {}
+local r21 = {}
+local r22
+local r23 = false
+local r24, r25 = true, 0
+local Position, Position_2 = MenuPanel.Position, MenuPanel.Position
+local function animate(r0: userdata, r1_p1: number, r2: { any }, r3: any) -- Line: 100 | Name: animate | Upvalues: ("r21" (copy), "TweenService" (copy))
+    if r21[r0] then r21[r0]:Cancel() end
+    local r7 = TweenInfo.new(r1_p1, r3, Enum.EasingDirection.Out)
+    local r4 = TweenService:Create(r0, r7, r2)
+    r21[r0] = r4
+    r4.Completed:Once(function() -- Line: 107 | Upvalues: ("r21" (upval), "r0" (copy), "r4" (copy))
+        if r21[r0] == r4 then r21[r0] = nil end
+    end)
+    r4:Play()
+    return r4
+end
+local function setOpen(r0_p3: boolean, r1: boolean?) -- Line: 118 | Name: setOpen | Upvalues: ("r24" (ref), "r25" (ref), "r23" (ref), "MenuPanel" (copy), "MotionScale_2" (copy), "Position_2" (ref), "Players" (copy), "r20" (copy), "Content" (copy), "CloseButton" (copy), "RewardsButton" (copy), "MysteryGiftButton" (copy), "FreeUgcButton" (copy), "GuiService" (copy), "MenuButton" (copy), "animate" (copy), "Position" (ref))
+    if not r24 then return end
+    r25 += 1
+    local __up1 = r25
+    r23 = r0_p3
+    if r0_p3 and not MenuPanel.Visible then
+        MenuPanel.Position = Position_2
+        MenuPanel.GroupTransparency = 1
+        MotionScale_2.Scale = 0.86
+    end
+    MenuPanel.Visible = true
+    Players:SetAttribute("Opened", r0_p3)
+    for r6, r7_p3 in ipairs(r20) do
+        Content[r7_p3].Selectable = r0_p3
+    end
+    CloseButton.Selectable = r0_p3
+    RewardsButton.Selectable = r0_p3
+    MysteryGiftButton.Selectable = r0_p3 and MysteryGiftButton.Visible
+    FreeUgcButton.Selectable = r0_p3 and FreeUgcButton.Visible
+    if r0_p3 and r1 then GuiService.SelectedObject = Content.Invite end
+    if not r0_p3 and GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(MenuPanel) then
+        GuiService.SelectedObject = MenuButton
+    end
+    local r7_p3 = if r0_p3 then Enum.EasingStyle.Back else Enum.EasingStyle.Quad
+    animate(MotionScale_2, 0.26, {Scale = if r0_p3 then 1 else 0.92}, r7_p3)
+    if r0_p3 then
+    end
+    animate(MenuPanel, 0.22, {Position = r7_p3, GroupTransparency = if r0_p3 then 0 else 1}, Enum.EasingStyle.Quad).Completed:Once(function(r0) -- Line: 146 | Upvalues: ("r24" (upval), "r25" (upval), "__up1" (copy), "r23" (upval), "MenuPanel" (upval))
+        if r24 and r25 == __up1 and not r23 and r0 == Enum.PlaybackState.Completed then
+            MenuPanel.Visible = false
+        end
+    end)
+end
+local function layout() -- Line: 160 | Name: layout | Upvalues: ("Workspace" (copy), "Players" (copy), "MenuPanel" (copy), "Position" (ref), "Position_2" (ref), "FreeUgcButton" (copy), "MysteryGiftButton" (copy), "r19" (copy), "MenuButton" (copy), "r25" (ref), "r21" (copy), "MotionScale_2" (copy), "r23" (ref))
+    local CurrentCamera = Workspace.CurrentCamera
+    local AbsoluteSize = Players.AbsoluteSize
+    if not CurrentCamera or AbsoluteSize.X <= 0 or AbsoluteSize.Y <= 0 then return end
+    local r2 = CurrentCamera.ViewportSize.X < CurrentCamera.ViewportSize.Y
+    local r3 = r2 and "Portrait" or CurrentCamera.ViewportSize.X <= 1000 and "CompactLandscape" or "Landscape"
+    CurrentCamera = MenuPanel:GetAttribute(r3 .. "Position")
+    local r4_p4 = math.max(0, - Players.AbsolutePosition.Y) / AbsoluteSize.Y
+    Position = UDim2.fromScale(CurrentCamera.X.Scale, CurrentCamera.Y.Scale + r4_p4)
+    Position_2 = UDim2.fromScale(CurrentCamera.X.Scale - 0.035, CurrentCamera.Y.Scale + r4_p4)
+    CurrentCamera = (FreeUgcButton.Visible and "Ugc" or "") .. (MysteryGiftButton.Visible and "Mystery" or "")
+    CurrentCamera = if CurrentCamera == "" then "Base" else CurrentCamera
+    MenuPanel.Size = MenuPanel:GetAttribute(r3 .. CurrentCamera .. "Size")
+    for r8, r9_p4 in r19 do
+        r9_p4.Position = r9_p4:GetAttribute("MenuLayout" .. CurrentCamera .. "Position")
+        r9_p4.Size = r9_p4:GetAttribute("MenuLayout" .. CurrentCamera .. "Size")
+    end
+    local r6 = if r2 then UDim2.fromScale(0.13, 0.071) else UDim2.fromScale(0.058, 0.145)
+    MenuButton.Size = r6
+    r3 = math.min(MenuButton.Size.X.Scale * AbsoluteSize.X, MenuButton.Size.Y.Scale * AbsoluteSize.Y) / AbsoluteSize.Y
+    r6 = if r2 then UDim2.fromScale(0.025, 0.45 + r4_p4) else UDim2.fromScale(0.012, 0.565 - r3 / 2)
+    MenuButton.Position = r6
+    r25 += 1
+    if r21[MenuPanel] then r21[MenuPanel]:Cancel() end
+    if r21[MotionScale_2] then r21[MotionScale_2]:Cancel() end
+    local r8 = if r23 then Position else Position_2
+    MenuPanel.Position = r8
+    MenuPanel.GroupTransparency = r23 and 0 or 1
+    MotionScale_2.Scale = 1
+    MenuPanel.Visible = r23
+end
+local function refreshBadge() -- Line: 204 | Name: refreshBadge | Upvalues: ("r20" (copy), "Content" (copy), "MenuButton" (copy), "RewardsButton" (copy), "MysteryGiftButton" (copy), "FreeUgcButton" (copy), "ReadyBadge" (copy))
+    local r0 = false
+    for r4, r5 in ipairs(r20) do
+        r0 = r0 or Content[r5].NewsBadge.Visible
+    end
+    MenuButton.NewsBadge.Visible = r0 or RewardsButton.ReadyBadge.Visible or MysteryGiftButton.Visible and MysteryGiftButton.ReadyBadge.Visible or FreeUgcButton.Visible and ReadyBadge.Visible
+end
+local r32 = {{"FriendInviteGui", "InviteDock"}, {"FishPetsGui", "PetsDock"}, {"IdeasGui", "IdeasDock"}, {"TeleportMenuGui", "TeleportDock"}, {"SettingsGui", "SettingsDock"}, {"StoreLauncherGui", "ShopDock"}}
+for r36, r37 in ipairs(r32) do
+    PlayerGui:WaitForChild(r37[1]):WaitForChild(r37[2]).Visible = false
+end
+r32 = PlayerGui.IdeasGui.IdeasDock.IdeasButton:WaitForChild("UnreadBadge")
+local function mirrorIdeas() -- Line: 224 | Name: mirrorIdeas | Upvalues: ("Content" (copy), "r32" (copy))
+    Content.Ideas.NewsBadge.Visible = r32.Visible
+end
+local function linkNavigation() -- Line: 230 | Name: linkNavigation | Upvalues: ("r20" (copy), "Content" (copy), "CloseButton" (copy), "RewardsButton" (copy), "MysteryGiftButton" (copy), "FreeUgcButton" (copy), "MenuButton" (copy), "r23" (ref), "GuiService" (copy))
+    local r0 = {}
+    for r4, r5 in r20 do
+        if Content[r5].Visible then table.insert(r0, Content[r5]) end
+    end
+    for r4, r5 in r0 do
+        local r7_p7 = if r4 % 2 == 0 then r4 - 1 else r4
+        r5.NextSelectionLeft = r0[r7_p7]
+        r7_p7 = if r4 % 2 == 1 and r0[r4 + 1] then r4 + 1 else r4
+        r5.NextSelectionRight = r0[r7_p7]
+        r5.NextSelectionUp = if r4 > 2 then r0[r4 - 2] else CloseButton
+        r5.NextSelectionDown = r0[r4 + 2] or RewardsButton
+    end
+    RewardsButton.NextSelectionUp = r0[#r0]
+    r0 = {RewardsButton}
+    if MysteryGiftButton.Visible then table.insert(r0, MysteryGiftButton) end
+    if FreeUgcButton.Visible then table.insert(r0, FreeUgcButton) end
+    for r4, r5 in r0 do
+        r5.NextSelectionDown = r0[r4 - 1] or MenuButton
+    end
+    MysteryGiftButton.Selectable = r23 and MysteryGiftButton.Visible
+    FreeUgcButton.Selectable = r23 and FreeUgcButton.Visible
+    if if MysteryGiftButton.Visible then not FreeUgcButton.Visible and GuiService.SelectedObject == FreeUgcButton else GuiService.SelectedObject == MysteryGiftButton or not FreeUgcButton.Visible and GuiService.SelectedObject == FreeUgcButton then
+        GuiService.SelectedObject = RewardsButton
+    end
+end
+for r37, r38 in r20 do
+    local r39 = Content[r38]
+    local r40_cap0 = r39:WaitForChild("MotionScale")
+    table.insert(Inner, r39.MouseEnter:Connect(function() -- Line: 272 | Upvalues: ("animate" (copy), "r40_cap0" (copy))
+        animate(r40_cap0, 0.13, {Scale = 1.025}, Enum.EasingStyle.Quad)
+    end))
+    table.insert(Inner, r39.MouseLeave:Connect(function() -- Line: 275 | Upvalues: ("animate" (copy), "r40_cap0" (copy))
+        animate(r40_cap0, 0.16, {Scale = 1}, Enum.EasingStyle.Quad)
+    end))
+    table.insert(Inner, r39.MouseButton1Down:Connect(function() -- Line: 278 | Upvalues: ("animate" (copy), "r40_cap0" (copy))
+        animate(r40_cap0, 0.08, {Scale = 0.95}, Enum.EasingStyle.Quad)
+    end))
+    table.insert(Inner, r39.MouseButton1Up:Connect(function() -- Line: 281 | Upvalues: ("animate" (copy), "r40_cap0" (copy))
+        animate(r40_cap0, 0.2, {Scale = 1}, Enum.EasingStyle.Back)
+    end))
+    table.insert(Inner, r39.NewsBadge:GetPropertyChangedSignal("Visible"):Connect(refreshBadge))
+    table.insert(Inner, r39:GetPropertyChangedSignal("Visible"):Connect(linkNavigation))
+end
+linkNavigation()
+table.insert(Inner, RewardsButton.ReadyBadge:GetPropertyChangedSignal("Visible"):Connect(refreshBadge))
+local function relayoutFooters() -- Line: 293 | Name: relayoutFooters | Upvalues: ("layout" (copy), "linkNavigation" (copy), "refreshBadge" (copy))
+    layout()
+    linkNavigation()
+    refreshBadge()
+end
+table.insert(Inner, MysteryGiftButton:GetPropertyChangedSignal("Visible"):Connect(relayoutFooters))
+table.insert(Inner, FreeUgcButton:GetPropertyChangedSignal("Visible"):Connect(relayoutFooters))
+table.insert(Inner, MysteryGiftButton.ReadyBadge:GetPropertyChangedSignal("Visible"):Connect(refreshBadge))
+table.insert(Inner, ReadyBadge:GetPropertyChangedSignal("Visible"):Connect(refreshBadge))
+local function bindFooterMotion(r0: userdata) -- Line: 304 | Name: bindFooterMotion | Upvalues: ("Inner" (copy), "animate" (copy))
+    local MotionScale = r0:WaitForChild("MotionScale")
+    table.insert(Inner, r0.MouseEnter:Connect(function() -- Line: 307 | Upvalues: ("animate" (upval), "MotionScale" (copy))
+        animate(MotionScale, 0.13, {Scale = 1.025}, Enum.EasingStyle.Quad)
+    end))
+    table.insert(Inner, r0.MouseLeave:Connect(function() -- Line: 308 | Upvalues: ("animate" (upval), "MotionScale" (copy))
+        animate(MotionScale, 0.16, {Scale = 1}, Enum.EasingStyle.Quad)
+    end))
+    table.insert(Inner, r0.MouseButton1Down:Connect(function() -- Line: 309 | Upvalues: ("animate" (upval), "MotionScale" (copy))
+        animate(MotionScale, 0.08, {Scale = 0.95}, Enum.EasingStyle.Quad)
+    end))
+    table.insert(Inner, r0.MouseButton1Up:Connect(function() -- Line: 310 | Upvalues: ("animate" (upval), "MotionScale" (copy))
+        animate(MotionScale, 0.2, {Scale = 1}, Enum.EasingStyle.Back)
+    end))
+end
+bindFooterMotion(MysteryGiftButton)
+bindFooterMotion(FreeUgcButton)
+CloseButton.NextSelectionDown = Content.Invite
+CloseButton.NextSelectionLeft = Content.Pets
+CloseButton.NextSelectionRight = MenuButton
+MenuButton.NextSelectionRight = Content.Invite
+local function contains(r0: userdata, r1: Vector2) -- Line: 320 | Name: contains
+    return r0.AbsolutePosition.X <= r1.X and r0.AbsolutePosition.Y <= r1.Y and r1.X <= r0.AbsolutePosition.X + r0.AbsoluteSize.X and r1.Y <= r0.AbsolutePosition.Y + r0.AbsoluteSize.Y
+end
+local function bindCamera() -- Line: 325 | Name: bindCamera | Upvalues: ("r22" (ref), "Workspace" (copy), "layout" (copy))
+    if r22 then r22:Disconnect() end
+    r22 = nil
+    if Workspace.CurrentCamera then
+        r22 = Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+    end
+    layout()
+end
+table.insert(Inner, MenuButton.Activated:Connect(function() -- Line: 336 | Upvalues: ("SoundEffects" (copy), "setOpen" (copy), "r23" (ref), "UserInputService" (copy))
+    SoundEffects.Play("UIClick")
+    setOpen(not r23, UserInputService.PreferredInput == Enum.PreferredInput.Gamepad)
+end))
+table.insert(Inner, CloseButton.Activated:Connect(function() -- Line: 341 | Upvalues: ("setOpen" (copy))
+    setOpen(false)
+end))
+table.insert(Inner, CloseRequested.Event:Connect(function() -- Line: 344 | Upvalues: ("setOpen" (copy))
+    setOpen(false)
+end))
+table.insert(Inner, ShopButton.Activated:Connect(function() -- Line: 348 | Upvalues: ("setOpen" (copy))
+    setOpen(false)
+end))
+table.insert(Inner, r32:GetPropertyChangedSignal("Visible"):Connect(mirrorIdeas))
+table.insert(Inner, UserInputService.InputBegan:Connect(function(r0: userdata) -- Line: 352 | Upvalues: ("r23" (ref), "setOpen" (copy), "MenuPanel" (copy), "MenuButton" (copy))
+    if not r23 then return end
+    if r0.KeyCode == Enum.KeyCode.Escape or r0.KeyCode == Enum.KeyCode.ButtonB then
+        setOpen(false)
+        return
+    end
+    if r0.UserInputType == Enum.UserInputType.MouseButton1 or r0.UserInputType == Enum.UserInputType.Touch then
+        local r1 = Vector2.new(r0.Position.X, r0.Position.Y)
+        local __up2 = MenuPanel
+        local r2 = __up2.AbsolutePosition.X <= r1.X and __up2.AbsolutePosition.Y <= r1.Y and r1.X <= __up2.AbsolutePosition.X + __up2.AbsoluteSize.X and r1.Y <= __up2.AbsolutePosition.Y + __up2.AbsoluteSize.Y
+        if not r2 then
+            __up2 = MenuButton
+            r2 = __up2.AbsolutePosition.X <= r1.X and __up2.AbsolutePosition.Y <= r1.Y and r1.X <= __up2.AbsolutePosition.X + __up2.AbsoluteSize.X and r1.Y <= __up2.AbsolutePosition.Y + __up2.AbsoluteSize.Y
+            if not r2 then setOpen(false) end
+        end
+    end
+end))
+table.insert(Inner, GuiService.MenuOpened:Connect(function() -- Line: 365 | Upvalues: ("setOpen" (copy))
+    setOpen(false)
+end))
+table.insert(Inner, Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera))
+table.insert(Inner, Players:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout))
+table.insert(Inner, Players:GetPropertyChangedSignal("AbsolutePosition"):Connect(layout))
+script.Destroying:Once(function() -- Line: 372 | Upvalues: ("r24" (ref), "Inner" (copy), "r22" (ref), "r21" (copy), "MenuPanel" (copy))
+    r24 = false
+    for r3, r4 in ipairs(Inner) do
+        r4:Disconnect()
+    end
+    if r22 then r22:Disconnect() end
+    for r3, r4 in pairs(r21) do
+        r4:Cancel()
+    end
+    MenuPanel.Visible = false
+end)
+Content.Ideas.NewsBadge.Visible = r32.Visible
+refreshBadge()
+setOpen(false)
+if r22 then r22:Disconnect() end
+r22 = nil
+if Workspace.CurrentCamera then
+    r22 = Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+end
+layout()

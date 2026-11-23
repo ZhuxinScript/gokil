@@ -1,0 +1,52 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.ClientStatsReporter
+-- Took 1.49s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local GuiService = game:GetService("GuiService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local UserInputService = game:GetService("UserInputService")
+local VRService = game:GetService("VRService")
+local Workspace = game:GetService("Workspace")
+local ClientStatsReport = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ClientStatsReport")
+local r8 = 0
+local r9 = os.clock()
+local function deviceType() -- Line: 55 | Name: deviceType | Upvalues: ("VRService" (copy), "GuiService" (copy), "UserInputService" (copy))
+    if VRService.VREnabled then return "VR" end
+    if GuiService:IsTenFootInterface() then return "Console" end
+    if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then return "Mobile" end
+    return "Desktop"
+end
+local function sendReport() -- Line: 68 | Name: sendReport | Upvalues: ("r9" (ref), "Workspace" (copy), "ClientStatsReport" (copy), "r8" (ref), "VRService" (copy), "GuiService" (copy), "UserInputService" (copy), "Stats" (copy))
+    local r0_p1 = os.clock()
+    local r1_0 = r0_p1 - r9
+    local CurrentCamera = Workspace.CurrentCamera
+    local r3_p1 = if CurrentCamera then CurrentCamera.ViewportSize else Vector2.zero
+    local r7_p1 = if r1_0 > 0 then r8 / r1_0 else 0
+    local r6_0 = {Fps = r7_p1, SampleSeconds = r1_0}
+    r7_p1 = VRService.VREnabled and "VR" or GuiService:IsTenFootInterface() and "Console" or UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled and "Mobile" or "Desktop"
+    r6_0.DeviceType = r7_p1
+    r6_0.InputType = UserInputService.PreferredInput.Name
+    r6_0.ScreenX = r3_p1.X
+    r6_0.ScreenY = r3_p1.Y
+    r6_0.MemoryMb = Stats:GetTotalMemoryUsageMb()
+    ClientStatsReport:FireServer(r6_0)
+    r8 = 0
+    r9 = r0_p1
+end
+local r11 = RunService.Heartbeat:Connect(function() -- Line: 92 | Upvalues: ("r8" (ref))
+    r8 += 1
+end)
+RunService = task.spawn(function() -- Line: 97 | Upvalues: ("sendReport" (copy))
+    task.wait(3)
+    while true do
+        sendReport()
+        task.wait(15)
+    end
+end)
+script.Destroying:Connect(function() -- Line: 106 | Upvalues: ("RunService" (copy), "r11" (copy))
+    task.cancel(RunService)
+    r11:Disconnect()
+end)

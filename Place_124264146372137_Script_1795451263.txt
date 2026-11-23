@@ -1,0 +1,69 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersCamera
+-- Took 1.46s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local r0_0 = {
+    new = function(r0) -- Line: 17 | Name: new
+        local r1 = r0 ~= nil and r0.Kind == "Ribbon"
+        local r2, Position
+        local r4_0, r5_0, r6_0 = 0, 0, 0
+        local r7_0, r8_0, r9_0 = 0, 0, 0
+        local r10_0 = 0
+        local r11_0, r12_0 = 0, nil
+        return {
+            Update = function(r0_p0: userdata, r1_p0: CFrame, r2_p0: any, r3: number, r4: number, r5: number) -- Line: 34 | Name: Update | Upvalues: ("Position" (ref), "r4_0" (ref), "r6_0" (ref), "r5_0" (ref), "r7_0" (ref), "r8_0" (ref), "r12_0" (ref), "r11_0" (ref), "r1" (copy), "r0" (copy), "r10_0" (ref), "r2" (ref), "r9_0" (ref))
+                local r6 = math.max(r4, 1E-05)
+                local r7 = 1 - math.exp(r6 * -7)
+                local r8 = if Position then (r1_p0.Position - Position).Magnitude / r6 else r2_p0.speed
+                Position = r1_p0.Position
+                r4_0 += (math.min(r8, 100) - r4_0) * r7
+                r6_0 += (math.clamp((r4_0 - r5_0) / r6, -65, 65) - r6_0) * (1 - math.exp(r6 * -5))
+                r5_0 = r4_0
+                local r12 = r3 < r2_p0.boostUntil and not r2_p0.finish and 1 or 0
+                r7_0 += (r12 - r7_0) * r7
+                r8_0 += (r5 - r8_0) * (1 - math.exp(r6 * -6))
+                if r2_p0.hitSerial and r2_p0.hitSerial ~= r12_0 then r12_0, r11_0 = r2_p0.hitSerial, 1 end
+                r11_0 *= math.exp(r6 * -6)
+                r8 = if r1 then r1_p0.LookVector else Vector3.new(r1_p0.LookVector.X, 0, r1_p0.LookVector.Z).Unit
+                local r9 = if r1 then r1_p0.UpVector else vector.create(0, 1, 0)
+                local r10 = 0
+                local r11 = 0
+                if r1 then
+                    r12 = r0.Project(r2_p0.position)
+                    r11 = r0.Surface(r2_p0.position):PointToObjectSpace(r2_p0.position).X
+                    local r14, r15 = r0.Point(r12)
+                    local r16, lookAt_2 = r0.Point(r12 + 16)
+                    local r18, r19 = r0.Point(r12 - 16)
+                    local r21 = math.abs(lookAt_2.Y - r15.Y)
+                    local r22 = math.abs(r19.Y - r15.Y)
+                    r18 = math.max(r21, r22)
+                    r10 = math.clamp((r18 - 0.06) / 0.22, 0, 1)
+                end
+                r10_0 += (r10 - r10_0) * (1 - math.exp(- (r10_0 < r10 and 18 or 7) * r6))
+                r10 = CFrame.lookAt(vector.create(0, 0, 0), r8, r9)
+                local r15 = 1 - math.exp(- (r10_0 * 15 + 7) * r6)
+                r2 = (r2 or r10):Lerp(r10, r15)
+                r10 = math.clamp(r4_0 / 82, 0, 1)
+                r6 = math.clamp(r6_0 / 38, -1, 1)
+                r12 = r10 * 3 + 14 + r7_0 * 1.3 + r6 * 0.8
+                local r13 = 7 - r10 * 1.2 - r7_0 * 0.35
+                r12 += (r10 + 9.5 + r7_0 * 0.3 - r12) * r10_0
+                r13 += (4.2 - r13) * r10_0
+                local r14 = - r8_0 * (r10 * 0.9 + 1.2) * (1 - r10_0 * 0.85) - r11 * r10_0 * 0.3
+                r11 = r1_p0.Position + r9 * 2.8
+                r15 = r11 - r2.LookVector * r12 + r2.UpVector * r13 + r2.RightVector * r14
+                r15 += r9 * (math.sin(r3 * 18) * 0.045 * r10 + r11_0 * math.sin(r3 * 35) * 0.15)
+                r14 = (r10 * 4 + 6) * (1 - r10_0) + (r10 * 2 + 3.5) * r10_0
+                r13 = r11 + r8 * r14 - r2.RightVector * r8_0 * 1.5
+                r9_0 += (- r8_0 * 0.048869219055841226 * r10 - r9_0) * r7
+                r0_p0.CameraType = Enum.CameraType.Scriptable
+                local lookAt = CFrame.lookAt
+                r0_p0.CFrame = lookAt(r15, r13, r2.UpVector) * CFrame.Angles(- r6 * 0.012217304763960306, 0, r9_0)
+                r0_p0.Focus = CFrame.new(r13)
+                r0_p0.FieldOfView += (r10 * 15 + 66 + r7_0 * 7 - r0_p0.FieldOfView) * r7
+            end
+        }
+    end
+}
+return table.freeze(r0_0)

@@ -1,0 +1,784 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersController
+-- Took 2.18s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
+local ContentProvider = game:GetService("ContentProvider")
+local TextChatService = game:GetService("TextChatService")
+local FishRidersTrack = require(ReplicatedStorage:WaitForChild("FishRidersTrack"))
+local FishRidersTracks = require(ReplicatedStorage:WaitForChild("FishRidersTracks"))
+local FishRidersTrackSelection = require(script.Parent:WaitForChild("FishRidersTrackSelection"))
+local FishRidersAnimation = require(script.Parent:WaitForChild("FishRidersAnimation"))
+local FishRidersMotion = require(ReplicatedStorage:WaitForChild("FishRidersMotion"))
+local FishRidersVisuals = require(script.Parent:WaitForChild("FishRidersVisuals"))
+local FishRidersCamera = require(script.Parent:WaitForChild("FishRidersCamera"))
+local FishRidersReactions = require(script.Parent:WaitForChild("FishRidersReactions"))
+local FishRidersEffects = require(script.Parent:WaitForChild("FishRidersEffects"))
+local FishRidersItemRoulette = require(script.Parent:WaitForChild("FishRidersItemRoulette"))
+local FishRidersStandings = require(script.Parent:WaitForChild("FishRidersStandings"))
+local FishRidersAudio = require(script.Parent:WaitForChild("FishRidersAudio"))
+local FishRidersAssets = ReplicatedStorage:WaitForChild("FishRidersAssets")
+local LocalPlayer = Players.LocalPlayer
+Players = LocalPlayer:WaitForChild("PlayerGui")
+local FishRidersGui = Players:WaitForChild("FishRidersGui")
+local Root, LoadingCover = FishRidersGui.Root, FishRidersGui.LoadingCover
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+ReplicatedStorage = Remotes:WaitForChild("FishRidersRequest")
+local FishRidersState = Remotes:WaitForChild("FishRidersState")
+Remotes = FishRidersTrackSelection.new(Players:WaitForChild("FishRidersTrackSelectGui"), function(r0: string, r1_p0: string) -- Line: 58 | Upvalues: ("ReplicatedStorage" (copy))
+    ReplicatedStorage:FireServer("SelectTrack", {token = r0, trackId = r1_p0})
+end, function(r0: string) -- Line: 61 | Upvalues: ("ReplicatedStorage" (copy))
+    ReplicatedStorage:FireServer("DismissTrack", {token = r0})
+end)
+local r26
+local r27 = {}
+local r28 = 0
+local r29
+FishRidersTrackSelection = Enum.ContextActionPriority.High.Value + 500
+local r30 = {Root.BoostButton, Root.ItemButton, Root.ExitButton}
+local r31 = FishRidersItemRoulette.new(FishRidersGui:WaitForChild("ItemRoulette"), Root.ItemButton, function(r0: number, r1: boolean) -- Line: 85 | Upvalues: ("r26" (ref))
+    local __up0 = r26
+    if __up0 and __up0.audio then __up0.audio.RouletteTick(r0, r1) end
+end)
+local Icon = Root.ItemButton.Icon
+local Size = Icon.Size
+local r34, r35 = Color3.fromRGB(255, 221, 69), Color3.fromRGB(16, 211, 241)
+local Prize = Root.ResultsPanel.Prize
+local r37 = {}
+local Children_2, r39, r40 = Root:GetChildren()
+for r41, r42 in Children_2, r39, r40 do
+    if r42:IsA("GuiObject") then r37[r42] = {position = r42.Position, size = r42.Size} end
+end
+Children_2 = {
+    PositionPanel = {0.7, 0.24, 0.275, 0.08}, TitlePanel = {0.69, 0.325, 0.285, 0.032},
+    TimePanel = {0.69, 0.365, 0.285, 0.03},
+    Leaderboard = {0.5, 0.07, 0.92, 0.13},
+    BoostButton = {0.975, 0.955, 0.3, 0.13}, ItemButton = {0.655, 0.955, 0.33, 0.15},
+    SpeedPanel = {0.025, 0.855, 0.28, 0.09},
+    ResultsPanel = {0.045, 0.25, 0.91, 0.45}, ExitButton = {0.82, 0.405, 0.15, 0.045}
+}
+local function layout() -- Line: 125 | Name: layout | Upvalues: ("Root" (copy), "r37" (copy), "Children_2" (copy), "Prize" (copy), "UserInputService" (copy))
+    local r0 = Root.AbsoluteSize.X < Root.AbsoluteSize.Y
+    for r4, r5 in r37 do
+        local r6 = r0 and Children_2[r4.Name]
+        local r7 = if r6 then UDim2.fromScale(r6[1], r6[2]) else r5.position
+        r4.Position = r7
+        r7 = if r6 then UDim2.fromScale(r6[3], r6[4]) else r5.size
+        r4.Size = r7
+    end
+    local r1 = if r0 then "Portrait" else "Landscape"
+    Prize.AnchorPoint = Prize:GetAttribute(r1 .. "AnchorPoint")
+    Prize.Position = Prize:GetAttribute(r1 .. "Position")
+    Prize.Size = Prize:GetAttribute(r1 .. "Size")
+    Root.Hint.Text = UserInputService.TouchEnabled and "DRAG TO STEER \226\128\162 DRAG DOWN TO BRAKE" or "A/D steer   \226\128\162   S brake   \226\128\162   SPACE boost   \226\128\162   E item"
+    Root.BoostButton.Key.Text = UserInputService.TouchEnabled and "TAP TO BOOST" or "SPACE / A"
+    Root.ItemButton.Key.Text = UserInputService.TouchEnabled and "TAP TO USE" or "E / X"
+end
+Root:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+layout()
+local function clock() -- Line: 145 | Name: clock
+    return workspace:GetServerTimeNow()
+end
+local function formatTime(r0: number) -- Line: 150 | Name: formatTime
+    r0 = math.max(0, r0)
+    return string.format("%02d:%04.1f", math.floor(r0 / 60), r0 % 60)
+end
+local function send(r0: string, r1_p6: any) -- Line: 156 | Name: send | Upvalues: ("r26" (ref), "ReplicatedStorage" (copy))
+    if not r26 or r26.closing then return end
+    r1_p6 = r1_p6 or {}
+    r1_p6.id = r26.id
+    ReplicatedStorage:FireServer(r0, r1_p6)
+end
+local function press(r0: string, r1_p7: boolean) -- Line: 167 | Name: press | Upvalues: ("r26" (ref), "ReplicatedStorage" (copy))
+    local __up0 = r26
+    if not __up0 or __up0.closing then return end
+    local audio, ownRow = __up0.audio, __up0.ownRow
+    local ServerTimeNow = workspace:GetServerTimeNow()
+    if audio then
+        local r6 = __up0.data ~= nil and __up0.data.phase == "Racing" and ownRow ~= nil and ownRow.finish == nil
+        local r7
+        if r0 == "Boost" then
+            r7 = r6
+            if r7 then r7 = ownRow.boostReady <= ServerTimeNow end
+        elseif r0 == "UseItem" then
+            r7 = r6
+            if r7 then r7 = ownRow.item ~= nil end
+        else
+            r7 = true
+        end
+        if r0 == "Exit" then
+            audio.Ui("UiClick")
+        elseif not r7 then
+            audio.Ui("UiUnavailable")
+        elseif r1_p7 then
+            audio.Ui("UiConfirm")
+        end
+    end
+    local r6
+    if r26 then
+        if r26.closing then return end
+        r6 = r6 or {}
+        r6.id = r26.id
+        ReplicatedStorage:FireServer(r0, r6)
+    end
+end
+local function showSlot(r0: string?, r1: boolean) -- Line: 192 | Name: showSlot | Upvalues: ("Root" (copy), "Icon" (copy), "FishRidersItemRoulette" (copy), "Size" (copy), "r34" (copy), "r35" (copy))
+    local ItemButton = Root.ItemButton
+    local r3 = if r1 then nil else r0
+    local r5 = if r3 then FishRidersItemRoulette.Icons[r3] or "" else ""
+    Icon.Image = r5
+    Icon.Size = Size
+    ItemButton.EmptyGlyph.Visible = Icon.Image == ""
+    r5 = if r1 then "LUCKY DRAW\226\128\166" else if r0 then FishRidersItemRoulette.Pretty(r0) else "NO ITEM"
+    ItemButton.ItemName.Text = r5
+    r5 = if r0 then r34 else r35
+    ItemButton.Bubble.Ring.Color = r5
+end
+local function syncItem(r0: any, r1: string?, r2: number) -- Line: 208 | Name: syncItem | Upvalues: ("r31" (copy), "Root" (copy), "Icon" (copy), "Size" (copy), "r34" (copy), "r35" (copy), "FishRidersItemRoulette" (copy))
+    if r0.itemPrimed and r0.heldItem == r1 then return end
+    local r3 = r0.itemPrimed and r0.heldItem == nil
+    r0.heldItem = r1
+    r0.itemPrimed = true
+    r0.slotPopAt = nil
+    r31.Cancel()
+    if r1 and r3 and r31.Start(r1, r2) then
+        local ItemButton_2 = Root.ItemButton
+        Icon.Image = ""
+        Icon.Size = Size
+        ItemButton_2.EmptyGlyph.Visible = Icon.Image == ""
+        ItemButton_2.ItemName.Text = "LUCKY DRAW\226\128\166"
+        ItemButton_2.Bubble.Ring.Color = if r1 then r34 else r35
+        return
+    end
+    local ItemButton = Root.ItemButton
+    local r5 = r1
+    local r7 = if r5 then FishRidersItemRoulette.Icons[r5] or "" else ""
+    Icon.Image = r7
+    Icon.Size = Size
+    ItemButton.EmptyGlyph.Visible = Icon.Image == ""
+    r7 = if r1 then FishRidersItemRoulette.Pretty(r1) else "NO ITEM"
+    ItemButton.ItemName.Text = r7
+    r7 = if r1 then r34 else r35
+    ItemButton.Bubble.Ring.Color = r7
+end
+local function prizeOf(r0) -- Line: 224 | Name: prizeOf
+    local prize = r0.prize
+    if typeof(prize) == "table" and typeof(prize.label) == "string" and typeof(prize.icon) == "string" then
+        return prize
+    end
+    return nil
+end
+local function bubblesEnabled() -- Line: 234 | Name: bubblesEnabled | Upvalues: ("TextChatService" (copy))
+    local BubbleChatConfiguration = TextChatService:FindFirstChildOfClass("BubbleChatConfiguration")
+    return TextChatService.ChatVersion == Enum.ChatVersion.TextChatService and BubbleChatConfiguration ~= nil and BubbleChatConfiguration.Enabled
+end
+local function speak(r0: any, r1: number, r2: any, r3: number) -- Line: 242 | Name: speak | Upvalues: ("TextChatService" (copy))
+    local quipSerial = r2.quipSerial
+    if typeof(quipSerial) ~= "number" or quipSerial == r0.quips[r1] then return end
+    r0.quips[r1] = quipSerial
+    if typeof(r2.quip) ~= "string" or typeof(r2.quipAt) ~= "number" or r3 - r2.quipAt > 3 then
+        return
+    end
+    quipSerial = r0.visuals.Head(r1)
+    if not quipSerial then return end
+    local BubbleChatConfiguration = TextChatService:FindFirstChildOfClass("BubbleChatConfiguration")
+    if not (TextChatService.ChatVersion == Enum.ChatVersion.TextChatService and BubbleChatConfiguration ~= nil and BubbleChatConfiguration.Enabled) then
+        return
+    end
+    local r5, BubbleChatConfiguration = pcall(TextChatService.DisplayBubble, TextChatService, quipSerial, r2.quip)
+    if not r5 then
+        warn("FishRiders bot speech bubble failed: " .. tostring(BubbleChatConfiguration))
+    end
+end
+local function suppress(r0: any, r1: userdata) -- Line: 263 | Name: suppress | Upvalues: ("FishRidersGui" (copy))
+    if r1:IsA("ScreenGui") and r1 ~= FishRidersGui and r0.hidden[r1] == nil then
+        r0.hidden[r1] = r1.Enabled
+        r1.Enabled = false
+    end
+end
+local function close() -- Line: 272 | Name: close | Upvalues: ("r26" (ref), "RunService" (copy), "ContextActionService" (copy), "LocalPlayer" (copy), "FishRidersGui" (copy), "LoadingCover" (copy), "r27" (ref), "r28" (ref), "r29" (ref), "r31" (copy), "Root" (copy), "Icon" (copy), "Size" (copy), "r35" (copy), "Prize" (copy))
+    local __up0 = r26
+    if not __up0 then return end
+    r26 = nil
+    RunService:UnbindFromRenderStep("FishRidersCamera")
+    ContextActionService:UnbindAction("FishRidersDriving")
+    ContextActionService:UnbindAction("FishRidersSteerTouch")
+    if __up0.added then __up0.added:Disconnect() end
+    for r4_p14, r5 in __up0.animations do
+        r5.Destroy()
+    end
+    for r4_p14, r5 in __up0.boxes do
+        r5.animation.Destroy()
+    end
+    if __up0.effects then __up0.effects.Destroy() end
+    if __up0.audio then __up0.audio.Destroy() end
+    if __up0.standings then __up0.standings.Destroy() end
+    if __up0.visuals then __up0.visuals.Destroy() end
+    for r4_p14, r5 in __up0.hidden do
+        if r4_p14.Parent then r4_p14.Enabled = r5 end
+    end
+    local CurrentCamera = workspace.CurrentCamera
+    if CurrentCamera then
+        CurrentCamera.CameraType = __up0.cameraType
+        CurrentCamera.FieldOfView = __up0.fov
+        CurrentCamera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") or __up0.subject
+    end
+    FishRidersGui.Enabled = false
+    LoadingCover.Visible = true
+    r27, r28, r29 = {}, 0, nil
+    r31.Cancel()
+    CurrentCamera = Root.ItemButton
+    Icon.Image = ""
+    Icon.Size = Size
+    CurrentCamera.EmptyGlyph.Visible = Icon.Image == ""
+    CurrentCamera.ItemName.Text = "NO ITEM"
+    CurrentCamera.Bubble.Ring.Color = r35
+    Prize.Visible = false
+    Prize.Icon.Image = ""
+    Prize.Label.Text = ""
+end
+local function controls(r0: string, r1_p15: any, r2: userdata) -- Line: 306 | Name: controls | Upvalues: ("r26" (ref), "r27" (ref), "ReplicatedStorage" (copy))
+    if not r26 then return Enum.ContextActionResult.Pass end
+    local KeyCode = r2.KeyCode
+    local r4 = r1_p15 == Enum.UserInputState.Begin
+    if KeyCode == Enum.KeyCode.A or KeyCode == Enum.KeyCode.Left then
+        r27.left = r4
+    elseif KeyCode == Enum.KeyCode.D or KeyCode == Enum.KeyCode.Right then
+        r27.right = r4
+    elseif KeyCode == Enum.KeyCode.S or KeyCode == Enum.KeyCode.Down or KeyCode == Enum.KeyCode.ButtonL2 then
+        r27.brake = r4
+    else
+        local r5
+        local r9
+        if r4 and (KeyCode == Enum.KeyCode.Space or KeyCode == Enum.KeyCode.ButtonA) then
+            r5 = r26
+            if r5 and not r5.closing then
+                repeat
+                    local audio, ownRow = r5.audio, r5.ownRow
+                    local ServerTimeNow = workspace:GetServerTimeNow()
+                    if not audio then break end
+                    if (r5.data ~= nil and r5.data.phase == "Racing" and ownRow ~= nil and ownRow.finish == nil) and ownRow.boostReady <= ServerTimeNow then
+                        break
+                    end
+                    audio.Ui("UiUnavailable")
+                    break
+                until true
+                r9 = nil
+                if r26 and not r26.closing then
+                    r9 = r9 or {}
+                    r9.id = r26.id
+                    ReplicatedStorage:FireServer("Boost", r9)
+                end
+            end
+        elseif r4 and (KeyCode == Enum.KeyCode.E or KeyCode == Enum.KeyCode.ButtonX) then
+            r5 = r26
+            if r5 and not r5.closing then
+                repeat
+                    local audio, ownRow = r5.audio, r5.ownRow
+                    local ServerTimeNow = workspace:GetServerTimeNow()
+                    if not audio then break end
+                    if (r5.data ~= nil and r5.data.phase == "Racing" and ownRow ~= nil and ownRow.finish == nil) and ownRow.item ~= nil then
+                        break
+                    end
+                    audio.Ui("UiUnavailable")
+                    break
+                until true
+                r9 = nil
+                if r26 and not r26.closing then
+                    r9 = r9 or {}
+                    r9.id = r26.id
+                    ReplicatedStorage:FireServer("UseItem", r9)
+                end
+            end
+        elseif r4 and (KeyCode == Enum.KeyCode.Q or KeyCode == Enum.KeyCode.ButtonB) then
+            r5 = r26
+            if r5 and not r5.closing then
+                local audio, ownRow = r5.audio, r5.ownRow
+                local ServerTimeNow = workspace:GetServerTimeNow()
+                if audio then
+                    r9 = r5.data ~= nil and r5.data.phase == "Racing" and ownRow ~= nil and ownRow.finish == nil
+                    audio.Ui("UiClick")
+                end
+                r9 = nil
+                if r26 and not r26.closing then
+                    r9 = r9 or {}
+                    r9.id = r26.id
+                    ReplicatedStorage:FireServer("Exit", r9)
+                end
+            end
+        end
+    end
+    return Enum.ContextActionResult.Sink
+end
+Root.BoostButton.Activated:Connect(function() -- Line: 322 | Upvalues: ("r26" (ref), "ReplicatedStorage" (copy))
+    local __up0 = r26
+    if __up0 then
+        if __up0.closing then return end
+        local audio, ownRow = __up0.audio, __up0.ownRow
+        local ServerTimeNow = workspace:GetServerTimeNow()
+        if audio then
+            if not ((__up0.data ~= nil and __up0.data.phase == "Racing" and ownRow ~= nil and ownRow.finish == nil) and ownRow.boostReady <= ServerTimeNow) then
+                audio.Ui("UiUnavailable")
+            else
+                audio.Ui("UiConfirm")
+            end
+        end
+        local r4
+        if r26 then
+            if r26.closing then return end
+            r4 = r4 or {}
+            r4.id = r26.id
+            ReplicatedStorage:FireServer("Boost", r4)
+        end
+    end
+end)
+Root.ItemButton.Activated:Connect(function() -- Line: 323 | Upvalues: ("r26" (ref), "ReplicatedStorage" (copy))
+    local __up0 = r26
+    if __up0 then
+        if __up0.closing then return end
+        local audio, ownRow = __up0.audio, __up0.ownRow
+        local ServerTimeNow = workspace:GetServerTimeNow()
+        if audio then
+            if not ((__up0.data ~= nil and __up0.data.phase == "Racing" and ownRow ~= nil and ownRow.finish == nil) and ownRow.item ~= nil) then
+                audio.Ui("UiUnavailable")
+            else
+                audio.Ui("UiConfirm")
+            end
+        end
+        local r4
+        if r26 then
+            if r26.closing then return end
+            r4 = r4 or {}
+            r4.id = r26.id
+            ReplicatedStorage:FireServer("UseItem", r4)
+        end
+    end
+end)
+Root.ExitButton.Activated:Connect(function() -- Line: 324 | Upvalues: ("r26" (ref), "ReplicatedStorage" (copy))
+    local __up0 = r26
+    if __up0 then
+        if __up0.closing then return end
+        local audio, ownRow = __up0.audio, __up0.ownRow
+        local ServerTimeNow = workspace:GetServerTimeNow()
+        if audio then audio.Ui("UiClick") end
+        local r4
+        if r26 then
+            if r26.closing then return end
+            r4 = r4 or {}
+            r4.id = r26.id
+            ReplicatedStorage:FireServer("Exit", r4)
+        end
+    end
+end)
+UserInputService.InputChanged:Connect(function(r0) -- Line: 325 | Upvalues: ("r26" (ref), "r28" (ref))
+    if r26 and r0.KeyCode == Enum.KeyCode.Thumbstick1 then r28 = r0.Position.X end
+end)
+UserInputService.WindowFocusReleased:Connect(function() -- Line: 329 | Upvalues: ("r27" (ref), "r28" (ref), "r29" (ref))
+    r27, r28, r29 = {}, 0, nil
+end)
+local function stickRadius() -- Line: 332 | Name: stickRadius | Upvalues: ("Root" (copy))
+    local AbsoluteSize = Root.AbsoluteSize
+    local r2_0 = math.min(AbsoluteSize.X, AbsoluteSize.Y) * 0.14
+    return math.clamp(r2_0, 48, 130)
+end
+local function onButton(r0_p22: vector) -- Line: 339 | Name: onButton | Upvalues: ("Players" (copy), "r30" (copy))
+    local r1, r2, r3 = Players:GetGuiObjectsAtPosition(r0_p22.X, r0_p22.Y)
+    for r4, r5 in r1, r2, r3 do
+        for r9, r10 in r30 do
+            if r5 == r10 or r5:IsDescendantOf(r10) then return true end
+        end
+    end
+    return false
+end
+local function steerTouch(r0: string, r1: any, r2: userdata) -- Line: 354 | Name: steerTouch | Upvalues: ("r26" (ref), "r29" (ref), "onButton" (copy), "Root" (copy))
+    if not r26 then return Enum.ContextActionResult.Pass end
+    if r1 == Enum.UserInputState.Begin then
+        if r29 or onButton(r2.Position) then return Enum.ContextActionResult.Pass end
+        local new = Vector2.new
+        r29 = {touch = r2, origin = new(r2.Position.X, r2.Position.Y), steer = 0, brake = false}
+        return Enum.ContextActionResult.Sink
+    end
+    local __up1 = r29
+    if not __up1 or __up1.touch ~= r2 then return Enum.ContextActionResult.Pass end
+    if r1 ~= Enum.UserInputState.Change then
+        r29 = nil
+        return Enum.ContextActionResult.Sink
+    end
+    local AbsoluteSize = Root.AbsoluteSize
+    local r7 = math.min(AbsoluteSize.X, AbsoluteSize.Y) * 0.14
+    local r4 = math.clamp(r7, 48, 130)
+    AbsoluteSize = Vector2.new
+    AbsoluteSize = AbsoluteSize(r2.Position.X, r2.Position.Y)
+    local r6 = AbsoluteSize - __up1.origin
+    if r4 < r6.Magnitude then
+        __up1.origin = AbsoluteSize - r6.Unit * r4
+        r6 = AbsoluteSize - __up1.origin
+    end
+    local r8 = math.abs(r6.X) / r4
+    AbsoluteSize = math.min(r8, 1)
+    r7 = math.max(AbsoluteSize - 0.12, 0) / 0.88
+    __up1.steer = - math.sign(r6.X) * r7
+    __up1.brake = r6.Y / r4 >= 0.75
+    return Enum.ContextActionResult.Sink
+end
+local function render(r0: number) -- Line: 392 | Name: render | Upvalues: ("r26" (ref), "r29" (ref), "r27" (ref), "r28" (ref), "ReplicatedStorage" (copy), "FishRidersReactions" (copy), "speak" (copy), "LocalPlayer" (copy), "Root" (copy), "FishRidersTrack" (copy), "syncItem" (copy), "r31" (copy), "Icon" (copy), "FishRidersItemRoulette" (copy), "Size" (copy), "r34" (copy), "r35" (copy), "Prize" (copy))
+    local __up0 = r26
+    if not __up0 or __up0.closing or not __up0.ready or not __up0.data then return end
+    local data = __up0.data
+    local ServerTimeNow = workspace:GetServerTimeNow()
+    local r4 = if r29 then r29.steer else 0
+    local r5 = if r29 then r29.brake else false
+    local r6 = math.clamp((r27.left and 1 or 0) - (r27.right and 1 or 0) - r28 + r4, -1, 1)
+    r4 = true
+    if r27.brake ~= true then r4 = r5 end
+    if ServerTimeNow - __up0.sentAt >= 0.05 or (r6 ~= __up0.sentSteer or r4 ~= __up0.sentBrake) and ServerTimeNow - __up0.sentAt >= 0.03333333333333333 then
+        __up0.inputSeq += 1
+        __up0.sentAt = ServerTimeNow
+        __up0.sentSteer = r6
+        __up0.sentBrake = r4
+        local r7_p25 = {steer = r6, brake = r4, seq = __up0.inputSeq}
+        if r26 and not r26.closing then
+            r7_p25 = r7_p25 or {}
+            r7_p25.id = r26.id
+            ReplicatedStorage:FireServer("Input", r7_p25)
+        end
+        if __up0.ownMotion then __up0.ownMotion.Record(__up0.inputSeq, ServerTimeNow, r6, r4) end
+    end
+    local r7_p25, r8
+    r5 = table.clone(data.racers)
+    table.sort(r5, function(r0, r1) -- Line: 415
+        if r0.place or r1.place then return (r0.place or (1/0)) < (r1.place or (1/0)) end
+        return r1.distance < r0.distance
+    end)
+    for format, r13 in data.racers do
+        local r14_p25 = __up0.models[format]
+        if not r14_p25 or not r14_p25.Parent then continue end
+        local r15 = __up0.motion[format].Sample(ServerTimeNow)
+        __up0.visuals.Place(format, r13, r15)
+        local r16_p25, r17, r18, r19 = FishRidersReactions.Select(r13, data, ServerTimeNow)
+        __up0.animations[format].Play(r16_p25, r17, r18, r19)
+        __up0.animations[format].Update(ServerTimeNow)
+        __up0.effects.Update(format, r15, r13, ServerTimeNow, r0, data.phase)
+        __up0.audio.Racer(format, r13, r15, ServerTimeNow, r0, data.phase)
+        if r13.bot then speak(__up0, format, r13, ServerTimeNow) end
+        if r13.userId == LocalPlayer.UserId then r7_p25, r8 = r13, r15 end
+    end
+    if not r7_p25 or not r8 then return end
+    __up0.ownRow = r7_p25
+    __up0.audio.Frame(data, r7_p25, ServerTimeNow, r6, r4)
+    local CurrentCamera = workspace.CurrentCamera
+    __up0.chase.Update(CurrentCamera, r8, r7_p25, ServerTimeNow, r0, r7_p25.finish and 0 or r6)
+    r8 = 1
+    for format, r13 in r5 do
+        if r13.index ~= r7_p25.index then continue end
+        r8 = format
+        break
+    end
+    Root.PositionPanel.Place.Text = ({"1ST", "2ND", "3RD", "4TH"})[r8]
+    Root.TitlePanel.Lap.Text = "LAP " .. r7_p25.lap .. "/" .. __up0.track.Laps
+    __up0.standings.Update(r5, LocalPlayer.UserId, __up0.visuals.Head)
+    local r11 = math.max(0, r7_p25.finish or data.startedAt and ServerTimeNow - data.startedAt or 0)
+    local format = string.format
+    CurrentCamera = format("%02d:%04.1f", math.floor(r11 / 60), r11 % 60)
+    Root.TimePanel.Time.Text = CurrentCamera
+    r11 = math.round(r7_p25.speed)
+    Root.SpeedPanel.Speed.Text = tostring(r11)
+    local Children, CurrentCamera, r11 = Root.SpeedPanel.Bars:GetChildren()
+    for format, r13 in Children, CurrentCamera, r11 do
+        r13.BackgroundTransparency = format / 17 <= r7_p25.speed / FishRidersTrack.BoostSpeed and 0.05 or 0.78
+    end
+    CurrentCamera = UDim2.fromScale
+    Root.BoostButton.Charge.Fill.Size = CurrentCamera(math.clamp(1 - (r7_p25.boostReady - ServerTimeNow) / FishRidersTrack.BoostCooldown, 0, 1), 1)
+    CurrentCamera = ServerTimeNow < r7_p25.boostUntil and "BOOST!" or ServerTimeNow < r7_p25.boostReady and "CHARGING" or "BOOST"
+    Root.BoostButton.Label.Text = CurrentCamera
+    r8 = r7_p25.boostReady <= ServerTimeNow
+    r6 = ServerTimeNow < r7_p25.boostUntil
+    CurrentCamera = if r6 then math.sin(ServerTimeNow * 20) * 3 else 0
+    Root.BoostButton.Icon.Rotation = CurrentCamera
+    CurrentCamera = if r8 or r6 then Color3.new(1, 1, 1) else Color3.fromRGB(135, 166, 183)
+    Root.BoostButton.Icon.ImageColor3 = CurrentCamera
+    CurrentCamera = if r8 then (math.sin(ServerTimeNow * 5) + 1) * 0.08 + 0.08 else 0.42
+    Root.BoostButton.Ring.BackgroundTransparency = CurrentCamera
+    Root.InkFeedback.Visible = ServerTimeNow < r7_p25.inkUntil
+    syncItem(__up0, r7_p25.item, ServerTimeNow)
+    r8 = r31.Update(ServerTimeNow)
+    if r8 and r8 == __up0.heldItem then
+        r6 = Root.ItemButton
+        r4 = r8
+        CurrentCamera = if r4 then FishRidersItemRoulette.Icons[r4] or "" else ""
+        Icon.Image = CurrentCamera
+        Icon.Size = Size
+        r6.EmptyGlyph.Visible = Icon.Image == ""
+        CurrentCamera = if r8 then FishRidersItemRoulette.Pretty(r8) else "NO ITEM"
+        r6.ItemName.Text = CurrentCamera
+        CurrentCamera = if r8 then r34 else r35
+        r6.Bubble.Ring.Color = CurrentCamera
+        __up0.slotPopAt = ServerTimeNow
+    end
+    r8 = if __up0.slotPopAt then (ServerTimeNow - __up0.slotPopAt) / 0.25 else nil
+    if r8 then
+        Children = if r8 < 1 then math.sin(3.141592653589793 * r8) * 0.22 + 1 else 1
+        r11 = UDim2.fromScale
+        Icon.Size = r11(Size.X.Scale * Children, Size.Y.Scale * Children)
+        if r8 >= 1 then __up0.slotPopAt = nil end
+    end
+    CurrentCamera = false
+    if data.phase ~= "Results" then
+        CurrentCamera = true
+        if data.phase == "Racing" then
+            CurrentCamera = true
+            if r7_p25.finish == nil then CurrentCamera = ServerTimeNow - data.startedAt < 1 end
+        end
+    end
+    Root.CenterBanner.Visible = CurrentCamera
+    local r13, r14_p25
+    if data.phase == "Queue" then
+        if data.queueAt then
+            r14_p25 = math.ceil(data.queueAt - ServerTimeNow)
+            format = math.max(0, r14_p25)
+            if not format then format = "\226\128\166" end
+        else
+            format = "\226\128\166"
+        end
+        Root.CenterBanner.Status.Text = "RACE STARTS IN " .. format
+        Root.CenterBanner.Subtitle.Text = "Players join first \226\128\162 bots fill the grid"
+    elseif data.phase == "Countdown" then
+        r13 = math.ceil(FishRidersTrack.CountdownSeconds - (ServerTimeNow - data.countdownAt))
+        r11 = math.max(1, r13)
+        Root.CenterBanner.Status.Text = tostring(r11)
+        Root.CenterBanner.Subtitle.Text = "GET READY!"
+    elseif r7_p25.finish then
+        CurrentCamera = r7_p25.prize
+        r8 = if typeof(CurrentCamera) == "table" and typeof(CurrentCamera.label) == "string" and typeof(CurrentCamera.icon) == "string" then CurrentCamera else nil
+        Root.CenterBanner.Status.Text = r7_p25.place == 1 and "YOU WIN!" or "FINISHED!"
+        CurrentCamera = if r8 then "You won " .. r8.label .. "!" else "Waiting for the other racers\226\128\166"
+        Root.CenterBanner.Subtitle.Text = CurrentCamera
+    else
+        Root.CenterBanner.Status.Text = "GO!"
+        Root.CenterBanner.Subtitle.Text = ""
+    end
+    Root.ResultsPanel.Visible = data.phase == "Results"
+    if data.phase == "Results" then
+        r11 = r7_p25.prize
+        Children = if typeof(r11) == "table" and typeof(r11.label) == "string" and typeof(r11.icon) == "string" then r11 else nil
+    else
+        Children = nil
+    end
+    Prize.Visible = not (Children == nil)
+    if Children then
+        Prize.Icon.Image = Children.icon
+        Prize.Label.Text = Children.label
+    end
+    local r17
+    if data.phase == "Results" then
+        for r13, r14_p25 in r5 do
+            Children = Root.ResultsPanel.Rows["Row" .. r13]
+            Children.Rank.Text = tostring(r13)
+            Children:FindFirstChild("Name").Text = r14_p25.name .. (r14_p25.bot and " \226\128\162 BOT" or "")
+            r17 = r14_p25.finish or 0
+            r17 = math.max(0, r17)
+            local r16_p25 = string.format("%02d:%04.1f", math.floor(r17 / 60), r17 % 60)
+            Children.Time.Text = r16_p25
+        end
+        local r15 = math.ceil(FishRidersTrack.ResultSeconds - (ServerTimeNow - data.resultAt))
+        Root.ResultsPanel.Return.Text = "Returning in " .. math.max(0, r15) .. "\226\128\166"
+    end
+    for r13, r14_p25 in __up0.boxes do
+        r7_p25 = r14_p25.model:GetAttribute("AvailableAt") or 0
+        r5 = not not (ServerTimeNow < r7_p25)
+        local r17 = if r5 then r7_p25 - 4 else ServerTimeNow
+        r14_p25.animation.Play(if r5 then "Collect" else "Idle", r17, not r5)
+        r14_p25.animation.Update(ServerTimeNow)
+        for r18, r19 in r14_p25.parts do
+            r19.LocalTransparencyModifier = r5 and r7_p25 - 2.2 < ServerTimeNow and 1 or 0
+        end
+    end
+end
+local function begin(r0_p29) -- Line: 521 | Name: begin | Upvalues: ("Remotes" (copy), "FishRidersTracks" (copy), "r26" (ref), "close" (copy), "FishRidersAudio" (copy), "FishRidersCamera" (copy), "FishRidersStandings" (copy), "Root" (copy), "LoadingCover" (copy), "FishRidersGui" (copy), "Players" (copy), "ContextActionService" (copy), "controls" (copy), "steerTouch" (copy), "FishRidersTrackSelection" (copy), "LocalPlayer" (copy), "FishRidersVisuals" (copy), "FishRidersEffects" (copy), "FishRidersTrack" (copy), "FishRidersMotion" (copy), "FishRidersAnimation" (copy), "FishRidersAssets" (copy), "FishRidersItemRoulette" (copy), "ContentProvider" (copy), "RunService" (copy), "render" (copy), "ReplicatedStorage" (copy))
+    Remotes.Hide()
+    local r1_p29 = assert(FishRidersTracks.Get(r0_p29.trackId), "Unknown Fish Riders circuit")
+    if r26 and r26.id == r0_p29.id then return end
+    close()
+    local CurrentCamera = workspace.CurrentCamera
+    local Children = if CurrentCamera.CameraType == Enum.CameraType.Scriptable then Enum.CameraType.Custom else CurrentCamera.CameraType
+    local r3 = {
+        id = r0_p29.id,
+        data = r0_p29,
+        track = r1_p29,
+        ready = false,
+        hidden = {},
+        animations = {},
+        models = {},
+        motion = {},
+        boxes = {},
+        sentAt = 0,
+        cameraType = Children,
+        fov = CurrentCamera.FieldOfView,
+        subject = CurrentCamera.CameraSubject,
+        itemPrimed = false,
+        inputSeq = 0,
+        quips = {},
+        audio = FishRidersAudio.new(r1_p29),
+        chase = FishRidersCamera.new(r1_p29),
+        standings = FishRidersStandings.new(Root.Leaderboard)
+    }
+    r26 = r3
+    r3.audio.Loading()
+    LoadingCover.Status.Text = "Getting your fish ready\226\128\166"
+    LoadingCover.Visible = true
+    FishRidersGui.Enabled = true
+    Root.ResultsPanel.Visible = false
+    local Children, r5_p29, r6 = Players:GetChildren()
+    for r7_p29, r8_p29 in Children, r5_p29, r6 do
+        if not (not r8_p29:IsA("ScreenGui") or r8_p29 == FishRidersGui or r3.hidden[r8_p29] ~= nil) then
+            r3.hidden[r8_p29] = r8_p29.Enabled
+            r8_p29.Enabled = false
+        end
+    end
+    r3.added = Players.ChildAdded:Connect(function(r0) -- Line: 554 | Upvalues: ("r3" (copy), "FishRidersGui" (upval))
+        local __up0 = r3
+        if r0:IsA("ScreenGui") and r0 ~= FishRidersGui and __up0.hidden[r0] == nil then
+            __up0.hidden[r0] = r0.Enabled
+            r0.Enabled = false
+        end
+    end)
+    local A, D, Left, Right, S, Down = Enum.KeyCode.A, Enum.KeyCode.D, Enum.KeyCode.Left, Enum.KeyCode.Right, Enum.KeyCode.S, Enum.KeyCode.Down
+    local Space, E, Q, ButtonA, ButtonX, ButtonB, ButtonL2 = Enum.KeyCode.Space, Enum.KeyCode.E, Enum.KeyCode.Q, Enum.KeyCode.ButtonA, Enum.KeyCode.ButtonX, Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonL2
+    ContextActionService:BindActionAtPriority("FishRidersDriving", controls, false, 3000, A, D, Left, Right, S, Down, Space, E, Q, ButtonA, ButtonX, ButtonB, ButtonL2)
+    A = Enum.UserInputType.Touch
+    ContextActionService:BindActionAtPriority("FishRidersSteerTouch", steerTouch, false, FishRidersTrackSelection, A)
+    task.spawn(function() -- Line: 559 | Upvalues: ("LocalPlayer" (upval), "r0_p29" (copy), "r26" (upval), "r3" (copy), "FishRidersVisuals" (upval), "FishRidersEffects" (upval), "r1_p29" (copy), "FishRidersTrack" (upval), "FishRidersMotion" (upval), "FishRidersAnimation" (upval), "FishRidersAssets" (upval), "Root" (upval), "FishRidersItemRoulette" (upval), "FishRidersAudio" (upval), "ContentProvider" (upval), "CurrentCamera" (copy), "RunService" (upval), "render" (upval), "ReplicatedStorage" (upval), "LoadingCover" (upval), "close" (upval))
+        local traceback = debug.traceback
+        local r0_p28, r1_p28 = xpcall(function() -- Line: 560 | Upvalues: ("LocalPlayer" (upval), "r0_p29" (upval), "r26" (upval), "r3" (upval), "FishRidersVisuals" (upval), "FishRidersEffects" (upval), "r1_p29" (upval), "FishRidersTrack" (upval), "FishRidersMotion" (upval), "FishRidersAnimation" (upval), "FishRidersAssets" (upval), "Root" (upval), "FishRidersItemRoulette" (upval), "FishRidersAudio" (upval), "ContentProvider" (upval), "CurrentCamera" (upval), "RunService" (upval), "render" (upval), "ReplicatedStorage" (upval), "LoadingCover" (upval))
+            LocalPlayer:RequestStreamAroundAsync(r0_p29.origin.Position, 15)
+            if r26 ~= r3 then return end
+            local FishRidersRuntime = workspace:WaitForChild("FishRidersRuntime", 10)
+            local Children = assert(FishRidersRuntime, "Race runtime did not replicate"):WaitForChild(r0_p29.id, 10)
+            FishRidersRuntime = assert(Children, "Race scene did not stream")
+            local r0_arg1 = assert(FishRidersRuntime:WaitForChild("Racers", 10), "Race mounts did not stream")
+            if r26 ~= r3 then return end
+            r3.visuals = FishRidersVisuals.new()
+            r3.effects = FishRidersEffects.new(FishRidersRuntime, LocalPlayer, r0_p29.origin.Position.Y, r1_p29, r0_p29.origin)
+            for i_0 = 1, FishRidersTrack.Capacity do
+                local r8 = tostring(i_0)
+                local r5_arg3 = assert(r0_arg1:WaitForChild(r8, 10), "Race mount missing")
+                if r26 ~= r3 then return end
+                local r6 = r3.visuals.Add(i_0, r5_arg3)
+                r5_arg3 = r3.data.racers[i_0]
+                r3.models[i_0] = r6
+                local r7_arg4 = r5_arg3.userId == LocalPlayer.UserId
+                r3.motion[i_0] = FishRidersMotion.new(r0_p29.origin, r7_arg4, r1_p29)
+                r3.motion[i_0].Push(r5_arg3, r3.data.serverAt, r3.data.phase)
+                if r7_arg4 then r3.ownMotion = r3.motion[i_0] end
+                r3.animations[i_0] = FishRidersAnimation.new(r6, FishRidersAssets.MountClips)
+                r3.effects.Add(i_0, r6)
+                r3.audio.Add(i_0, r7_arg4)
+            end
+            local Children, r3_arg2, r4 = FishRidersRuntime:GetChildren()
+            for r5_arg3, r6 in Children, r3_arg2, r4 do
+                if not (not r6:IsA("Model") or not r6:GetAttribute("RaceItemBox")) then
+                    r0_arg1 = {}
+                    local Descendants, r8, lookAt = r6:GetDescendants()
+                    for r10_arg5, r11_arg6 in Descendants, r8, lookAt do
+                        if r11_arg6:IsA("BasePart") then table.insert(r0_arg1, r11_arg6) end
+                    end
+                    table.insert(r3.boxes, {model = r6, parts = r0_arg1, animation = FishRidersAnimation.new(r6, FishRidersAssets.BoxClips)})
+                end
+            end
+            r3.audio.Bind(FishRidersRuntime)
+            Children = {FishRidersRuntime, FishRidersAssets.Items, Root.BoostButton.Icon}
+            for r6, r7_arg4 in FishRidersItemRoulette.Icons do
+                table.insert(Children, r7_arg4)
+            end
+            for r6, r7_arg4 in FishRidersAudio.PreloadSounds() do
+                table.insert(Children, r7_arg4)
+            end
+            ContentProvider:PreloadAsync(Children)
+            if r26 ~= r3 then return end
+            r3.scene = FishRidersRuntime
+            r3.ready = true
+            for r6, r7_arg4 in r3.data.racers do
+                if r7_arg4.userId == LocalPlayer.UserId then
+                    local lookAt = CFrame.lookAt
+                    CurrentCamera.CFrame = lookAt(r7_arg4.frame.Position - r7_arg4.frame.LookVector * 25 + vector.create(0, 15, 0), r7_arg4.frame.Position)
+                end
+            end
+            local r6 = Enum.RenderPriority.Camera.Value + 5
+            RunService:BindToRenderStep("FishRidersCamera", r6, render)
+            local r3_arg2
+            if r26 and not r26.closing then
+                r3_arg2 = r3_arg2 or {}
+                r3_arg2.id = r26.id
+                ReplicatedStorage:FireServer("Ready", r3_arg2)
+            end
+            LoadingCover.Visible = false
+            r3.audio.Ready(r3.data.phase)
+        end, traceback)
+        if not r0_p28 and r26 == r3 then
+            traceback = warn
+            traceback("FishRiders presentation failed: " .. tostring(r1_p28))
+            traceback = nil
+            if r26 and not r26.closing then
+                traceback = traceback or {}
+                traceback.id = r26.id
+                ReplicatedStorage:FireServer("LoadFailed", traceback)
+            end
+            close()
+        end
+    end)
+end
+FishRidersState.OnClientEvent:Connect(function(r0: string, r1: any) -- Line: 623 | Upvalues: ("r26" (ref), "Remotes" (copy), "begin" (copy), "FishRidersAudio" (copy), "LoadingCover" (copy), "LocalPlayer" (copy), "close" (copy))
+    if r0 == "ChooseTrack" then
+        if not r26 then
+            Remotes.Show(r1)
+            return
+        end
+    else
+        if r0 == "SelectionDenied" then
+            Remotes.Denied(r1.reason)
+            return
+        end
+        if r0 == "Loading" then
+            begin(r1)
+            return
+        end
+        if r0 == "State" and r26 and r26.id == r1.id and r26.data.serverAt <= r1.serverAt then
+            r26.data = r1
+            for r5, r6 in r26.motion do
+                r6.Push(r1.racers[r5], r1.serverAt, r1.phase)
+            end
+            return
+        end
+        if r0 == "Closed" and r26 and r26.id == r1.id then
+            local __up0 = r26
+            __up0.closing = true
+            FishRidersAudio.PlayLocal("PortalExit")
+            if r1.reason == "Exit" then FishRidersAudio.PlayLocal("UiBack") end
+            LoadingCover.Status.Text = "Returning to the island\226\128\166"
+            LoadingCover.Visible = true
+            task.spawn(function() -- Line: 643 | Upvalues: ("r1" (copy), "LocalPlayer" (upval), "r26" (upval), "__up0" (copy), "close" (upval))
+                if typeof(r1.position) == "Vector3" then
+                    local r0, r1_p31 = pcall(function() -- Line: 646 | Upvalues: ("LocalPlayer" (upval), "r1" (upval))
+                        LocalPlayer:RequestStreamAroundAsync(r1.position, 10)
+                    end)
+                    if not r0 then warn("FishRiders return streaming failed: " .. tostring(r1_p31)) end
+                end
+                if r26 == __up0 then close() end
+            end)
+        end
+    end
+end)
+LocalPlayer.CharacterRemoving:Connect(function() -- Line: 655 | Upvalues: ("Remotes" (copy), "close" (copy))
+    Remotes.Hide()
+    close()
+end)
+script.Destroying:Connect(function() -- Line: 657 | Upvalues: ("Remotes" (copy), "close" (copy))
+    Remotes.Destroy()
+    close()
+end)
+FishRidersAudio.WatchPortal()

@@ -1,0 +1,153 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.CatchFeedController
+-- Took 0.77s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+local FishRarity = require(ReplicatedStorage:WaitForChild("FishRarity"))
+local ColossalRainbow = require(script.Parent:WaitForChild("ColossalRainbow"))
+local TradeConfig = require(ReplicatedStorage:WaitForChild("TradeConfig"))
+local MissionConfig = require(ReplicatedStorage:WaitForChild("MissionConfig"))
+local ResponsiveLayout = require(script.Parent:WaitForChild("ResponsiveLayout"))
+local new, Quad = TweenInfo.new, Enum.EasingStyle.Quad
+new = new(0.25, Quad, Enum.EasingDirection.Out)
+local new_2, Quad_2 = TweenInfo.new, Enum.EasingStyle.Quad
+new_2 = new_2(0.2, Quad_2, Enum.EasingDirection.Out)
+Quad = Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("CatchFeedGui")
+Players = Quad:WaitForChild("Feed")
+Quad_2 = Players:WaitForChild("LineTemplate")
+assert(Quad_2:FindFirstChildOfClass("UIStroke"), "CatchFeedGui LineTemplate needs its UIStroke outline")
+local CatchFeed = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CatchFeed")
+local r14 = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild(TradeConfig.FEED_REMOTE)
+TradeConfig = {}
+local r15 = {}
+local function escapeRichText(r0: string) -- Line: 85 | Name: escapeRichText
+    return r0:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub("\"", "&quot;"):gsub("'", "&apos;")
+end
+local function readableFishName(r0: string) -- Line: 91 | Name: readableFishName
+    return (r0:match("^([^_]+)") or r0):gsub("(%l)(%u)", "%1 %2")
+end
+local function slotPosition(r0: number) -- Line: 99 | Name: slotPosition | Upvalues: ("Quad_2" (copy))
+    local fromScale = UDim2.fromScale
+    return Quad_2.Position - fromScale(0, r0 * Quad_2.Size.Y.Scale)
+end
+local function fadeLine(r0: { any }, r1: number) -- Line: 104 | Name: fadeLine | Upvalues: ("TweenService" (copy), "new" (copy))
+    TweenService:Create(r0.label, new, {TextTransparency = r1}):Play()
+    TweenService:Create(r0.outline, new, {Transparency = r1}):Play()
+end
+local function removeLine(r0: { any }) -- Line: 111 | Name: removeLine | Upvalues: ("TradeConfig" (copy))
+    local r1 = table.find(TradeConfig, r0)
+    if r1 then table.remove(TradeConfig, r1) end
+    r0.label:Destroy()
+end
+local function runLifetime(r0: { any }) -- Line: 122 | Name: runLifetime | Upvalues: ("fadeLine" (copy), "new" (copy), "TradeConfig" (copy))
+    fadeLine(r0, 0)
+    task.wait(new.Time + 3)
+    fadeLine(r0, 1)
+    task.wait(new.Time)
+    local r1 = table.find(TradeConfig, r0)
+    if r1 then table.remove(TradeConfig, r1) end
+    r0.label:Destroy()
+end
+local function showCatch(r0_p6: any, r1: any, r2_p6: any, r3: string?) -- Line: 133 | Name: showCatch | Upvalues: ("FishRarity" (copy), "Quad_2" (copy), "escapeRichText" (copy), "ColossalRainbow" (copy), "TradeConfig" (copy), "TweenService" (copy), "new_2" (copy), "Players" (copy), "runLifetime" (copy))
+    local r4_p6 = FishRarity.Get(r2_p6)
+    if typeof(r0_p6) ~= "string" or typeof(r1) ~= "string" or r4_p6 == nil then
+        warn("CatchFeedController ignored a malformed catch announcement")
+        return
+    end
+    local r5_p6 = string.find(r4_p6.DisplayName, "^[AEIOUaeiou]") and "an" or "a"
+    local r6_p6 = Quad_2:Clone()
+    local r7 = r3
+    local r10_p6, r11
+    if not r7 then
+        r7 = string.format
+        local r10_p6, r11, r12_p6 = r5_p6, r4_p6.Color:ToHex(), escapeRichText(r4_p6.DisplayName)
+        r7 = r7("%s caught %s <font color=\"#%s\">%s</font> %s", escapeRichText(r0_p6), r10_p6, r11, r12_p6, escapeRichText((r1:match("^([^_]+)") or r1):gsub("(%l)(%u)", "%1 %2")))
+    end
+    r6_p6.Text = r7
+    r5_p6 = r6_p6:FindFirstChild("ColossalRainbow")
+    if r4_p6.Id == "Colossal" and r5_p6 then
+        r7 = string.format
+        r6_p6.Text = r7("%s caught a %s %s", escapeRichText(r0_p6), escapeRichText(r4_p6.DisplayName), escapeRichText((r1:match("^([^_]+)") or r1):gsub("(%l)(%u)", "%1 %2")))
+        r6_p6.TextColor3 = Color3.new(1, 1, 1)
+        r5_p6.Enabled = true
+        ColossalRainbow.Register(r5_p6, r6_p6)
+    end
+    r6_p6.TextTransparency = 1
+    local fromScale = UDim2.fromScale
+    r7 = Quad_2.Position - fromScale(0, 0 * Quad_2.Size.Y.Scale)
+    r6_p6.Position = r7
+    r6_p6.Visible = true
+    r5_p6 = r6_p6:FindFirstChildOfClass("UIStroke")
+    r5_p6.Transparency = 1
+    r4_p6 = {label = r6_p6, outline = r5_p6}
+    table.insert(TradeConfig, 1, r4_p6)
+    if #TradeConfig > 4 then
+        r5_p6 = TradeConfig[#TradeConfig]
+        if r5_p6.lifetime then
+            r7 = task.cancel
+            r7(r5_p6.lifetime)
+        end
+        r7 = table.find(TradeConfig, r5_p6)
+        if r7 then table.remove(TradeConfig, r7) end
+        r5_p6.label:Destroy()
+    end
+    for r10_p6, r11 in TradeConfig do
+        if r11 ~= r4_p6 then
+            local r18 = r10_p6 - 1
+            local fromScale_2 = UDim2.fromScale
+            TweenService:Create(r11.label, new_2, {Position = Quad_2.Position - fromScale_2(0, r18 * Quad_2.Size.Y.Scale)}):Play()
+        end
+    end
+    r6_p6.Parent = Players
+    r4_p6.lifetime = task.spawn(runLifetime, r4_p6)
+end
+local function applyLayout() -- Line: 183 | Name: applyLayout | Upvalues: ("ResponsiveLayout" (copy), "Quad" (copy))
+    ResponsiveLayout.Apply(Quad)
+end
+table.insert(r15, CatchFeed.OnClientEvent:Connect(showCatch))
+table.insert(r15, r14.OnClientEvent:Connect(function(r0, r1, r2, r3) -- Line: 189 | Upvalues: ("FishRarity" (copy), "escapeRichText" (copy), "showCatch" (copy))
+    if typeof(r0) ~= "string" or typeof(r1) ~= "string" or typeof(r2) ~= "table" or typeof(r3) ~= "table" then
+        return
+    end
+    local function fishText(r0) -- Line: 192 | Name: fishText | Upvalues: ("FishRarity" (upval), "escapeRichText" (upval))
+        local r1 = FishRarity.Get(r0.rarity)
+        if not r1 then
+            local name_2 = r0.name or r0.FishId or "Fish"
+            return escapeRichText((name_2:match("^([^_]+)") or name_2):gsub("(%l)(%u)", "%1 %2"))
+        end
+        local format, r4_arg1, name = string.format, r1.Color:ToHex(), r0.name
+        return format("<font color=\"#%s\">%s</font> %s", r4_arg1, escapeRichText(r1.DisplayName), escapeRichText((name:match("^([^_]+)") or name):gsub("(%l)(%u)", "%1 %2")))
+    end
+    local r5 = {}
+    for r9, r10 in r3 do
+        table.insert(r5, fishText(r10))
+    end
+    local r6 = escapeRichText(r0) .. " traded " .. fishText(r2) .. " with " .. escapeRichText(r1) .. " for " .. table.concat(r5, " + ")
+    showCatch(r0, r2.name, r2.rarity, r6)
+end))
+r14 = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild(MissionConfig.FEED)
+table.insert(r15, r14.OnClientEvent:Connect(function(r0, r1, r2, r3, r4) -- Line: 206 | Upvalues: ("MissionConfig" (copy), "escapeRichText" (copy), "showCatch" (copy))
+    if typeof(r0) ~= "number" or typeof(r1) ~= "string" or not MissionConfig.IsBadgeKey(r2) or typeof(r3) ~= "string" or typeof(r4) ~= "number" or r4 <= 0 then
+        return
+    end
+    showCatch(r1, "Mission", "Common", escapeRichText(r1) .. " completed <font color=\"#FFD34F\">" .. escapeRichText(r3) .. "</font>!")
+end))
+r14 = Workspace.CurrentCamera
+if r14 then table.insert(r15, r14:GetPropertyChangedSignal("ViewportSize"):Connect(applyLayout)) end
+local r26 = script.Destroying:Connect(function() -- Line: 220 | Upvalues: ("TradeConfig" (copy), "r15" (copy))
+    for r3, r4 in TradeConfig do
+        if r4.lifetime then task.cancel(r4.lifetime) end
+        r4.label:Destroy()
+    end
+    table.clear(TradeConfig)
+    for r3, r4 in r15 do
+        r4:Disconnect()
+    end
+    table.clear(r15)
+end)
+table.insert(r15, r26)
+ResponsiveLayout.Apply(Quad)

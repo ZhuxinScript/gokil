@@ -1,0 +1,259 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.CastAimPresentation
+-- Took 1.92s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local GuiService = game:GetService("GuiService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+ReplicatedStorage = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local WorldBossHudFocus = require(script.Parent:WaitForChild("WorldBossHudFocus"))
+local r6 = table.freeze({CastDistanceGui = true, FishingReelFocusGui = true, FishingReelSpeedGui = true, CatchRevealGui = true, CatchDecisionGui = true, FishEscapedGui = true})
+local r7 = {
+    new = function(r0_p14: userdata) -- Line: 41 | Name: new | Upvalues: ("WorldBossHudFocus" (copy), "r6" (copy), "GuiService" (copy), "UserInputService" (copy), "ReplicatedStorage" (copy), "PlayerSettings" (copy), "Players" (copy))
+        local CastAimMode = r0_p14:WaitForChild("CastAimMode")
+        local Composition = CastAimMode:WaitForChild("Composition")
+        local CastPowerButton = Composition:WaitForChild("CastPowerButton")
+        local CancelButton = Composition:WaitForChild("CancelButton")
+        assert(CastAimMode:IsA("GuiObject") and Composition:IsA("GuiObject") and CastPowerButton:IsA("GuiButton") and CancelButton:IsA("GuiButton"), "Invalid CastAimMode controls")
+        local Surface = CastPowerButton:WaitForChild("Surface")
+        local PowerMeter = Surface:WaitForChild("PowerMeter")
+        local BlueFrame = PowerMeter:WaitForChild("BlueFrame")
+        assert(BlueFrame:IsA("ImageLabel"), "Invalid CastAimMode rim")
+        local Size = BlueFrame.Size
+        local Rotation = BlueFrame.Rotation
+        local PowerTrack = PowerMeter:WaitForChild("PowerTrack")
+        local Needle = PowerTrack:WaitForChild("Needle")
+        local LaunchRecoil = PowerMeter:WaitForChild("LaunchRecoil")
+        local LaunchBurst = PowerTrack:WaitForChild("LaunchBurst")
+        local Expansion = LaunchBurst:WaitForChild("Expansion")
+        local Readout = Surface:WaitForChild("Readout")
+        local PowerLabel = Readout:WaitForChild("PowerLabel")
+        local PondLabel = Readout:WaitForChild("PondLabel")
+        Readout = Surface:WaitForChild("Prompt")
+        Surface = Readout.TextColor3
+        local PondTicks = PowerTrack:WaitForChild("PondTicks")
+        PowerTrack = PondTicks:WaitForChild("TickTemplate")
+        local Pulse = PowerMeter:WaitForChild("LockFlash"):WaitForChild("Pulse")
+        assert(Needle:IsA("ImageLabel") and PowerLabel:IsA("TextLabel") and PondLabel:IsA("TextLabel") and Readout:IsA("TextLabel") and PowerTrack:IsA("GuiObject") and Pulse:IsA("UIStroke"), "Invalid CastAimMode artwork")
+        PowerMeter = WorldBossHudFocus.new(r0_p14, r6)
+        local r20 = false
+        local r21 = {}
+        local r22 = {}
+        local r23 = {}
+        local r24_0
+        local r25_0
+        local r26_0 = {}
+        local r27_0
+        local r28_0
+        local r29_0 = {Button = CastPowerButton, Cancel = CancelButton}
+        CastPowerButton.NextSelectionDown = CancelButton
+        CancelButton.NextSelectionUp = CastPowerButton
+        local function hideSibling(r0: userdata) -- Line: 103 | Name: hideSibling | Upvalues: ("CastAimMode" (copy), "r21" (copy), "r22" (copy))
+            if r0 == CastAimMode or not r0:IsA("GuiObject") or r21[r0] ~= nil then return end
+            r21[r0] = r0.Visible
+            r0.Visible = false
+            r22[r0] = r0:GetPropertyChangedSignal("Visible"):Connect(function() -- Line: 107 | Upvalues: ("r0" (copy), "r21" (upval))
+                if r0.Visible then
+                    r21[r0] = true
+                    r0.Visible = false
+                end
+            end)
+        end
+        local function scaledRimSize(r0: number) -- Line: 114 | Name: scaledRimSize | Upvalues: ("Size" (copy))
+            return UDim2.fromScale(Size.X.Scale * r0, Size.Y.Scale * r0)
+        end
+        function r29_0.Hide() -- Line: 120 | Name: Hide | Upvalues: ("r27_0" (ref), "r26_0" (copy), "LaunchRecoil" (copy), "LaunchBurst" (copy), "Expansion" (copy), "Readout" (copy), "Surface" (copy), "r28_0" (ref), "BlueFrame" (copy), "Size" (copy), "Rotation" (copy), "Pulse" (copy), "CastAimMode" (copy), "r24_0" (ref), "r22" (copy), "r21" (copy), "r23" (copy), "r20" (ref), "PowerMeter" (copy), "GuiService" (upval), "CastPowerButton" (copy), "CancelButton" (copy), "r25_0" (ref), "r0_p14" (copy))
+            if r27_0 then
+                task.cancel(r27_0)
+                r27_0 = nil
+            end
+            for r3_p4, r4_p4 in r26_0 do
+                r4_p4:Cancel()
+                r4_p4:Destroy()
+            end
+            table.clear(r26_0)
+            LaunchRecoil.Scale = 1
+            LaunchBurst.Visible = false
+            LaunchBurst.GroupTransparency = 1
+            Expansion.Scale = 1
+            Readout.TextColor3 = Surface
+            r28_0 = nil
+            BlueFrame.Size = Size
+            BlueFrame.Rotation = Rotation
+            Pulse.Transparency = 1
+            CastAimMode.Visible = false
+            if not r24_0 then return end
+            r24_0:Disconnect()
+            r24_0 = nil
+            for r3_p4, r4_p4 in r22 do
+                r4_p4:Disconnect()
+            end
+            table.clear(r22)
+            for r3_p4, r4_p4 in r21 do
+                if r3_p4.Parent then r3_p4.Visible = r4_p4 end
+            end
+            table.clear(r21)
+            for r3_p4, r4_p4 in r23 do
+                r4_p4:Destroy()
+            end
+            table.clear(r23)
+            if not r20 then PowerMeter.Set(false) end
+            local SelectedObject = GuiService.SelectedObject
+            if SelectedObject == nil or SelectedObject == CastPowerButton or SelectedObject == CancelButton then
+                local r1_cap0 = r25_0
+                if SelectedObject ~= nil then GuiService.SelectedObject = nil end
+                if r1_cap0 and not r20 then
+                    task.defer(function() -- Line: 151 | Upvalues: ("r24_0" (upval), "r1_cap0" (copy), "r0_p14" (upval), "GuiService" (upval))
+                        if not r24_0 and (r1_cap0:IsDescendantOf(r0_p14.Parent or r0_p14) and r1_cap0.Visible and r1_cap0.Selectable and GuiService.SelectedObject == nil) then
+                            GuiService.SelectedObject = r1_cap0
+                        end
+                    end)
+                end
+            end
+            r25_0 = nil
+        end
+        function r29_0.SetFishingFocus(r0: boolean) -- Line: 165 | Name: SetFishingFocus | Upvalues: ("r20" (ref), "PowerMeter" (copy), "r29_0" (copy))
+            if r20 == r0 then return end
+            r20 = r0
+            if r0 then
+                PowerMeter.Set(true)
+                return
+            end
+            r29_0.Hide()
+            PowerMeter.Set(false)
+        end
+        function r29_0.Resize(r0: Vector2, r1: number) -- Line: 177 | Name: Resize | Upvalues: ("Composition" (copy))
+            local r2_p6 = r0.X < r0.Y and "Portrait" or r0.X <= r1 and "CompactLandscape" or "Landscape"
+            local r3 = Composition:GetAttribute(r2_p6 .. "Position")
+            local r4 = Composition:GetAttribute(r2_p6 .. "Size")
+            local r6 = typeof(r3) == "UDim2" and typeof(r4) == "UDim2"
+            assert(r6, "CastAimMode layout missing: " .. r2_p6)
+            Composition.Position = r3
+            Composition.Size = r4
+        end
+        function r29_0.UpdateInput() -- Line: 188 | Name: UpdateInput | Upvalues: ("r27_0" (ref), "UserInputService" (upval), "Readout" (copy), "r24_0" (ref), "GuiService" (upval), "CastPowerButton" (copy))
+            if r27_0 then return end
+            local PreferredInput = UserInputService.PreferredInput
+            local r2 = PreferredInput == Enum.PreferredInput.Touch and "TAP TO CAST!" or PreferredInput == Enum.PreferredInput.Gamepad and "CAST!" or "CLICK TO CAST!"
+            Readout.Text = r2
+            if r24_0 and PreferredInput == Enum.PreferredInput.Gamepad and GuiService.SelectedObject == nil then
+                GuiService.SelectedObject = CastPowerButton
+            end
+        end
+        function r29_0.Show(r0_p8: number) -- Line: 199 | Name: Show | Upvalues: ("r29_0" (copy), "r25_0" (ref), "GuiService" (upval), "r0_p14" (copy), "hideSibling" (copy), "r24_0" (ref), "PowerMeter" (copy), "PowerTrack" (copy), "PondTicks" (copy), "r23" (copy), "CastPowerButton" (copy), "CancelButton" (copy), "r28_0" (ref), "BlueFrame" (copy), "Size" (copy), "CastAimMode" (copy))
+            r29_0.Hide()
+            r25_0 = GuiService.SelectedObject
+            local Children, r2, r3_p8 = r0_p14:GetChildren()
+            for r4_p8, r5 in Children, r2, r3_p8 do
+                hideSibling(r5)
+            end
+            r24_0 = r0_p14.ChildAdded:Connect(hideSibling)
+            PowerMeter.Set(true)
+            for i_0 = 2, r0_p8 do
+                local PondTick = PowerTrack:Clone()
+                PondTick.Name = "PondTick"
+                local fromScale = UDim2.fromScale
+                PondTick.Position = fromScale(PowerTrack.Position.X.Scale, 1 - (i_0 - 1) / r0_p8)
+                PondTick.Visible = true
+                PondTick.Parent = PondTicks
+                table.insert(r23, PondTick)
+            end
+            CastPowerButton.Interactable = true
+            CancelButton.Visible = true
+            r28_0 = os.clock()
+            if not GuiService.ReducedMotionEnabled then
+                r2 = UDim2.fromScale
+                r2 = r2(Size.X.Scale * 0.96, Size.Y.Scale * 0.96)
+                BlueFrame.Size = r2
+            end
+            CastAimMode.Visible = true
+            r29_0.UpdateInput()
+        end
+        function r29_0.IsAvailable() -- Line: 223 | Name: IsAvailable | Upvalues: ("r0_p14" (copy), "CastAimMode" (copy))
+            local r0_p9 = false
+            if r0_p14.Parent ~= nil then
+                r0_p9 = r0_p14.Enabled
+                if r0_p9 then r0_p9 = CastAimMode.Parent == r0_p14 end
+            end
+            return r0_p9
+        end
+        function r29_0.Draw(r0_arg1: number, r1: string) -- Line: 228 | Name: Draw | Upvalues: ("Needle" (copy), "PowerLabel" (copy), "PondLabel" (copy), "r28_0" (ref), "GuiService" (upval), "BlueFrame" (copy), "Size" (copy), "Rotation" (copy))
+            Needle.Position = UDim2.fromScale(0.5, 1 - r0_arg1)
+            local format = string.format
+            PowerLabel.Text = format("%d%%", math.floor(r0_arg1 * 100 + 0.5))
+            PondLabel.Text = r1
+            if not r28_0 then return end
+            if GuiService.ReducedMotionEnabled then
+                BlueFrame.Size = Size
+                BlueFrame.Rotation = Rotation
+                return
+            end
+            local r2 = os.clock() - r28_0
+            format = math.min(1, r2 / 0.26)
+            local r4 = 1 - (1 - format) ^ 1.5 * 0.04 * math.cos(format * 3.141592653589793 * 2)
+            format = math.clamp((r0_arg1 - 0.55) / 0.45, 0, 1)
+            local r5 = math.sin(r2 * 9 * 2 * 3.141592653589793)
+            local r8_p10 = r4 + format * 0.012 * (r5 * 0.5 + 0.5)
+            local fromScale = UDim2.fromScale
+            BlueFrame.Size = fromScale(Size.X.Scale * r8_p10, Size.Y.Scale * r8_p10)
+            BlueFrame.Rotation = Rotation + r5 * (format ^ 2 * 0.95 + 0.25)
+        end
+        function r29_0.Confirm(r0_arg2: (...any) -> ...any) -- Line: 255 | Name: Confirm | Upvalues: ("r28_0" (ref), "CastPowerButton" (copy), "CancelButton" (copy), "Readout" (copy), "ReplicatedStorage" (upval), "r26_0" (copy), "GuiService" (upval), "PlayerSettings" (upval), "Players" (upval), "Pulse" (copy), "LaunchBurst" (copy), "Needle" (copy), "Expansion" (copy), "BlueFrame" (copy), "Size" (copy), "Rotation" (copy), "LaunchRecoil" (copy), "r27_0" (ref), "r29_0" (copy))
+            r28_0 = nil
+            CastPowerButton.Interactable = false
+            CancelButton.Visible = false
+            Readout.Text = "LAUNCH!"
+            Readout.TextColor3 = Color3.fromRGB(255, 218, 109)
+            local new, Quad = TweenInfo.new, Enum.EasingStyle.Quad
+            new = new(0.32, Quad, Enum.EasingDirection.Out)
+            local function animate(r0: userdata, r1: userdata, r2_arg3: { any }) -- Line: 264 | Name: animate | Upvalues: ("ReplicatedStorage" (upval), "r26_0" (upval))
+                local r3 = ReplicatedStorage:Create(r0, r1, r2_arg3)
+                table.insert(r26_0, r3)
+                r3:Play()
+            end
+            Quad = GuiService.ReducedMotionEnabled
+            local r4_p13, r5
+            if PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then
+                Pulse.Transparency = if Quad then 0.55 else 0.08
+                r4_p13, r5 = Pulse, {Transparency = 1}
+                local r6 = ReplicatedStorage:Create(r4_p13, new, r5)
+                table.insert(r26_0, r6)
+                r6:Play()
+                if not Quad then
+                    LaunchBurst.Position = Needle.Position
+                    Expansion.Scale = 0.62
+                    LaunchBurst.GroupTransparency = 0.05
+                    LaunchBurst.Visible = true
+                    r4_p13, r5 = Expansion, {Scale = 1.17}
+                    r6 = ReplicatedStorage:Create(r4_p13, new, r5)
+                    table.insert(r26_0, r6)
+                    r6:Play()
+                    r4_p13, r5 = LaunchBurst, {GroupTransparency = 1}
+                    r6 = ReplicatedStorage:Create(r4_p13, new, r5)
+                    table.insert(r26_0, r6)
+                    r6:Play()
+                end
+            end
+            BlueFrame.Size = Size
+            BlueFrame.Rotation = Rotation
+            if not Quad then
+                LaunchRecoil.Scale = 0.88
+                local __up16, new_2, Back = LaunchRecoil, TweenInfo.new, Enum.EasingStyle.Back
+                new_2 = new_2(0.32, Back, Enum.EasingDirection.Out)
+                new = ReplicatedStorage:Create(__up16, new_2, {Scale = 1})
+                table.insert(r26_0, new)
+                new:Play()
+            end
+            r27_0 = task.delay(0.32, function() -- Line: 290 | Upvalues: ("r27_0" (upval), "r29_0" (upval), "r0_arg2" (copy))
+                r27_0 = nil
+                r29_0.Hide()
+                r0_arg2()
+            end)
+        end
+        return r29_0
+    end
+}
+return table.freeze(r7)

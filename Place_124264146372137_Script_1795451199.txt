@@ -1,0 +1,224 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersItemRoulette
+-- Took 0.71s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local r0_0 = {
+    Icons = table.freeze({SpinShell = "rbxassetid://122529073726043", JellyZap = "rbxassetid://139658851982345", InkSplash = "rbxassetid://100839380244543", Whirlpool = "rbxassetid://132792376308324", CrabClamp = "rbxassetid://138342369730716", AquaShield = "rbxassetid://122704961796743"}),
+    Order = table.freeze({"SpinShell", "JellyZap", "InkSplash", "Whirlpool", "CrabClamp", "AquaShield"})
+}
+local r1 = table.freeze({
+    SpinShell = Color3.fromRGB(48, 214, 186),
+    JellyZap = Color3.fromRGB(110, 236, 255),
+    InkSplash = Color3.fromRGB(150, 84, 236),
+    Whirlpool = Color3.fromRGB(70, 210, 255),
+    CrabClamp = Color3.fromRGB(255, 120, 60),
+    AquaShield = Color3.fromRGB(110, 230, 255)
+})
+local r2 = Color3.fromRGB(255, 221, 69)
+local r4, r5 = table.create(12), 0
+for i_0 = 1, 12 do
+    local r9 = (i_0 - 1) / 11
+    r4[i_0] = r9 * 0.19 * r9 + 0.05
+    r5 += r4[i_0]
+end
+local r6, r7 = table.create(12), 0
+for i_1 = 1, 12 do
+    r7 += r4[i_1] * 1.4 / r5
+    r6[i_1] = r7
+end
+r6[12] = 1.4
+local r3 = table.freeze(r6)
+function r0_0.Pretty(r0: string) -- Line: 100 | Name: Pretty
+    return r0:gsub("(%l)(%u)", "%1 %2"):upper()
+end
+local function backOut(r0: number) -- Line: 105 | Name: backOut
+    local r1_0 = math.clamp(r0, 0, 1) - 1
+    return r1_0 * 2.70158 * r1_0 * r1_0 + 1 + r1_0 * 1.70158 * r1_0
+end
+local function smooth(r0: number) -- Line: 111 | Name: smooth
+    local r1 = math.clamp(r0, 0, 1)
+    return r1 * r1 * (3 - r1 * 2)
+end
+local function lerp(r0: number, r1: number, r2: number) -- Line: 117 | Name: lerp
+    return r0 + (r1 - r0) * r2
+end
+local function scaled(r0: UDim2, r1: number) -- Line: 122 | Name: scaled
+    return UDim2.fromScale(r0.X.Scale * r1, r0.Y.Scale * r1)
+end
+function r0_0.new(r0: userdata, r1_p15: userdata, r2_p15: (...any) -> ...any?) -- Line: 129 | Name: new | Upvalues: ("r0_0" (copy), "r3" (copy), "r2" (copy), "r1" (copy))
+    local r3_p15 = assert(r0:FindFirstChild("Pop"), "ItemRoulette needs its Pop UIScale")
+    local r4 = assert(r0:FindFirstChild("Glow"), "ItemRoulette needs Glow")
+    local r5 = assert(r0:FindFirstChild("Rays"), "ItemRoulette needs Rays")
+    local r6 = assert(r0:FindFirstChild("Disc"), "ItemRoulette needs Disc")
+    local r7 = assert(r6:FindFirstChild("Ring"), "ItemRoulette Disc needs Ring")
+    local r8 = assert(r0:FindFirstChild("Icon"), "ItemRoulette needs Icon")
+    local r9 = assert(r0:FindFirstChild("Title"), "ItemRoulette needs Title")
+    local r10 = assert(r0:FindFirstChild("Label"), "ItemRoulette needs Label")
+    local UIStroke = r9:FindFirstChildOfClass("UIStroke")
+    local UIStroke_2 = r10:FindFirstChildOfClass("UIStroke")
+    local r13 = {
+        visible = r0.Visible, position = r0.Position, size = r0.Size,
+        glow = r4.ImageTransparency, rays = r5.ImageTransparency, raysRotation = r5.Rotation,
+        disc = r6.BackgroundTransparency, ring = r7.Transparency, ringColor = r7.Color,
+        iconSize = r8.Size, iconImage = r8.Image, title = r9.TextTransparency, label = r10.TextTransparency,
+        labelText = r10.Text, titleStroke = UIStroke and UIStroke.Transparency or 0,
+        labelStroke = UIStroke_2 and UIStroke_2.Transparency or 0
+    }
+    local r14
+    local r15_0 = true
+    local r16_0 = {}
+    local function restore() -- Line: 160 | Name: restore | Upvalues: ("r0" (copy), "r13" (copy), "r3_p15" (copy), "r4" (copy), "r5" (copy), "r6" (copy), "r7" (copy), "r8" (copy), "r9" (copy), "r10" (copy), "UIStroke" (copy), "UIStroke_2" (copy))
+        r0.Visible = r13.visible
+        r0.Position = r13.position
+        r0.Size = r13.size
+        r3_p15.Scale = 1
+        r4.ImageTransparency = r13.glow
+        r5.ImageTransparency = r13.rays
+        r5.Rotation = r13.raysRotation
+        r6.BackgroundTransparency = r13.disc
+        r7.Transparency = r13.ring
+        r7.Color = r13.ringColor
+        r8.Size = r13.iconSize
+        r8.Image = r13.iconImage
+        r9.TextTransparency = r13.title
+        r10.TextTransparency = r13.label
+        r10.Text = r13.labelText
+        if UIStroke then UIStroke.Transparency = r13.titleStroke end
+        if UIStroke_2 then UIStroke_2.Transparency = r13.labelStroke end
+    end
+    local function itemAt(r0: number, r1: number) -- Line: 177 | Name: itemAt | Upvalues: ("r0_0" (upval))
+        return r0_0.Order[(r0 - 12 + r1 - 1) % #r0_0.Order + 1]
+    end
+    local function slotTarget() -- Line: 185 | Name: slotTarget | Upvalues: ("r0" (copy), "r1_p15" (copy), "r13" (copy))
+        local Parent = r0.Parent
+        local AbsolutePosition, AbsoluteSize = Parent.AbsolutePosition, Parent.AbsoluteSize
+        if AbsoluteSize.X < 1 or AbsoluteSize.Y < 1 or r1_p15.AbsoluteSize.Y < 1 then
+            return {position = r13.position, size = r13.size}
+        end
+        Parent = r1_p15.AbsolutePosition + r1_p15.AbsoluteSize / 2 - AbsolutePosition
+        AbsolutePosition = math.min(r1_p15.AbsoluteSize.X, r1_p15.AbsoluteSize.Y)
+        local fromScale = UDim2.fromScale
+        return {position = fromScale(Parent.X / AbsoluteSize.X, Parent.Y / AbsoluteSize.Y), size = UDim2.fromOffset(AbsolutePosition, AbsolutePosition)}
+    end
+    local function draw(r0_p9: number) -- Line: 198 | Name: draw | Upvalues: ("r14" (ref), "restore" (copy), "r3" (upval), "r8" (copy), "r0_0" (upval), "r2_p15" (copy), "r7" (copy), "r10" (copy), "r2" (upval), "r1" (upval), "r13" (copy), "r5" (copy), "r3_p15" (copy), "slotTarget" (copy), "r0" (copy), "r4" (copy), "r6" (copy), "r9" (copy), "UIStroke" (copy), "UIStroke_2" (copy))
+        local __up0 = r14
+        local r2_p9 = r0_p9 - __up0.startAt
+        if r2_p9 >= 2.65 then
+            local item = __up0.item
+            r14 = nil
+            restore()
+            return item
+        end
+        local r3_p9 = r2_p9 - 0.18
+        local r4_p9 = 0
+        for iconSize, r9_p9 in r3 do
+            if r3_p9 < r9_p9 then break end
+            r4_p9 += 1
+        end
+        if r4_p9 ~= __up0.tick then
+            __up0.tick = r4_p9
+            __up0.bumpAt = r0_p9
+            local Icons = r0_0.Icons
+            local index = __up0.index
+            r3_p9 = #r0_0.Order
+            r8.Image = Icons[r0_0.Order[(index - 12 + r4_p9 - 1) % r3_p9 + 1]]
+            if r2_p15 and r4_p9 > 0 then r2_p15(r4_p9, not not (r4_p9 == 12)) end
+        end
+        r4_p9 = r2_p9 - 0.18 - 1.4
+        local r5_p9 = 1
+        local r6_p9
+        if r4_p9 < 0 then
+            r6_p9 = (r0_p9 - __up0.bumpAt) / 0.09
+            if r6_p9 < 1 then r5_p9 = 1 + 0.14 * (1 - r6_p9) end
+            r7.Color = r2
+            r10.Text = ""
+        else
+            local iconSize = 3.141592653589793 * math.min(r4_p9 / 0.22, 1)
+            r5_p9 = math.sin(iconSize) * 0.2 + 1
+            r7.Color = r1[__up0.item] or r2
+            r10.Text = r0_0.Pretty(__up0.item)
+        end
+        local iconSize = r13.iconSize
+        local r7_p9 = UDim2.fromScale(iconSize.X.Scale * r5_p9, iconSize.Y.Scale * r5_p9)
+        r8.Size = r7_p9
+        iconSize = r13.raysRotation + math.min(r2_p9, 1.5799999999999998) * 220
+        r5.Rotation = iconSize + math.max(r4_p9, 0) * 60
+        iconSize = r2_p9 / 0.18
+        r5_p9 = math.clamp(iconSize, 0, 1) - 1
+        r7_p9 = r5_p9 * 2.70158 * r5_p9 * r5_p9 + 1 + r5_p9 * 1.70158 * r5_p9
+        r3_p15.Scale = r7_p9
+        r4_p9 = r2_p9 - 0.18 - 1.4 - 0.22 - 0.45
+        r2_p9 = 0
+        if r4_p9 >= 0 then
+            __up0.flightTo = __up0.flightTo or slotTarget()
+            r7_p9 = r4_p9 / 0.4
+            iconSize = math.clamp(r7_p9, 0, 1)
+            local r6_p9 = iconSize * iconSize * (3 - iconSize * 2)
+            r0.Position = r13.position:Lerp(__up0.flightTo.position, r6_p9)
+            r0.Size = r13.size:Lerp(__up0.flightTo.size, r6_p9)
+            r2_p9 = r6_p9
+        end
+        iconSize = r13.glow
+        r7_p9 = iconSize + (1 - iconSize) * r2_p9
+        r4.ImageTransparency = r7_p9
+        iconSize = r13.rays
+        r7_p9 = iconSize + (1 - iconSize) * r2_p9
+        r5.ImageTransparency = r7_p9
+        iconSize = r13.disc
+        r7_p9 = iconSize + (1 - iconSize) * r2_p9
+        r6.BackgroundTransparency = r7_p9
+        iconSize = r13.ring
+        r7_p9 = iconSize + (1 - iconSize) * r2_p9
+        r7.Transparency = r7_p9
+        iconSize = r13.title
+        r7_p9 = iconSize + (1 - iconSize) * r2_p9
+        r9.TextTransparency = r7_p9
+        iconSize = r13.label
+        r7_p9 = iconSize + (1 - iconSize) * r2_p9
+        r10.TextTransparency = r7_p9
+        if UIStroke then
+            iconSize = r13.titleStroke
+            r7_p9 = iconSize + (1 - iconSize) * r2_p9
+            UIStroke.Transparency = r7_p9
+        end
+        if UIStroke_2 then
+            iconSize = r13.labelStroke
+            r7_p9 = iconSize + (1 - iconSize) * r2_p9
+            UIStroke_2.Transparency = r7_p9
+        end
+        return nil
+    end
+    function r16_0.Start(r0_p10: string, r1: number) -- Line: 266 | Name: Start | Upvalues: ("r15_0" (ref), "r0_0" (upval), "restore" (copy), "r14" (ref), "r0" (copy), "draw" (copy))
+        assert(r15_0, "FishRidersItemRoulette handle was destroyed")
+        local r2 = table.find(r0_0.Order, r0_p10)
+        if not r2 or not r0_0.Icons[r0_p10] then
+            warn("FishRidersItemRoulette has no icon for race item " .. tostring(r0_p10))
+            return false
+        end
+        restore()
+        r14 = {item = r0_p10, index = r2, startAt = r1, tick = -1, bumpAt = (-1/0)}
+        r0.Visible = true
+        draw(r1)
+        return true
+    end
+    function r16_0.Update(r0: number) -- Line: 282 | Name: Update | Upvalues: ("r15_0" (ref), "r14" (ref), "draw" (copy))
+        if not r15_0 or not r14 then return nil end
+        return draw(r0)
+    end
+    function r16_0.Busy() -- Line: 290 | Name: Busy | Upvalues: ("r14" (ref))
+        return r14 ~= nil
+    end
+    function r16_0.Cancel() -- Line: 295 | Name: Cancel | Upvalues: ("r14" (ref), "restore" (copy))
+        if r14 then
+            r14 = nil
+            restore()
+        end
+    end
+    function r16_0.Destroy() -- Line: 303 | Name: Destroy | Upvalues: ("r16_0" (copy), "r15_0" (ref))
+        r16_0.Cancel()
+        r15_0 = false
+    end
+    return r16_0
+end
+return table.freeze(r0_0)

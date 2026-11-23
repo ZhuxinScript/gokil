@@ -1,0 +1,357 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishViewportPresenter
+-- Took 1.04s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local r1 = {
+    ["+X"] = vector.create(1, 0, 0), ["-X"] = vector.create(-1, -0, -0),
+    ["+Y"] = vector.create(0, 1, 0), ["-Y"] = vector.create(-0, -1, -0),
+    ["+Z"] = vector.create(0, 0, 1), ["-Z"] = vector.create(-0, -0, -1)
+}
+local FishPreviews = ReplicatedStorage:WaitForChild("FishPreviews", 15)
+assert(FishPreviews and FishPreviews:IsA("Folder"), "FishPreviews must be published before viewport presentation")
+ReplicatedStorage = {}
+local r3 = {}
+local r4 = 0
+local r5 = false
+local function aimCamera(r0: { any }) -- Line: 121 | Name: aimCamera
+    local r1_0 = r0.distance * 0.9902680687415704
+    local r3 = math.sin(r0.angle) * r1_0
+    local r4, r5 = r0.distance * 0.13917310096006544, math.cos(r0.angle) * r1_0
+    local r2 = Vector3.new(r3, r4, r5)
+    r0.camera.CFrame = CFrame.lookAt(r2, vector.create(0, 0, 0))
+end
+local function fitCamera(r0: userdata, r1: { any }) -- Line: 133 | Name: fitCamera
+    local AbsoluteSize = r0.AbsoluteSize
+    if AbsoluteSize.X <= 0 or AbsoluteSize.Y <= 0 then return end
+    local r3 = math.rad(r1.camera.FieldOfView)
+    local r7 = math.tan(r3 / 2) * AbsoluteSize.X
+    local r4 = math.atan(r7 / AbsoluteSize.Y) * 2
+    AbsoluteSize = math.tan(r3 / 2)
+    r3 = math.tan(r4 / 2)
+    r4 = r1.halfHeight * 0.13917310096006544 + r1.horizontalRadius * math.sqrt(1 / r3 ^ 2 + 0.9806308479691596)
+    local r5 = r1.halfHeight * math.abs(0.9902680687415704 / AbsoluteSize + 0.13917310096006544) + r1.horizontalRadius * math.abs(0.9902680687415704 - 0.13917310096006544 / AbsoluteSize)
+    r7 = r1.halfHeight * math.abs(0.13917310096006544 - 0.9902680687415704 / AbsoluteSize)
+    local r6 = r7 + r1.horizontalRadius * math.abs(0.13917310096006544 / AbsoluteSize + 0.9902680687415704)
+    r1.distance = math.max(r4, r5, r6) * 1.04
+    if r1.tightFraming and #r1.framingPoints > 0 then
+        r7 = math.sin(r1.angle) * 0.9902680687415704
+        local r9 = math.cos(r1.angle) * 0.9902680687415704
+        r6 = Vector3.new(r7, 0.13917310096006544, r9)
+        r5 = CFrame.lookAt(vector.create(0, 0, 0), - r6)
+        r6 = 0.1
+        for r10, r11 in r1.framingPoints do
+            r4 = r5:VectorToObjectSpace(r11)
+            local r17 = math.abs(r4.X) / r3
+            local r18 = math.abs(r4.Y) / AbsoluteSize
+            local r14 = r4.Z + math.max(r17, r18)
+            r6 = math.max(r6, r14)
+        end
+        r1.distance = r6 * 1.06
+    end
+    r3 = r1.distance * 0.9902680687415704
+    local r8 = math.sin(r1.angle) * r3
+    local r9, r10 = r1.distance * 0.13917310096006544, math.cos(r1.angle) * r3
+    AbsoluteSize = Vector3.new(r8, r9, r10)
+    r1.camera.CFrame = CFrame.lookAt(AbsoluteSize, vector.create(0, 0, 0))
+    if not r1.ready then
+        r1.ready = true
+        r1.readySignal:Fire()
+    end
+end
+local function isOnScreen(r0: userdata) -- Line: 187 | Name: isOnScreen
+    local r1 = r0
+    while r1 do
+        if r1:IsA("LayerCollector") then break end
+        if r1:IsA("GuiObject") and not r1.Visible then return false end
+        r1 = r1.Parent
+    end
+    if not r1 or not r1.Enabled or not r1:IsDescendantOf(game) then return false end
+    r1 = r0:FindFirstAncestorWhichIsA("ScrollingFrame")
+    if r1 then
+        local Y = r1.AbsolutePosition.Y
+        local r3 = Y + r1.AbsoluteSize.Y
+        local Y_2 = r0.AbsolutePosition.Y
+        if Y_2 + r0.AbsoluteSize.Y < Y or r3 < Y_2 then return false end
+    end
+    return true
+end
+local function setSwimPlaying(r0: { any }, r1: boolean) -- Line: 211 | Name: setSwimPlaying
+    local swimTrack = r0.swimTrack
+    if not swimTrack then return end
+    if r1 and not swimTrack.IsPlaying then
+        swimTrack:Play(0.2)
+        return
+    end
+    if r1 then
+        swimTrack:AdjustSpeed(1)
+        return
+    end
+    if swimTrack.IsPlaying then swimTrack:AdjustSpeed(0) end
+end
+local function startRotation() -- Line: 227 | Name: startRotation | Upvalues: ("r5" (ref), "r4" (ref), "r3" (copy), "isOnScreen" (copy), "fitCamera" (copy))
+    if r5 then return end
+    r5 = true
+    task.spawn(function() -- Line: 230 | Upvalues: ("r4" (upval), "r3" (upval), "isOnScreen" (upval), "fitCamera" (upval), "r5" (upval))
+        local r0 = os.clock()
+        while r4 > 0 do
+            task.wait(0.03333333333333333)
+            local r1 = os.clock()
+            local r2 = r1 - r0
+            r0 = r1
+            for r6, r7 in r3 do
+                if r7.model then
+                    r1 = isOnScreen(r6)
+                    if r1 then
+                        local FacingDegrees = r6:GetAttribute("FacingDegrees")
+                        local r9 = if typeof(FacingDegrees) == "number" then math.rad(FacingDegrees) else (r7.angle + r2 * 2 * 3.141592653589793 / r7.revolutionSeconds) % 6.283185307179586
+                        r7.angle = r9
+                        if r7.tightFraming then
+                            fitCamera(r6, r7)
+                        else
+                            FacingDegrees = r7.distance * 0.9902680687415704
+                            local r10 = math.sin(r7.angle) * FacingDegrees
+                            local r11, r12 = r7.distance * 0.13917310096006544, math.cos(r7.angle) * FacingDegrees
+                            r9 = Vector3.new(r10, r11, r12)
+                            r7.camera.CFrame = CFrame.lookAt(r9, vector.create(0, 0, 0))
+                        end
+                    end
+                    local swimTrack = r7.swimTrack
+                    if not swimTrack then
+                    elseif r1 and not swimTrack.IsPlaying then
+                        swimTrack:Play(0.2)
+                    elseif r1 then
+                        swimTrack:AdjustSpeed(1)
+                    elseif not swimTrack.IsPlaying then
+                    else
+                        swimTrack:AdjustSpeed(0)
+                    end
+                end
+            end
+        end
+        r5 = false
+    end)
+end
+function ReplicatedStorage.Clear(r0: userdata) -- Line: 261 | Name: Clear | Upvalues: ("r3" (copy), "r4" (ref))
+    local r1_0 = r3[r0]
+    if not r1_0 then return end
+    r3[r0] = nil
+    if r1_0.loadTask then
+        task.cancel(r1_0.loadTask)
+        r1_0.loadTask = nil
+    end
+    if r1_0.sizeConnection then r1_0.sizeConnection:Disconnect() end
+    if r1_0.destroyedConnection then r1_0.destroyedConnection:Disconnect() end
+    if r1_0.swimTrack then
+        r1_0.swimTrack:Stop(0)
+        r1_0.swimTrack:Destroy()
+    end
+    if r1_0.model then
+        r1_0.model:Destroy()
+        r4 -= 1
+    end
+    if r1_0.worldModel then r1_0.worldModel:Destroy() end
+    r1_0.readySignal:Fire()
+    r1_0.readySignal:Destroy()
+end
+function ReplicatedStorage.WaitUntilReady(r0: userdata, r1: string) -- Line: 292 | Name: WaitUntilReady | Upvalues: ("r3" (copy))
+    local r2_0 = r3[r0]
+    if not r2_0 or r2_0.fishId ~= r1 then return false end
+    if not r2_0.ready then r2_0.readySignal.Event:Wait() end
+    return r3[r0] == r2_0 and r2_0.ready
+end
+local function loadSwimTrack(r0: userdata) -- Line: 307 | Name: loadSwimTrack
+    local Animations = r0:FindFirstChild("Animations")
+    local walk = Animations and Animations:FindFirstChild("walk")
+    Animations = r0:FindFirstChildOfClass("AnimationController")
+    local Animator = Animations and Animations:FindFirstChildOfClass("Animator")
+    if not walk or not walk:IsA("Animation") or walk.AnimationId == "" or not Animator then
+        warn("Fish preview has no swim animation: " .. r0.Name)
+        return nil
+    end
+    local r4, r5 = pcall(function() -- Line: 321 | Upvalues: ("Animator" (copy), "walk" (copy))
+        return Animator:LoadAnimation(walk)
+    end)
+    if not r4 then
+        warn("Fish preview could not load swim animation for " .. r0.Name .. ": " .. tostring(r5))
+        return nil
+    end
+    r5.Looped = true
+    return r5
+end
+local function showSource(r0: userdata, r1_p11: { any }, r2: userdata) -- Line: 337 | Name: showSource | Upvalues: ("r1" (copy), "loadSwimTrack" (copy), "r4" (ref), "r3" (copy), "fitCamera" (copy), "r5" (ref), "isOnScreen" (copy))
+    local r3_0 = r1[r2:GetAttribute("NoseAxis")]
+    local r4_p11 = r1[r2:GetAttribute("UprightAxis")]
+    if not r3_0 or not r4_p11 or math.abs(r3_0:Dot(r4_p11)) > 0.001 then
+        warn("Fish preview has invalid axes: " .. r2:GetFullName())
+        return false
+    end
+    local PreviewFish = r2:Clone()
+    local BoundingBox, r7 = PreviewFish:GetBoundingBox()
+    if r7.X <= 0 or r7.Y <= 0 or r7.Z <= 0 then
+        PreviewFish:Destroy()
+        warn("Fish preview has no visible geometry: " .. r2:GetFullName())
+        return false
+    end
+    local Unit = r3_0:Cross(r4_p11).Unit
+    local PreviewWorld = CFrame.fromMatrix(vector.create(0, 0, 0), r3_0, r4_p11, Unit):Inverse()
+    local r9 = PreviewFish:GetPivot():PointToObjectSpace(BoundingBox.Position)
+    local new = CFrame.new
+    PreviewFish:PivotTo(new(- PreviewWorld:VectorToWorldSpace(r9)) * PreviewWorld)
+    PreviewFish.Name = "PreviewFish"
+    local r13 = (math.abs(r3_0:Dot(r7)) / 2) ^ 2
+    local r12 = r13 + (math.abs(Unit:Dot(r7)) / 2) ^ 2
+    r1_p11.horizontalRadius = math.sqrt(r12)
+    r1_p11.halfHeight = math.abs(r4_p11:Dot(r7)) / 2
+    r1_p11.tightFraming = r2:GetAttribute("FishClass") == "Colossal"
+    local r11
+    if r1_p11.tightFraming then
+        r1_p11.angle = 0
+        local Descendants, r12, r13 = PreviewFish:GetDescendants()
+        for new, r15 in Descendants, r12, r13 do
+            if r15:IsA("BasePart") then
+                for r19, r20 in {-1, 1} do
+                    for r24, r25 in {-1, 1} do
+                        for r29, r30 in {-1, 1} do
+                            local r35 = r15.Size * Vector3.new(r20, r25, r30) * 0.5
+                            table.insert(r1_p11.framingPoints, r15.CFrame:PointToWorldSpace(r35))
+                        end
+                    end
+                end
+            end
+        end
+    end
+    if r1_p11.animate then
+        PreviewWorld = Instance.new("WorldModel")
+        PreviewWorld.Name = "PreviewWorld"
+        PreviewWorld.Parent = r0
+        r1_p11.worldModel = PreviewWorld
+        PreviewFish.Parent = PreviewWorld
+        r1_p11.swimTrack = loadSwimTrack(PreviewFish)
+    else
+        local Descendants, r12, r13 = PreviewFish:GetDescendants()
+        for new, r15 in Descendants, r12, r13 do
+            if not (not r15:IsA("AnimationController") and not r15:IsA("Animation")) then r15:Destroy() end
+        end
+        PreviewFish.Parent = r0
+    end
+    r1_p11.model = PreviewFish
+    r4 += 1
+    r1_p11.sizeConnection = r0:GetPropertyChangedSignal("AbsoluteSize"):Connect(function() -- Line: 400 | Upvalues: ("r3" (upval), "r0" (copy), "r1_p11" (copy), "fitCamera" (upval))
+        if r3[r0] == r1_p11 then fitCamera(r0, r1_p11) end
+    end)
+    fitCamera(r0, r1_p11)
+    if not r5 then
+        r5 = true
+        task.spawn(function() -- Line: 230 | Upvalues: ("r4" (upval), "r3" (upval), "isOnScreen" (upval), "fitCamera" (upval), "r5" (upval))
+            local r0 = os.clock()
+            while r4 > 0 do
+                task.wait(0.03333333333333333)
+                local r1 = os.clock()
+                local r2 = r1 - r0
+                r0 = r1
+                for r6, r7 in r3 do
+                    if r7.model then
+                        r1 = isOnScreen(r6)
+                        if r1 then
+                            local FacingDegrees = r6:GetAttribute("FacingDegrees")
+                            local r9 = if typeof(FacingDegrees) == "number" then math.rad(FacingDegrees) else (r7.angle + r2 * 2 * 3.141592653589793 / r7.revolutionSeconds) % 6.283185307179586
+                            r7.angle = r9
+                            if r7.tightFraming then
+                                fitCamera(r6, r7)
+                            else
+                                FacingDegrees = r7.distance * 0.9902680687415704
+                                local r10 = math.sin(r7.angle) * FacingDegrees
+                                local r11, r12 = r7.distance * 0.13917310096006544, math.cos(r7.angle) * FacingDegrees
+                                r9 = Vector3.new(r10, r11, r12)
+                                r7.camera.CFrame = CFrame.lookAt(r9, vector.create(0, 0, 0))
+                            end
+                        end
+                        local swimTrack = r7.swimTrack
+                        if not swimTrack then
+                        elseif r1 and not swimTrack.IsPlaying then
+                            swimTrack:Play(0.2)
+                        elseif r1 then
+                            swimTrack:AdjustSpeed(1)
+                        elseif not swimTrack.IsPlaying then
+                        else
+                            swimTrack:AdjustSpeed(0)
+                        end
+                    end
+                end
+            end
+            r5 = false
+        end)
+    end
+    return true
+end
+local function awaitGeometry(r0: userdata, r1: { any }, r2: userdata, r3_p12: number) -- Line: 413 | Name: awaitGeometry | Upvalues: ("r3" (copy))
+    while true do
+        if r3[r0] ~= r1 then break end
+        if r2:FindFirstChildWhichIsA("BasePart", true) then return true end
+        if r3_p12 <= os.clock() then return false end
+        task.wait(0.03333333333333333)
+    end
+    return false
+end
+function ReplicatedStorage.Show(r0_p15: userdata, r1: string, r2_p15: boolean?) -- Line: 431 | Name: Show | Upvalues: ("r3" (copy), "fitCamera" (copy), "ReplicatedStorage" (copy), "FishPreviews" (copy), "awaitGeometry" (copy), "showSource" (copy))
+    local r4 = r0_p15:IsA("ViewportFrame") and (typeof(r1) == "string" and r1 ~= "")
+    assert(r4, "FishViewportPresenter.Show needs a ViewportFrame and nonempty FishId")
+    local r3_p15 = not not (r2_p15 == true)
+    r0_p15.Visible = true
+    r4 = r3[r0_p15]
+    if r4 and r4.fishId == r1 and r4.animate == r3_p15 then
+        r0_p15.CurrentCamera = r4.camera
+        if r4.model then fitCamera(r0_p15, r4) end
+        return
+    end
+    ReplicatedStorage.Clear(r0_p15)
+    r4 = r0_p15:FindFirstChild("PreviewCamera")
+    if not r4 then
+        local PreviewCamera_2 = Instance.new("Camera")
+        PreviewCamera_2.Name = "PreviewCamera"
+        PreviewCamera_2.FieldOfView = 30
+        PreviewCamera_2.Parent = r0_p15
+        r4 = PreviewCamera_2
+    end
+    assert(r4:IsA("Camera"), "FishViewport.PreviewCamera must be a Camera")
+    r0_p15.CurrentCamera = r4
+    local PreviewCamera = r0_p15:GetAttribute("RevolutionSeconds")
+    local FacingDegrees = r0_p15:GetAttribute("FacingDegrees")
+    local r7 = {
+        fishId = r1,
+        animate = r3_p15,
+        camera = r4, ready = false,
+        readySignal = Instance.new("BindableEvent"), distance = 1, horizontalRadius = 0, halfHeight = 0,
+        tightFraming = false
+    }
+    local r8 = if typeof(FacingDegrees) == "number" then math.rad(FacingDegrees) else -0.5235987755982988
+    r7.angle = r8
+    r8 = if typeof(PreviewCamera) == "number" and PreviewCamera > 0 then PreviewCamera else 12
+    r7.revolutionSeconds = r8
+    r7.framingPoints = {}
+    r3[r0_p15] = r7
+    r7.destroyedConnection = r0_p15.Destroying:Connect(function() -- Line: 487 | Upvalues: ("ReplicatedStorage" (upval), "r0_p15" (copy))
+        ReplicatedStorage.Clear(r0_p15)
+    end)
+    r7.loadTask = task.defer(function() -- Line: 491 | Upvalues: ("FishPreviews" (upval), "r1" (copy), "r3" (upval), "r0_p15" (copy), "r7" (copy), "awaitGeometry" (upval), "showSource" (upval), "ReplicatedStorage" (upval))
+        local r0_0 = os.clock() + 8
+        local r1_p14 = FishPreviews:FindFirstChild(r1) or FishPreviews:WaitForChild(r1, 8)
+        if r3[r0_p15] ~= r7 then return end
+        local r2_arg1 = r1_p14 ~= nil and r1_p14:IsA("Model") and awaitGeometry(r0_p15, r7, r1_p14, r0_0)
+        if r3[r0_p15] ~= r7 then return end
+        r7.loadTask = nil
+        if not r2_arg1 or not showSource(r0_p15, r7, r1_p14) then
+            warn("Fish preview unavailable for species " .. r1)
+            r0_p15.Visible = false
+            ReplicatedStorage.Clear(r0_p15)
+        end
+    end)
+end
+script.Destroying:Connect(function() -- Line: 515 | Upvalues: ("r3" (copy), "ReplicatedStorage" (copy))
+    for r3_p16 in r3 do
+        ReplicatedStorage.Clear(r3_p16)
+    end
+end)
+return ReplicatedStorage

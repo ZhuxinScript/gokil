@@ -1,0 +1,62 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.HarborbeakController
+-- Took 1.37s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HarborbeakPresentation = require(script.Parent:WaitForChild("HarborbeakPresentation"))
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+ReplicatedStorage = Players.LocalPlayer
+Players = {}
+local r5 = {}
+local r6 = true
+local function track(r0: userdata) -- Line: 35 | Name: track | Upvalues: ("r6" (ref), "Players" (copy), "HarborbeakPresentation" (copy), "ReplicatedStorage" (copy))
+    if not r6 or not r0:IsA("Model") or not r0:IsDescendantOf(workspace) or Players[r0] then return end
+    local r1_p0, r2_p0 = pcall(HarborbeakPresentation.new, r0, ReplicatedStorage)
+    if r1_p0 then
+        Players[r0] = r2_p0
+        return
+    end
+    warn("HarborbeakController: " .. r0:GetFullName() .. ": " .. tostring(r2_p0))
+end
+local function forget(r0: userdata) -- Line: 47 | Name: forget | Upvalues: ("Players" (copy))
+    if not r0:IsA("Model") then return end
+    local r1_p1 = Players[r0]
+    if r1_p1 then
+        Players[r0] = nil
+        r1_p1.Destroy()
+    end
+end
+local function reconcile() -- Line: 57 | Name: reconcile | Upvalues: ("Players" (copy))
+    for r3, r4 in Players do
+        r4.Reconcile()
+    end
+end
+local function shutdown() -- Line: 64 | Name: shutdown | Upvalues: ("r6" (ref), "r5" (copy), "Players" (copy))
+    if not r6 then return end
+    r6 = false
+    for r3, r4 in r5 do
+        r4:Disconnect()
+    end
+    table.clear(r5)
+    for r3 in Players do
+        if not r3:IsA("Model") then continue end
+        local r5_p3 = Players[r3]
+        if r5_p3 then
+            Players[r3] = nil
+            r5_p3.Destroy()
+        end
+    end
+end
+table.insert(r5, CollectionService:GetInstanceAddedSignal("HarborbeakGull"):Connect(track))
+table.insert(r5, CollectionService:GetInstanceRemovedSignal("HarborbeakGull"):Connect(forget))
+table.insert(r5, ReplicatedStorage:GetAttributeChangedSignal(PlayerSettings.AttributeName("WorldAnimationsEnabled")):Connect(reconcile))
+table.insert(r5, ReplicatedStorage:GetAttributeChangedSignal(PlayerSettings.AttributeName("VfxEnabled")):Connect(reconcile))
+local r13 = script.Destroying:Connect(shutdown)
+table.insert(r5, r13)
+local r11, r12, r13 = CollectionService:GetTagged("HarborbeakGull")
+for r14, r15 in r11, r12, r13 do
+    track(r15)
+end

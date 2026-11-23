@@ -1,0 +1,472 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.CatchDecisionController
+-- Took 1.09s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+local CarrySlotConfig = require(ReplicatedStorage:WaitForChild("CarrySlotConfig"))
+local ResponsiveLayout = require(script.Parent:WaitForChild("ResponsiveLayout"))
+local PaddedScrollLayout = require(script.Parent:WaitForChild("PaddedScrollLayout"))
+local FishViewportPresenter = require(script.Parent:WaitForChild("FishViewportPresenter"))
+local FishStatsPresenter = require(script.Parent:WaitForChild("FishStatsPresenter"))
+local SoundEffects = require(script.Parent:WaitForChild("SoundEffects"))
+local LocalPlayer = Players.LocalPlayer
+Players = LocalPlayer:WaitForChild("PlayerGui")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+ReplicatedStorage = Remotes:WaitForChild("CaughtFishDecisionRequest")
+local RodCastRequest = Remotes:WaitForChild("RodCastRequest")
+local WorldTeleportRequest = Remotes:WaitForChild("WorldTeleportRequest")
+Remotes = Players:WaitForChild("CatchDecisionGui")
+local Dimmer = Remotes:WaitForChild("Dimmer")
+local Panel = Dimmer:WaitForChild("Panel")
+local CaughtFishCard = Panel:WaitForChild("CaughtFishCard")
+local FishViewport_2 = CaughtFishCard:WaitForChild("FishViewport")
+local InventoryCountLabel = Panel:WaitForChild("InventoryCountLabel")
+local CarriedSlots = Panel:WaitForChild("CarriedSlots")
+local KeepButton = Panel:WaitForChild("KeepButton")
+local ThrowBackButton = Panel:WaitForChild("ThrowBackButton")
+local StatusLabel = Panel:WaitForChild("StatusLabel")
+local CloseButton = Panel:WaitForChild("CloseButton")
+local FuserButton = Panel:WaitForChild("FuserButton")
+local KeptBanner = Panel:WaitForChild("KeptBanner")
+local CountdownLabel = KeptBanner:WaitForChild("CountdownLabel")
+local Fill = KeptBanner:WaitForChild("CountdownBar"):WaitForChild("Fill")
+local KeepFx = Panel:WaitForChild("KeepFx")
+local FlyFish = KeepFx:WaitForChild("FlyFish")
+local SlotBurst = KeepFx:WaitForChild("SlotBurst")
+local FullInventoryNotice = Remotes:WaitForChild("FullInventoryNotice")
+local NeedBaitNotice = Remotes:WaitForChild("NeedBaitNotice")
+Remotes = Players:WaitForChild("CatchRevealGui")
+Players = KeepFx:GetAttribute("FlySeconds")
+local LandPopSeconds = KeepFx:GetAttribute("LandPopSeconds")
+local HoldSeconds = KeepFx:GetAttribute("HoldSeconds")
+local r36 = typeof(Players) == "number" and Players > 0 and typeof(LandPopSeconds) == "number" and LandPopSeconds > 0 and typeof(HoldSeconds) == "number" and HoldSeconds >= 1
+assert(r36, "CatchDecisionGui KeepFx needs positive FlySeconds, LandPopSeconds, and HoldSeconds attributes")
+local Position = FlyFish.Position
+r36 = FlyFish.Size
+local Position_2 = SlotBurst.Position
+local Size = SlotBurst.Size
+local Size_2 = Fill.Size
+local r40 = UDim2.new(0, 0, Size_2.Y.Scale, Size_2.Y.Offset)
+local r41 = {}
+for i_0 = 1, CarrySlotConfig.MAX_SLOTS do
+    local r45 = CarriedSlots:WaitForChild("Slot" .. i_0)
+    assert(r45:IsA("Frame"), "Catch decision slot must be a Frame")
+    r41[i_0] = r45
+end
+CarrySlotConfig = PaddedScrollLayout.Bind(CarriedSlots)
+local r42 = {}
+local r43
+local r44 = false
+local r45 = false
+local r46 = false
+local r47 = 0
+local r48 = true
+local r49
+local r50_0 = false
+local r51_0 = 0
+local r52_0 = {}
+local function setChoiceAvailability() -- Line: 213 | Name: setChoiceAvailability | Upvalues: ("r44" (ref), "r43" (ref), "KeepButton" (copy), "ThrowBackButton" (copy))
+    local r0 = not r44 and (r43 ~= nil and r43.pending ~= nil)
+    for r4, r5 in {KeepButton, ThrowBackButton} do
+        r5.Active = r0
+        r5.Interactable = r0
+        r5.Selectable = r0
+    end
+end
+local function renderSlot(r0: userdata, r1: any) -- Line: 225 | Name: renderSlot | Upvalues: ("FishStatsPresenter" (copy), "FishViewportPresenter" (copy))
+    local EmptyLabel = r0:WaitForChild("EmptyLabel")
+    local FishViewport = r0:WaitForChild("FishViewport")
+    local EmptyGradient = r0:WaitForChild("EmptyGradient")
+    local FilledGradient = r0:WaitForChild("FilledGradient")
+    local SelectedStroke = r0:WaitForChild("SelectedStroke")
+    local r7_p1 = r1 ~= nil and typeof(r1.fishId) == "string" and r1.fishId ~= ""
+    EmptyGradient.Enabled = not r7_p1
+    FilledGradient.Enabled = r7_p1
+    SelectedStroke.Enabled = false
+    EmptyLabel.Visible = not r7_p1
+    FishStatsPresenter.Apply(r0, if r7_p1 then r1 else nil)
+    FishViewport.Visible = r7_p1
+    if r7_p1 then
+        FishViewportPresenter.Show(FishViewport, r1.fishId)
+        return
+    end
+    FishViewportPresenter.Clear(FishViewport)
+end
+local function resetKeptVisuals() -- Line: 253 | Name: resetKeptVisuals | Upvalues: ("r52_0" (copy), "FishViewportPresenter" (copy), "FlyFish" (copy), "Position" (copy), "r36" (copy), "SlotBurst" (copy), "Position_2" (copy), "Size" (copy), "Fill" (copy), "Size_2" (copy), "KeepFx" (copy), "KeptBanner" (copy), "CloseButton" (copy), "KeepButton" (copy), "ThrowBackButton" (copy))
+    for r3, r4 in r52_0 do
+        r4:Cancel()
+    end
+    table.clear(r52_0)
+    FishViewportPresenter.Clear(FlyFish)
+    FlyFish.Position = Position
+    FlyFish.Size = r36
+    SlotBurst.Position = Position_2
+    SlotBurst.Size = Size
+    SlotBurst.Rotation = 0
+    SlotBurst.ImageTransparency = 1
+    Fill.Size = Size_2
+    KeepFx.Visible = false
+    KeptBanner.Visible = false
+    CloseButton.Visible = false
+    KeepButton.Visible = true
+    ThrowBackButton.Visible = true
+end
+local function endKept() -- Line: 274 | Name: endKept | Upvalues: ("r49" (ref), "r50_0" (ref), "r51_0" (ref), "resetKeptVisuals" (copy))
+    if not r49 then return end
+    r49 = nil
+    r50_0 = false
+    r51_0 += 1
+    resetKeptVisuals()
+end
+local function renderDecision() -- Line: 287 | Name: renderDecision | Upvalues: ("r43" (ref), "r49" (ref), "r50_0" (ref), "r51_0" (ref), "resetKeptVisuals" (copy), "Remotes" (copy), "Dimmer" (copy), "FishViewportPresenter" (copy), "FishViewport_2" (copy), "r41" (copy), "setChoiceAvailability" (copy), "FishStatsPresenter" (copy), "CaughtFishCard" (copy), "InventoryCountLabel" (copy), "renderSlot" (copy))
+    local __up0 = r43
+    local pending = __up0 and __up0.pending
+    local r2 = pending ~= nil and typeof(pending.catchId) == "string" and typeof(pending.fishId) == "string" and pending.fishId ~= ""
+    if r2 and r49 then
+        r49 = nil
+        r50_0 = false
+        r51_0 += 1
+        resetKeptVisuals()
+    end
+    local r3 = r2 and pending.catchId == Remotes:GetAttribute("RevealingCatchId")
+    local r4 = if r49 then r49 else if r2 and not r3 then pending else nil
+    Dimmer.Visible = if r4 == nil then false else not (__up0 == nil)
+    if not Dimmer.Visible then
+        FishViewportPresenter.Clear(FishViewport_2)
+        for r8_p4, r9 in r41 do
+            FishViewportPresenter.Clear(r9.FishViewport)
+        end
+        setChoiceAvailability()
+        return
+    end
+    FishStatsPresenter.Apply(CaughtFishCard, r4)
+    local format = string.format
+    InventoryCountLabel.Text = format("Carrying %d / %d fish", #__up0.carried, __up0.capacity)
+    FishViewport_2.Visible = r49 == nil
+    if r49 then
+        FishViewportPresenter.Clear(FishViewport_2)
+    else
+        FishViewportPresenter.Show(FishViewport_2, r4.fishId)
+    end
+    for r8_p4, r9 in r41 do
+        r4 = __up0.carried[r8_p4]
+        if r4 and r49 and not r50_0 and r4.catchId == r49.catchId then r4 = nil end
+        renderSlot(r9, r4)
+    end
+    setChoiceAvailability()
+end
+local function requestDecision(r0: string, r1_p6: string?) -- Line: 330 | Name: requestDecision | Upvalues: ("ReplicatedStorage" (copy))
+    local r2, r3 = pcall(function() -- Line: 332 | Upvalues: ("ReplicatedStorage" (upval), "r0" (copy), "r1_p6" (copy))
+        return ReplicatedStorage:InvokeServer(r0, r1_p6)
+    end)
+    if not r2 then
+        warn("Catch decision request failed: " .. tostring(r3))
+        return nil
+    end
+    if typeof(r3) ~= "table" or typeof(r3.ok) ~= "boolean" or typeof(r3.message) ~= "string" then
+        warn("Catch decision returned an invalid response")
+        return nil
+    end
+    return r3
+end
+local r59
+local function scheduleRetry() -- Line: 353 | Name: scheduleRetry | Upvalues: ("r46" (ref), "r48" (ref), "LocalPlayer" (copy), "r59" (ref))
+    if r46 or not r48 or LocalPlayer:GetAttribute("PendingCatchId") == nil then return end
+    r46 = true
+    task.delay(0.5, function() -- Line: 356 | Upvalues: ("r46" (upval), "r48" (upval), "LocalPlayer" (upval), "r59" (upval))
+        r46 = false
+        if r48 and LocalPlayer:GetAttribute("PendingCatchId") ~= nil then r59() end
+    end)
+end
+r59 = function() -- Line: 364 | Upvalues: ("r48" (ref), "LocalPlayer" (copy), "r44" (ref), "r45" (ref), "setChoiceAvailability" (copy), "requestDecision" (copy), "r43" (ref), "StatusLabel" (copy), "renderDecision" (copy), "r46" (ref), "r59" (ref))
+    if not r48 or LocalPlayer:GetAttribute("ProfileLoaded") ~= true then return end
+    if r44 then
+        r45 = true
+        return
+    end
+    r44 = true
+    setChoiceAvailability()
+    local r0 = requestDecision("Get", nil)
+    if not r48 then return end
+    r44 = false
+    if r0 and typeof(r0.snapshot) == "table" then
+        r43 = r0.snapshot
+        StatusLabel.Text = ""
+        renderDecision()
+    else
+        StatusLabel.Text = if r0 then r0.message else "Catch inventory unavailable."
+        if not r46 and r48 and LocalPlayer:GetAttribute("PendingCatchId") ~= nil then
+            r46 = true
+            task.delay(0.5, function() -- Line: 356 | Upvalues: ("r46" (upval), "r48" (upval), "LocalPlayer" (upval), "r59" (upval))
+                r46 = false
+                if r48 and LocalPlayer:GetAttribute("PendingCatchId") ~= nil then r59() end
+            end)
+        end
+        setChoiceAvailability()
+    end
+    if r45 then
+        r45 = false
+        task.defer(r59)
+    end
+end
+local function placeInFx(r0: userdata) -- Line: 390 | Name: placeInFx | Upvalues: ("KeepFx" (copy), "Position" (copy), "r36" (copy))
+    local AbsolutePosition, AbsoluteSize = KeepFx.AbsolutePosition, KeepFx.AbsoluteSize
+    if AbsoluteSize.X <= 0 or AbsoluteSize.Y <= 0 then return Position, r36 end
+    local r3 = r0.AbsolutePosition + r0.AbsoluteSize / 2 - AbsolutePosition
+    return UDim2.fromScale(r3.X / AbsoluteSize.X, r3.Y / AbsoluteSize.Y), UDim2.fromScale(r0.AbsoluteSize.X / AbsoluteSize.X, r0.AbsoluteSize.Y / AbsoluteSize.Y)
+end
+local function scrollToSlot(r0: userdata) -- Line: 401 | Name: scrollToSlot | Upvalues: ("CarriedSlots" (copy))
+    local r1_0 = r0.AbsolutePosition.Y - CarriedSlots.AbsolutePosition.Y + CarriedSlots.CanvasPosition.Y
+    local r2 = r1_0 + r0.AbsoluteSize.Y
+    local Y, Y_2 = CarriedSlots.CanvasPosition.Y, CarriedSlots.AbsoluteWindowSize.Y
+    if Y <= r1_0 and r2 <= Y + Y_2 then return end
+    local r5 = if r1_0 < Y then r1_0 else r2 - Y_2
+    local new = Vector2.new
+    local r12 = math.max(0, CarriedSlots.AbsoluteCanvasSize.Y - Y_2)
+    local r9 = math.clamp(r5, 0, r12)
+    CarriedSlots.CanvasPosition = new(CarriedSlots.CanvasPosition.X, r9)
+end
+local function playKeptTween(r0: userdata, r1: number, r2_p12: any, r3: any, r4: { any }, r5: number?) -- Line: 416 | Name: playKeptTween | Upvalues: ("TweenService" (copy), "r52_0" (copy))
+    local r9 = TweenInfo.new(r1, r2_p12, r3, 0, false, r5 or 0)
+    local r6 = TweenService:Create(r0, r9, r4)
+    table.insert(r52_0, r6)
+    r6:Play()
+    return r6
+end
+local function playKeep(r0_p14) -- Line: 430 | Name: playKeep | Upvalues: ("r49" (ref), "r50_0" (ref), "r51_0" (ref), "resetKeptVisuals" (copy), "KeepFx" (copy), "placeInFx" (copy), "FishViewport_2" (copy), "r48" (ref), "KeepButton" (copy), "ThrowBackButton" (copy), "KeptBanner" (copy), "CloseButton" (copy), "CountdownLabel" (copy), "HoldSeconds" (copy), "renderDecision" (copy), "r43" (ref), "r41" (copy), "scrollToSlot" (copy), "FlyFish" (copy), "FishViewportPresenter" (copy), "SoundEffects" (copy), "Players" (copy), "TweenService" (copy), "r52_0" (copy), "SlotBurst" (copy), "Size" (copy), "LandPopSeconds" (copy), "Fill" (copy), "Size_2" (copy), "r40" (copy))
+    if r49 then
+        r49 = nil
+        r50_0 = false
+        r51_0 += 1
+        resetKeptVisuals()
+    end
+    KeepFx.Visible = true
+    local r1, r2_p14 = placeInFx(FishViewport_2)
+    r51_0 += 1
+    local __up2 = r51_0
+    local function isCurrent() -- Line: 439 | Name: isCurrent | Upvalues: ("r48" (upval), "__up2" (copy), "r51_0" (upval))
+        return r48 and __up2 == r51_0
+    end
+    r49 = r0_p14
+    r50_0 = false
+    KeepButton.Visible = false
+    ThrowBackButton.Visible = false
+    KeptBanner.Visible = true
+    CloseButton.Visible = true
+    local format = string.format
+    CountdownLabel.Text = format("Closing in %d...", math.ceil(HoldSeconds))
+    renderDecision()
+    local r5
+    for Out, r10 in r43.carried do
+        if r10.catchId == r0_p14.catchId then r5 = r41[Out] end
+    end
+    if r5 then
+        scrollToSlot(r5)
+        task.wait()
+        format = r48
+        if format then format = __up2 == r51_0 end
+        if not format then return end
+        local format, __up13 = placeInFx(r5:WaitForChild("FishViewport"))
+        FlyFish.Position = r1
+        FlyFish.Size = r2_p14
+        FishViewportPresenter.Show(FlyFish, r0_p14.fishId)
+        SoundEffects.Play("CatchSwipe")
+        local __up18 = FlyFish
+        local __up21, Quad = Players, Enum.EasingStyle.Quad
+        local In = Enum.EasingDirection.In
+        local r12 = {Position = format, Size = __up13}
+        local r16 = TweenInfo.new(__up21, Quad, In, 0, false, 0)
+        local r13 = TweenService:Create(__up18, r16, r12)
+        table.insert(r52_0, r13)
+        r13:Play()
+        task.wait(Players)
+        __up18 = r48
+        if __up18 then __up18 = __up2 == r51_0 end
+        if not __up18 then return end
+        FishViewportPresenter.Clear(FlyFish)
+        r50_0 = true
+        renderDecision()
+        SlotBurst.Position = placeInFx(r5)
+        __up21 = UDim2.new
+        SlotBurst.Size = __up21(Size.X.Scale * 0.4, 0, Size.Y.Scale * 0.4, 0)
+        SlotBurst.Rotation = 0
+        SlotBurst.ImageTransparency = 0.15
+        SoundEffects.Play("UIPop")
+        __up18, __up21, Quad, In = SlotBurst, LandPopSeconds, Enum.EasingStyle.Back, Enum.EasingDirection.Out
+        r12 = {Size = Size, Rotation = 90}
+        r16 = TweenInfo.new(__up21, Quad, In, 0, false, 0)
+        __up13 = TweenService:Create(__up18, r16, r12)
+        table.insert(r52_0, __up13)
+        __up13:Play()
+        __up18, __up21, Quad, In = SlotBurst, LandPopSeconds, Enum.EasingStyle.Quad, Enum.EasingDirection.In
+        r12, r13 = {ImageTransparency = 1}, LandPopSeconds
+        local r17_p14 = TweenInfo.new(__up21, Quad, In, 0, false, r13 or 0)
+        format = TweenService:Create(__up18, r17_p14, r12)
+        table.insert(r52_0, format)
+        format:Play()
+    else
+        r50_0 = true
+    end
+    Fill.Size = Size_2
+    format = Fill
+    local __up13, Linear = HoldSeconds, Enum.EasingStyle.Linear
+    local Out = Enum.EasingDirection.Out
+    local r10 = {Size = r40}
+    local r14 = TweenInfo.new(__up13, Linear, Out, 0, false, 0)
+    r5 = TweenService:Create(format, r14, r10)
+    table.insert(r52_0, r5)
+    r5:Play()
+    for i_0 = math.ceil(HoldSeconds), 1, -1 do
+        CountdownLabel.Text = string.format("Closing in %d...", i_0)
+        task.wait(1)
+        Out = r48
+        if Out then Out = __up2 == r51_0 end
+        if not Out then return end
+    end
+    if r49 then
+        r49 = nil
+        r50_0 = false
+        r51_0 += 1
+        resetKeptVisuals()
+    end
+    renderDecision()
+end
+local function chooseCatch(r0: string) -- Line: 501 | Name: chooseCatch | Upvalues: ("r43" (ref), "r44" (ref), "r48" (ref), "setChoiceAvailability" (copy), "requestDecision" (copy), "StatusLabel" (copy), "SoundEffects" (copy), "playKeep" (copy), "renderDecision" (copy), "r45" (ref), "r59" (ref))
+    local pending = r43 and r43.pending
+    if r44 or not r48 or not pending then return end
+    r44 = true
+    setChoiceAvailability()
+    local r2 = requestDecision(r0, pending.catchId)
+    if not r48 then return end
+    r44 = false
+    if r2 and typeof(r2.snapshot) == "table" then
+        r43 = r2.snapshot
+        StatusLabel.Text = r2.ok and "" or r2.message
+        if not r2.ok then
+            SoundEffects.Play("ErrorBeep")
+        elseif r0 == "ThrowBack" then
+            SoundEffects.Play("WaterSplash")
+        end
+        if r2.ok and r0 == "Keep" then
+            task.spawn(playKeep, pending)
+        else
+            renderDecision()
+        end
+    else
+        StatusLabel.Text = if r2 then r2.message else "Catch decision unavailable. Try again."
+        SoundEffects.Play("ErrorBeep")
+        setChoiceAvailability()
+    end
+    if r45 then
+        r45 = false
+        task.defer(r59)
+    end
+end
+local function showRefusalNotice(r0: userdata) -- Line: 538 | Name: showRefusalNotice | Upvalues: ("r47" (ref), "FullInventoryNotice" (copy), "NeedBaitNotice" (copy), "r48" (ref))
+    r47 += 1
+    local __up0 = r47
+    FullInventoryNotice.Visible = r0 == FullInventoryNotice
+    NeedBaitNotice.Visible = r0 == NeedBaitNotice
+    task.delay(3, function() -- Line: 544 | Upvalues: ("r48" (upval), "__up0" (copy), "r47" (upval), "r0" (copy))
+        if r48 and __up0 == r47 then r0.Visible = false end
+    end)
+end
+local function applyResponsiveLayout() -- Line: 551 | Name: applyResponsiveLayout | Upvalues: ("ResponsiveLayout" (copy), "Panel" (copy), "PaddedScrollLayout" (copy), "CarriedSlots" (copy))
+    ResponsiveLayout.Apply(Panel)
+    PaddedScrollLayout.Refresh(CarriedSlots)
+end
+local function goToFuser() -- Line: 560 | Name: goToFuser | Upvalues: ("r48" (ref), "r49" (ref), "r50_0" (ref), "r51_0" (ref), "resetKeptVisuals" (copy), "renderDecision" (copy), "WorldTeleportRequest" (copy))
+    if not r48 then return end
+    if r49 then
+        if r49 then
+            r49 = nil
+            r50_0 = false
+            r51_0 += 1
+            resetKeptVisuals()
+        end
+        renderDecision()
+    end
+    WorldTeleportRequest:FireServer("Fusion")
+end
+table.insert(r42, KeepButton.Activated:Connect(function() -- Line: 569 | Upvalues: ("chooseCatch" (copy))
+    chooseCatch("Keep")
+end))
+table.insert(r42, ThrowBackButton.Activated:Connect(function() -- Line: 570 | Upvalues: ("chooseCatch" (copy))
+    chooseCatch("ThrowBack")
+end))
+table.insert(r42, FuserButton.Activated:Connect(goToFuser))
+table.insert(r42, CloseButton.Activated:Connect(function() -- Line: 573 | Upvalues: ("r49" (ref), "r50_0" (ref), "r51_0" (ref), "resetKeptVisuals" (copy), "renderDecision" (copy))
+    if r49 then
+        if r49 then
+            r49 = nil
+            r50_0 = false
+            r51_0 += 1
+            resetKeptVisuals()
+        end
+        renderDecision()
+    end
+end))
+table.insert(r42, RodCastRequest.OnClientEvent:Connect(function(r0) -- Line: 579 | Upvalues: ("FullInventoryNotice" (copy), "r47" (ref), "NeedBaitNotice" (copy), "r48" (ref), "r59" (ref))
+    if r0 == "InventoryFull" then
+        local r1_cap1 = FullInventoryNotice
+        r47 += 1
+        local r2_cap0 = r47
+        FullInventoryNotice.Visible = r1_cap1 == FullInventoryNotice
+        NeedBaitNotice.Visible = r1_cap1 == NeedBaitNotice
+        task.delay(3, function() -- Line: 544 | Upvalues: ("r48" (upval), "r2_cap0" (copy), "r47" (upval), "r1_cap1" (copy))
+            if r48 and r2_cap0 == r47 then r1_cap1.Visible = false end
+        end)
+        return
+    end
+    if r0 == "NeedBait" then
+        local r1_cap2 = NeedBaitNotice
+        r47 += 1
+        local __up1 = r47
+        FullInventoryNotice.Visible = r1_cap2 == FullInventoryNotice
+        NeedBaitNotice.Visible = r1_cap2 == NeedBaitNotice
+        task.delay(3, function() -- Line: 544 | Upvalues: ("r48" (upval), "__up1" (copy), "r47" (upval), "r1_cap2" (copy))
+            if r48 and __up1 == r47 then r1_cap2.Visible = false end
+        end)
+        return
+    end
+    if r0 == "DecideCatch" then r59() end
+end))
+for r72, r73 in {"PendingCatchId", "CarriedFishCount", "CarrySlots", "ProfileLoaded"} do
+    table.insert(r42, LocalPlayer:GetAttributeChangedSignal(r73):Connect(r59))
+end
+table.insert(r42, Remotes:GetAttributeChangedSignal("RevealingCatchId"):Connect(renderDecision))
+local CurrentCamera = Workspace.CurrentCamera
+if CurrentCamera then
+    table.insert(r42, CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(applyResponsiveLayout))
+end
+local r71 = script.Destroying:Connect(function() -- Line: 601 | Upvalues: ("r48" (ref), "CarrySlotConfig" (copy), "r47" (ref), "r49" (ref), "r51_0" (ref), "resetKeptVisuals" (copy), "Dimmer" (copy), "FullInventoryNotice" (copy), "NeedBaitNotice" (copy), "FishViewportPresenter" (copy), "FishViewport_2" (copy), "r41" (copy), "r42" (copy))
+    r48 = false
+    CarrySlotConfig()
+    r47 += 1
+    r49 = nil
+    r51_0 += 1
+    resetKeptVisuals()
+    Dimmer.Visible = false
+    FullInventoryNotice.Visible = false
+    NeedBaitNotice.Visible = false
+    FishViewportPresenter.Clear(FishViewport_2)
+    for r3, r4_p24 in r41 do
+        FishViewportPresenter.Clear(r4_p24.FishViewport)
+    end
+    for r3, r4_p24 in r42 do
+        r4_p24:Disconnect()
+    end
+end)
+table.insert(r42, r71)
+Dimmer.Visible = false
+FullInventoryNotice.Visible = false
+NeedBaitNotice.Visible = false
+resetKeptVisuals()
+ResponsiveLayout.Apply(Panel)
+PaddedScrollLayout.Refresh(CarriedSlots)
+setChoiceAvailability()
+if LocalPlayer:GetAttribute("ProfileLoaded") == true then task.defer(r59) end

@@ -1,0 +1,93 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishingCastVFX
+-- Took 1.37s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GuiService = game:GetService("GuiService")
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+local r4 = {}
+local r5
+local r6
+ReplicatedStorage = {
+    Stop = function() -- Line: 29 | Name: Stop | Upvalues: ("r4" (copy), "r5" (ref))
+        for r3, r4_p0 in r4 do
+            r4_p0:Destroy()
+        end
+        table.clear(r4)
+        r5 = nil
+    end
+}
+local function makeRibbon(r0: userdata, r1: string, r2: number, r3: userdata, r4_p1: number) -- Line: 38 | Name: makeRibbon | Upvalues: ("r4" (copy))
+    local Attachment = Instance.new("Attachment")
+    local Attachment_2 = Instance.new("Attachment")
+    Attachment.Name = r1 .. "Top"
+    Attachment_2.Name = r1 .. "Bottom"
+    Attachment.Position = vector.create(0, 1, 0) * (r2 * 0.5)
+    Attachment_2.Position = - Attachment.Position
+    Attachment.Parent = r0
+    Attachment_2.Parent = r0
+    local Trail = Instance.new("Trail")
+    Trail.Name = r1
+    Trail.Attachment0 = Attachment
+    Trail.Attachment1 = Attachment_2
+    Trail.FaceCamera = true
+    Trail.LightEmission = 0.86
+    Trail.LightInfluence = 0
+    Trail.Lifetime = 0.22
+    Trail.MinLength = 0.12
+    Trail.MaxLength = 54
+    Trail.Color = r3
+    Trail.WidthScale = NumberSequence.new(1, 0.04)
+    local new = NumberSequence.new
+    local new_2 = NumberSequenceKeypoint.new
+    Trail.Transparency = new({NumberSequenceKeypoint.new(0, r4_p1), new_2(0.35, math.min(0.85, r4_p1 + 0.16)), NumberSequenceKeypoint.new(1, 1)})
+    Trail.Parent = r0
+    table.insert(r4, Trail)
+    table.insert(r4, Attachment)
+    table.insert(r4, Attachment_2)
+end
+local function emitLaunch(r0: userdata, r1: number) -- Line: 72 | Name: emitLaunch | Upvalues: ("r4" (copy))
+    local CastLaunchSparks = Instance.new("ParticleEmitter")
+    CastLaunchSparks.Name = "CastLaunchSparks"
+    CastLaunchSparks.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+    CastLaunchSparks.Rate = 0
+    CastLaunchSparks.LightEmission = 0.92
+    CastLaunchSparks.LightInfluence = 0
+    CastLaunchSparks.SpreadAngle = Vector2.new(180, 180)
+    CastLaunchSparks.Lifetime = NumberRange.new(0.22, 0.47)
+    CastLaunchSparks.Speed = NumberRange.new(7, r1 * 12 + 14)
+    CastLaunchSparks.Drag = 2.5
+    CastLaunchSparks.RotSpeed = NumberRange.new(-140, 140)
+    local new, r4_p2 = ColorSequence.new, Color3.fromRGB(255, 231, 129)
+    CastLaunchSparks.Color = new(r4_p2, Color3.fromRGB(115, 232, 255))
+    CastLaunchSparks.Size = NumberSequence.new(0.8, 0.06)
+    CastLaunchSparks.Transparency = NumberSequence.new(0.03, 1)
+    CastLaunchSparks.Parent = r0
+    table.insert(r4, CastLaunchSparks)
+    local r5 = math.round(r1 * 12) + 9
+    CastLaunchSparks:Emit(r5)
+end
+function ReplicatedStorage.Update(r0_p3: userdata?, r1_p3: number?, r2_p3: number?) -- Line: 95 | Name: Update | Upvalues: ("r6" (ref), "PlayerSettings" (copy), "Players" (copy), "ReplicatedStorage" (copy), "r5" (ref), "makeRibbon" (copy), "GuiService" (copy), "emitLaunch" (copy))
+    if r0_p3 == nil then r6 = nil end
+    if r0_p3 == nil or not PlayerSettings.Get(Players.LocalPlayer, "VfxEnabled") then
+        ReplicatedStorage.Stop()
+        return
+    end
+    if r5 == r0_p3 then return end
+    ReplicatedStorage.Stop()
+    r5 = r0_p3
+    local r3_p3 = math.clamp(r0_p3.Size.Y * 0.6, 0.8, 1.4)
+    local new, r9 = ColorSequence.new, Color3.fromRGB(100, 244, 255)
+    new = new(r9, Color3.fromRGB(52, 124, 255))
+    makeRibbon(r0_p3, "CastRibbonHalo", r3_p3, new, 0.28)
+    new, r9 = ColorSequence.new, Color3.fromRGB(255, 255, 224)
+    new = new(r9, Color3.fromRGB(124, 239, 255))
+    makeRibbon(r0_p3, "CastRibbonCore", r3_p3 * 0.33, new, 0.04)
+    if r6 ~= r0_p3 and (r1_p3 or 1) < 0.16 and not GuiService.ReducedMotionEnabled then
+        r6 = r0_p3
+        emitLaunch(r0_p3, math.clamp(r2_p3 or 0, 0, 1))
+    end
+end
+return ReplicatedStorage

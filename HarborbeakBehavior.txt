@@ -1,0 +1,271 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.HarborbeakBehavior
+-- Took 1.73s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players_2 = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local HarborbeakMotion = require(game:GetService("ReplicatedStorage"):WaitForChild("HarborbeakMotion"))
+local r3 = {
+    new = function(r0_p9: userdata) -- Line: 29 | Name: new | Upvalues: ("Players_2" (copy), "Workspace" (copy), "HarborbeakMotion" (copy))
+        local HarborbeakGull = r0_p9:FindFirstChild("HarborbeakGull")
+        local Head = HarborbeakGull and HarborbeakGull:FindFirstChild("Head", true)
+        local BeakJaw = HarborbeakGull and HarborbeakGull:FindFirstChild("BeakJaw", true)
+        assert(HarborbeakGull and Head and BeakJaw, "HarborbeakBehavior requires the original gull rig")
+        HarborbeakGull = r0_p9:GetPivot()
+        local Unit = Vector3.new(BeakJaw.WorldPosition.X - Head.WorldPosition.X, 0, BeakJaw.WorldPosition.Z - Head.WorldPosition.Z).Unit
+        BeakJaw = Random.new()
+        local r5 = 0
+        local r6
+        local r7
+        Head = {}
+        local r8 = 0
+        local r9 = BeakJaw:NextNumber(18, 30)
+        local r10 = BeakJaw:NextNumber(10, 18)
+        local r11 = 0
+        local r12
+        local r13 = RaycastParams.new()
+        r13.FilterType = Enum.RaycastFilterType.Exclude
+        r13.RespectCanCollide = true
+        local r14 = {}
+        local function refreshFilter() -- Line: 65 | Name: refreshFilter | Upvalues: ("r0_p9" (copy), "Players_2" (upval), "r13" (copy))
+            local r0_0 = {r0_p9}
+            local Players, r2, r3 = Players_2:GetPlayers()
+            for r4, r5 in Players, r2, r3 do
+                if r5.Character then table.insert(r0_0, r5.Character) end
+            end
+            r13.FilterDescendantsInstances = r0_0
+        end
+        local function choose(r0: string, r1_p1: CFrame, r2: CFrame, r3: number, r4_p1: number, r5_p1: number?, r6_p1: number?, r7: number?, r8: number?) -- Line: 79 | Name: choose | Upvalues: ("r5" (ref), "r6" (ref), "HarborbeakGull" (copy), "Unit" (copy))
+            r5 += 1
+            r6 = {
+                kind = r0, revision = r5, started = r3, duration = r4_p1,
+                home = HarborbeakGull, from = r1_p1, to = r2, forward = Unit,
+                speed = r5_p1 or 1, radius = r6_p1 or 0, height = r7 or 0, side = r8 or 1
+            }
+        end
+        local function voice(r0: number) -- Line: 92 | Name: voice | Upvalues: ("r11" (ref), "BeakJaw" (copy), "r12" (ref), "r10" (ref))
+            if r11 <= r0 then
+                local r1 = BeakJaw:NextNumber(0.96, 1.04)
+                r12 = r1
+                r11 = r0 + 3.530667 / r1
+            end
+            r10 = r0 + BeakJaw:NextNumber(12, 24)
+        end
+        local function idle(r0: CFrame, r1_p3: number) -- Line: 103 | Name: idle | Upvalues: ("BeakJaw" (copy), "r5" (ref), "r6" (ref), "HarborbeakGull" (copy), "Unit" (copy))
+            local r3_p3, r4_p3, r5_p3, r6_p3 = BeakJaw:NextNumber(0.93, 1.03)
+            r5 += 1
+            r6 = {
+                kind = "Idle", revision = r5, started = r1_p3, duration = BeakJaw:NextNumber(4.5, 9),
+                home = HarborbeakGull, from = r0, to = r0, forward = Unit,
+                speed = r3_p3 or 1, radius = r4_p3 or 0, height = r5_p3 or 0, side = r6_p3 or 1
+            }
+        end
+        local function walkDestination(r0: vector) -- Line: 109 | Name: walkDestination | Upvalues: ("refreshFilter" (copy), "BeakJaw" (copy), "HarborbeakGull" (copy), "Workspace" (upval), "r13" (copy))
+            refreshFilter()
+            for i_0 = 1, 4 do
+                local r4 = BeakJaw:NextNumber(0, 6.283185307179586)
+                local r5 = BeakJaw:NextNumber(2.5, 6)
+                local r9, r11 = math.cos(r4) * r5, math.sin(r4) * r5
+                local r6 = HarborbeakGull.Position + Vector3.new(r9, 0, r11)
+                r5 = r6 - r0
+                r4 = false
+                if r5.Magnitude >= 1.5 then
+                    r9 = CFrame.new(r0 + vector.create(0, 2, 0))
+                    r11 = r5
+                    r4 = Workspace:Blockcast(r9, vector.create(2.200000047683716, 2.5999999046325684, 2.200000047683716), r11, r13) == nil
+                end
+                r9 = math.ceil(r5.Magnitude / 1.5)
+                local r7 = math.max(1, r9)
+                for i_1 = 0, r7 do
+                    r5 = r0:Lerp(r6, i_1 / r7)
+                    r11 = Workspace:Raycast(r5 + vector.create(0, 2, 0), vector.create(-0, -4, -0), r13)
+                    if r11 and not (math.abs(r11.Position.Y - HarborbeakGull.Position.Y) > 0.35) and not (r11.Normal.Y < 0.95) then
+                        continue
+                    end
+                    r4 = false
+                    break
+                end
+                if r4 then return r6 end
+            end
+            return nil
+        end
+        local function flight(r0: CFrame, r1_p5: number) -- Line: 143 | Name: flight | Upvalues: ("refreshFilter" (copy), "HarborbeakGull" (copy), "Unit" (copy), "BeakJaw" (copy), "HarborbeakMotion" (upval), "Workspace" (upval), "r13" (copy), "r7" (ref), "r5" (ref), "r6" (ref), "r11" (ref), "r12" (ref), "r10" (ref))
+            refreshFilter()
+            local r2_arg1 = r0.Rotation * HarborbeakGull.Rotation:Inverse()
+            r2_arg1 = r2_arg1:VectorToWorldSpace(Unit)
+            local r3_p5 = if BeakJaw:NextNumber() < 0.5 then 1 else -1
+            for i_0 = 1, 4 do
+                local r7_p5 = BeakJaw:NextNumber(24, 36)
+                local r8 = BeakJaw:NextNumber(16, 24)
+                local r9 = r3_p5 * (i_0 % 2 == 1 and 1 or -1)
+                local r10_p5 = r2_arg1:Cross(vector.create(0, 1, 0)) * r9
+                local Position = r0.Position
+                local r12_p5 = true
+                for i_1 = 1, 96 do
+                    local r16 = HarborbeakMotion.FlightPoint(r0.Position, r2_arg1, r10_p5, i_1 / 96, r7_p5, r8)
+                    local r19 = CFrame.new(Position + vector.create(0, 2.200000047683716, 0))
+                    if Workspace:Blockcast(r19, vector.create(6.800000190734863, 3.5999999046325684, 4.5), r16 - Position, r13) then
+                        r12_p5 = false
+                        break
+                    end
+                    Position = r16
+                end
+                if not r12_p5 then continue end
+                r7 = nil
+                r5 += 1
+                r6 = {
+                    kind = "Flight", revision = r5, started = r1_p5,
+                    duration = HarborbeakMotion.Lengths.takeoff + BeakJaw:NextNumber(16, 22) + HarborbeakMotion.Lengths.land,
+                    home = HarborbeakGull, from = r0, to = r0, forward = Unit, speed = 1,
+                    radius = r7_p5 or 0, height = r8 or 0, side = r9 or 1
+                }
+                if not (r11 <= r1_p5) then
+                    r10 = r1_p5 + BeakJaw:NextNumber(12, 24)
+                    return true
+                end
+                Position = BeakJaw:NextNumber(0.96, 1.04)
+                r12 = Position
+                r11 = r1_p5 + 3.530667 / Position
+                r10 = r1_p5 + BeakJaw:NextNumber(12, 24)
+                return true
+            end
+            return false
+        end
+        local function approached(r0_arg2: vector, r1_arg3: number) -- Line: 183 | Name: approached | Upvalues: ("r8" (ref), "Players_2" (upval), "Workspace" (upval), "Head" (copy), "BeakJaw" (copy))
+            if r1_arg3 < r8 then return false end
+            r8 = r1_arg3 + 0.15
+            local r2_p6 = {}
+            local r3_p6 = false
+            local Players, r5, r6 = Players_2:GetPlayers()
+            for r7, r8_p6 in Players, r5, r6 do
+                local Character = r8_p6.Character
+                local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+                local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+                if not Humanoid or not (Humanoid.Health > 0) or not HumanoidRootPart or not HumanoidRootPart:IsA("BasePart") or not HumanoidRootPart:IsDescendantOf(Workspace) then
+                    continue
+                end
+                Character = (HumanoidRootPart.Position - r0_arg2).Magnitude
+                if Character <= 16 then r2_p6[r8_p6] = true end
+                if Head[r8_p6] or not (Character <= 12) then continue end
+                Head[r8_p6] = true
+                if BeakJaw:NextNumber() < 0.55 then r3_p6 = true end
+            end
+            for r7 in Head do
+                if not r2_p6[r7] then Head[r7] = nil end
+            end
+            return r3_p6
+        end
+        local function advance(r0: number) -- Line: 221 | Name: advance | Upvalues: ("HarborbeakMotion" (upval), "r6" (ref), "r9" (ref), "BeakJaw" (copy), "r5" (ref), "HarborbeakGull" (copy), "Unit" (copy), "r7" (ref), "flight" (copy), "walkDestination" (copy))
+            local r1_p7 = HarborbeakMotion.Sample(r6, r0)
+            local r3_p7, r4_p7, r5_p7, r6_p7
+            if r6.kind == "Flight" then
+                r9 = r0 + BeakJaw:NextNumber(24, 42)
+                r3_p7, r4_p7, r5_p7, r6_p7 = BeakJaw:NextNumber(0.93, 1.03)
+                r5 += 1
+                r6 = {
+                    kind = "Idle", revision = r5, started = r0, duration = BeakJaw:NextNumber(4.5, 9),
+                    home = HarborbeakGull, from = r1_p7, to = r1_p7, forward = Unit,
+                    speed = r3_p7 or 1, radius = r4_p7 or 0, height = r5_p7 or 0, side = r6_p7 or 1
+                }
+                return
+            end
+            local r7_p7
+            if r6.kind == "Turn" and r7 then
+                local __up7 = r7
+                r7 = nil
+                local r4_p7, r5_p7, r6_p7, r7_p7 = BeakJaw:NextNumber(0.93, 1.04)
+                r5 += 1
+                r6 = {
+                    kind = "Walk", revision = r5, started = r0,
+                    duration = (__up7.Position - r1_p7.Position).Magnitude / 1.65,
+                    home = HarborbeakGull, from = r1_p7, to = __up7, forward = Unit,
+                    speed = r4_p7 or 1, radius = r5_p7 or 0, height = r6_p7 or 0, side = r7_p7 or 1
+                }
+                return
+            end
+            if r6.kind == "Walk" then
+                local r3_p7, r4_p7, r5_p7, r6_p7 = BeakJaw:NextNumber(0.93, 1.03)
+                r5 += 1
+                r6 = {
+                    kind = "Idle", revision = r5, started = r0, duration = BeakJaw:NextNumber(4.5, 9),
+                    home = HarborbeakGull, from = r1_p7, to = r1_p7, forward = Unit,
+                    speed = r3_p7 or 1, radius = r4_p7 or 0, height = r5_p7 or 0, side = r6_p7 or 1
+                }
+                return
+            end
+            if r9 <= r0 then
+                if not flight(r1_p7, r0) then
+                    local r3_p7, r4_p7, r5_p7, r6_p7 = BeakJaw:NextNumber(0.93, 1.03)
+                    r5 += 1
+                    r6 = {
+                        kind = "Idle", revision = r5, started = r0, duration = BeakJaw:NextNumber(4.5, 9),
+                        home = HarborbeakGull, from = r1_p7, to = r1_p7, forward = Unit,
+                        speed = r3_p7 or 1, radius = r4_p7 or 0, height = r5_p7 or 0, side = r6_p7 or 1
+                    }
+                end
+                r9 = r0 + BeakJaw:NextNumber(24, 42)
+                return
+            end
+            local r2_arg4 = BeakJaw:NextNumber()
+            if r2_arg4 < 0.72 then
+                r2_arg4 = walkDestination(r1_p7.Position)
+                if r2_arg4 then
+                    r7 = HarborbeakMotion.Pose(HarborbeakGull, Unit, r2_arg4, r2_arg4 - r1_p7.Position)
+                    local r4_p7, r5_p7, r6_p7, r7_p7, r8 = BeakJaw:NextNumber(0.5, 0.9)
+                    r5 += 1
+                    r6 = {
+                        kind = "Turn", revision = r5, started = r0, duration = r4_p7,
+                        home = HarborbeakGull, from = r1_p7,
+                        to = HarborbeakMotion.Pose(HarborbeakGull, Unit, r1_p7.Position, r2_arg4 - r1_p7.Position),
+                        forward = Unit,
+                        speed = r5_p7 or 1, radius = r6_p7 or 0, height = r7_p7 or 0, side = r8 or 1
+                    }
+                    return
+                end
+            end
+            local r3_p7, r4_p7, r5_p7, r6_p7 = BeakJaw:NextNumber(0.93, 1.03)
+            r5 += 1
+            r6 = {
+                kind = "Idle", revision = r5, started = r0, duration = BeakJaw:NextNumber(4.5, 9),
+                home = HarborbeakGull, from = r1_p7, to = r1_p7, forward = Unit,
+                speed = r3_p7 or 1, radius = r4_p7 or 0, height = r5_p7 or 0, side = r6_p7 or 1
+            }
+        end
+        function r14.Step(r0: number) -- Line: 263 | Name: Step | Upvalues: ("HarborbeakMotion" (upval), "r6" (ref), "approached" (copy), "flight" (copy), "BeakJaw" (copy), "r5" (ref), "HarborbeakGull" (copy), "Unit" (copy), "advance" (copy), "r10" (ref), "r11" (ref), "r12" (ref))
+            local r1_p8 = HarborbeakMotion.Sample(r6, r0)
+            if r6.kind ~= "Flight" and approached(r1_p8.Position, r0) then
+                if not flight(r1_p8, r0) then
+                    local r3_p8, r4_p8, r5_p8, r6_p8 = BeakJaw:NextNumber(0.93, 1.03)
+                    r5 += 1
+                    r6 = {
+                        kind = "Idle", revision = r5, started = r0, duration = BeakJaw:NextNumber(4.5, 9),
+                        home = HarborbeakGull, from = r1_p8, to = r1_p8, forward = Unit,
+                        speed = r3_p8 or 1, radius = r4_p8 or 0, height = r5_p8 or 0, side = r6_p8 or 1
+                    }
+                end
+            elseif r6.started + r6.duration <= r0 then
+                advance(r0)
+            end
+            if r6.kind ~= "Flight" and r10 <= r0 then
+                if r11 <= r0 then
+                    r1_p8 = BeakJaw:NextNumber(0.96, 1.04)
+                    r12 = r1_p8
+                    r11 = r0 + 3.530667 / r1_p8
+                end
+                r10 = r0 + BeakJaw:NextNumber(12, 24)
+            end
+            local __up11 = r12
+            r12 = nil
+            return r6, __up11
+        end
+        local r24, r25, r26, r27 = BeakJaw:NextNumber(0.93, 1.03)
+        r6 = {
+            kind = "Idle", revision = r5 + 1, started = 0, duration = BeakJaw:NextNumber(4.5, 9),
+            home = HarborbeakGull, from = HarborbeakGull, to = HarborbeakGull, forward = Unit,
+            speed = r24 or 1, radius = r25 or 0, height = r26 or 0, side = r27 or 1
+        }
+        return r14
+    end
+}
+return table.freeze(r3)

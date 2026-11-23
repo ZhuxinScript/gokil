@@ -1,0 +1,114 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.CoinPickupController
+-- Took 1.4s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local CollectionService = game:GetService("CollectionService")
+local Debris = game:GetService("Debris")
+local CoinMotion = require(ReplicatedStorage:WaitForChild("CoinMotion"))
+local CosmeticRange = require(script.Parent:WaitForChild("CosmeticRange"))
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+local SoundEffects = require(script.Parent:WaitForChild("SoundEffects"))
+local CoinPickupPresenter = require(script.Parent:WaitForChild("CoinPickupPresenter"))
+local LocalPlayer = Players.LocalPlayer
+Players = ReplicatedStorage:WaitForChild("CoinPickupState")
+local CoinTag = Players:GetAttribute("CoinTag")
+local OriginAttribute = Players:GetAttribute("OriginAttribute")
+local PhaseAttribute = Players:GetAttribute("PhaseAttribute")
+local r15 = typeof(CoinTag) == "string" and typeof(OriginAttribute) == "string" and typeof(PhaseAttribute) == "string"
+assert(r15, "CoinPickupState requires randomized CoinTag, OriginAttribute, and PhaseAttribute strings")
+Players = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CoinPickupCollected")
+local Burst = ReplicatedStorage:WaitForChild("CoinPickupEffects"):WaitForChild("Burst")
+assert(Burst:IsA("BasePart"), "CoinPickupEffects.Burst must be an authored BasePart")
+ReplicatedStorage = Burst:GetAttribute("DrainSeconds")
+local r16 = typeof(ReplicatedStorage) == "number" and ReplicatedStorage > 0
+assert(r16, "CoinPickupEffects.Burst needs DrainSeconds")
+r15 = {}
+r16 = {}
+local CoinPickupVisuals = Instance.new("Folder")
+CoinPickupVisuals.Name = "CoinPickupVisuals"
+CoinPickupVisuals.Parent = Workspace
+local function track(r0: userdata) -- Line: 74 | Name: track | Upvalues: ("Workspace" (copy), "r15" (copy))
+    if r0:IsA("BasePart") and r0:IsDescendantOf(Workspace) then r15[r0] = true end
+end
+local function forget(r0: userdata) -- Line: 82 | Name: forget | Upvalues: ("r15" (copy))
+    if r0:IsA("BasePart") then r15[r0] = nil end
+end
+local function onCollected(r0: vector, r1_p2: number, r2_p2: number, r3: number) -- Line: 91 | Name: onCollected | Upvalues: ("PlayerSettings" (copy), "LocalPlayer" (copy), "CosmeticRange" (copy), "Burst" (copy), "CoinPickupVisuals" (copy), "Debris" (copy), "ReplicatedStorage" (copy), "SoundEffects" (copy), "Workspace" (copy), "CoinPickupPresenter" (copy))
+    if typeof(r0) ~= "Vector3" or typeof(r1_p2) ~= "number" or r1_p2 <= 0 or r1_p2 >= (1/0) or r1_p2 % 1 ~= 0 or typeof(r2_p2) ~= "number" or not (r2_p2 > 0) or not (r2_p2 < (1/0)) or typeof(r3) ~= "number" then
+        return
+    end
+    local r4_p2
+    if PlayerSettings.Get(LocalPlayer, "VfxEnabled") and CosmeticRange.Contains(r0) then
+        r4_p2 = Burst:Clone()
+        r4_p2.CFrame = CFrame.new(r0)
+        r4_p2.Parent = CoinPickupVisuals
+        local Descendants, r6_p2, r7_p2 = r4_p2:GetDescendants()
+        for r8_p2, r9_p2 in Descendants, r6_p2, r7_p2 do
+            if r9_p2:IsA("ParticleEmitter") then
+                local EmitCount = r9_p2:GetAttribute("EmitCount")
+                local r12 = typeof(EmitCount) == "number" and EmitCount > 0 and EmitCount % 1 == 0
+                assert(r12, "CoinPickupEffects burst emitter requires positive whole EmitCount")
+                r9_p2:Emit(EmitCount)
+            end
+        end
+        Debris:AddItem(r4_p2, ReplicatedStorage)
+    end
+    if r3 == LocalPlayer.UserId then
+        SoundEffects.Play("CoinPickup")
+        local r4_p2 = r2_p2 - Workspace:GetServerTimeNow()
+        if r4_p2 > 0 then CoinPickupPresenter.Play(r0, r1_p2, r4_p2) end
+    end
+end
+table.insert(r16, CollectionService:GetInstanceAddedSignal(CoinTag):Connect(track))
+table.insert(r16, CollectionService:GetInstanceRemovedSignal(CoinTag):Connect(forget))
+table.insert(r16, Players.OnClientEvent:Connect(onCollected))
+local r22, r23, r24 = CollectionService:GetTagged(CoinTag)
+for r25, r26 in r22, r23, r24 do
+    if not (not r26:IsA("BasePart") or not r26:IsDescendantOf(Workspace)) then r15[r26] = true end
+end
+r24 = LocalPlayer:GetAttributeChangedSignal(PlayerSettings.AttributeName("VfxEnabled"))
+table.insert(r16, r24:Connect(function() -- Line: 133 | Upvalues: ("PlayerSettings" (copy), "LocalPlayer" (copy), "CoinPickupVisuals" (copy))
+    if not PlayerSettings.Get(LocalPlayer, "VfxEnabled") then
+        local Children, r1, r2 = CoinPickupVisuals:GetChildren()
+        for r3, r4 in Children, r1, r2 do
+            r4:Destroy()
+        end
+    end
+end))
+local r17 = task.spawn(function() -- Line: 142 | Upvalues: ("CoinPickupVisuals" (copy), "CosmeticRange" (copy), "Workspace" (copy), "r15" (copy), "OriginAttribute" (copy), "PhaseAttribute" (copy), "CoinMotion" (copy))
+    while true do
+        local r0 = false
+        local Children, wait, r3 = CoinPickupVisuals:GetChildren()
+        for r4, r5_p4 in Children, wait, r3 do
+            if not (not r5_p4:IsA("BasePart") or CosmeticRange.Contains(r5_p4.Position)) then
+                r5_p4:Destroy()
+            end
+        end
+        Children = Workspace:GetServerTimeNow()
+        for r5_p4 in r15 do
+            local r7 = r5_p4:GetAttribute(OriginAttribute)
+            local r8 = r5_p4:GetAttribute(PhaseAttribute)
+            if not (not r5_p4:IsDescendantOf(Workspace) or typeof(r7) ~= "CFrame" or typeof(r8) ~= "number" or not CosmeticRange.Contains(r5_p4.Position)) then
+                r0 = true
+                r5_p4.CFrame = CoinMotion.At(r7, r8, Children)
+            end
+        end
+        wait = task.wait
+        wait(r0 and 0.03333333333333333 or CosmeticRange.INTERVAL)
+    end
+end)
+r24 = script.Destroying:Connect(function() -- Line: 169 | Upvalues: ("r16" (copy), "r17" (ref), "r15" (copy), "CoinPickupVisuals" (copy), "CoinPickupPresenter" (copy))
+    for r3, r4 in r16 do
+        r4:Disconnect()
+    end
+    if r17 and coroutine.status(r17) ~= "dead" then task.cancel(r17) end
+    r17 = nil
+    table.clear(r15)
+    CoinPickupVisuals:Destroy()
+    CoinPickupPresenter.Destroy()
+end)
+table.insert(r16, r24)

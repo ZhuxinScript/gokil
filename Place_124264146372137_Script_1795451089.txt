@@ -1,0 +1,153 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersVisuals
+-- Took 0.7s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local r1 = {}
+local function cosmetic(r0: userdata, r1: any) -- Line: 22 | Name: cosmetic
+    local Archivable = r0.Archivable
+    r0.Archivable = true
+    local r3 = r0:Clone()
+    r0.Archivable = Archivable
+    assert(r3, "Fish Riders visual source could not be cloned")
+    local function restoreDecals(r0: userdata, r1_p0: userdata) -- Line: 31 | Name: restoreDecals | Upvalues: ("r1" (copy), "restoreDecals" (copy))
+        local r2 = r1[r0]
+        if r2 and r0:IsA("Decal") then
+            r1_p0.Transparency = r2.value
+        elseif r2 and (r0:IsA("ParticleEmitter") or r0:IsA("Beam") or r0:IsA("Trail")) then
+            r1_p0.Enabled = r2.value
+        end
+        local Children, r4, r5 = r0:GetChildren()
+        for r6, r7 in Children, r4, r5 do
+            r2 = r1_p0:FindFirstChild(r7.Name)
+            if not (not r2 or r2.ClassName ~= r7.ClassName) then restoreDecals(r7, r2) end
+        end
+    end
+    restoreDecals(r0, r3)
+    local Descendants, r5, r6 = r3:GetDescendants()
+    for r7, r8 in Descendants, r5, r6 do
+        if r8:IsA("LuaSourceContainer") or r8:IsA("BillboardGui") then
+            r8:Destroy()
+        elseif r8:IsA("BasePart") then
+            r8.Anchored = true
+            r8.CanCollide = false
+            r8.CanTouch = false
+            r8.CanQuery = false
+            r8.LocalTransparencyModifier = 0
+        elseif not r8:IsA("Humanoid") then
+        else
+            r8.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+        end
+    end
+    return r3
+end
+function r1.new() -- Line: 55 | Name: new | Upvalues: ("cosmetic" (copy), "Players" (copy))
+    local FishRidersLocalPresentation = Instance.new("Folder")
+    FishRidersLocalPresentation.Name = "FishRidersLocalPresentation"
+    FishRidersLocalPresentation.Parent = workspace
+    local r1, r2 = {}, {}
+    local r3_0 = {}
+    local r4_0 = true
+    local r5_0 = {}
+    local function hide(r0: userdata) -- Line: 70 | Name: hide | Upvalues: ("r1" (copy))
+        if r1[r0] then return end
+        if r0:IsA("BasePart") then
+            r1[r0] = {property = "LocalTransparencyModifier", value = r0.LocalTransparencyModifier}
+            r0.LocalTransparencyModifier = 1
+            return
+        end
+        if r0:IsA("Decal") then
+            r1[r0] = {property = "Transparency", value = r0.Transparency}
+            r0.Transparency = 1
+            return
+        end
+        if r0:IsA("ParticleEmitter") or r0:IsA("Beam") or r0:IsA("Trail") then
+            r1[r0] = {property = "Enabled", value = r0.Enabled}
+            r0.Enabled = false
+            return
+        end
+        if r0:IsA("Humanoid") then
+            r1[r0] = {property = "DisplayDistanceType", value = r0.DisplayDistanceType}
+            r0.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            return
+        end
+        if r0:IsA("BillboardGui") then
+            r1[r0] = {property = "Enabled", value = r0.Enabled}
+            r0.Enabled = false
+        end
+    end
+    local function conceal(r0: userdata) -- Line: 94 | Name: conceal | Upvalues: ("r2" (copy), "hide" (copy))
+        if r2[r0] then return end
+        local Descendants, r2_p3, r3 = r0:GetDescendants()
+        for r4, r5 in Descendants, r2_p3, r3 do
+            hide(r5)
+        end
+        r2[r0] = r0.DescendantAdded:Connect(hide)
+    end
+    function r5_0.Add(r0_p4: number, r1_p4: userdata) -- Line: 102 | Name: Add | Upvalues: ("r4_0" (ref), "r3_0" (copy), "cosmetic" (upval), "r1" (copy), "FishRidersLocalPresentation" (copy), "conceal" (copy))
+        assert(r4_0 and not r3_0[r0_p4], "Invalid Fish Riders display ownership")
+        local r2 = cosmetic(r1_p4, r1)
+        r2.Name = tostring(r0_p4)
+        local BotRider = r2:FindFirstChild("BotRider")
+        if BotRider then BotRider:Destroy() end
+        r2.Parent = FishRidersLocalPresentation
+        r3_0[r0_p4] = {source = r1_p4, model = r2, offsets = {}}
+        conceal(r1_p4)
+        return r2
+    end
+    function r5_0.Place(r0_arg1: number, r1_p5: any, r2: CFrame) -- Line: 117 | Name: Place | Upvalues: ("r4_0" (ref), "r3_0" (copy), "Players" (upval), "cosmetic" (upval), "r1" (copy), "conceal" (copy))
+        if not r4_0 then return end
+        local r3 = assert(r3_0[r0_arg1], "Missing Fish Riders display")
+        local Rider = if r1_p5.userId > 0 then Players:GetPlayerByUserId(r1_p5.userId) else nil
+        local r5 = if Rider then Rider.Character else r3.source:FindFirstChild("BotRider")
+        local r9
+        if r5 and r5 ~= r3.riderSource then
+            Rider = cosmetic(r5, r1)
+            local WearableTrailEffect = Rider:FindFirstChild("WearableTrailEffect")
+            if WearableTrailEffect then WearableTrailEffect:Destroy() end
+            WearableTrailEffect = Rider:FindFirstChild("HumanoidRootPart")
+            assert(WearableTrailEffect and WearableTrailEffect:IsA("BasePart"), "Fish Riders rider requires its native root")
+            if r3.rider then r3.rider:Destroy() end
+            r3.rider = Rider
+            r3.riderSource = r5
+            r3.offsets = {}
+            local Descendants, r8, r9 = Rider:GetDescendants()
+            for r10, r11 in Descendants, r8, r9 do
+                if r11:IsA("BasePart") then
+                    r3.offsets[r11] = WearableTrailEffect.CFrame:ToObjectSpace(r11.CFrame)
+                end
+            end
+            Rider.Name = "Rider"
+            Rider.Parent = r3.model
+            conceal(r5)
+        end
+        r3.model:PivotTo(r2 * r3.model:GetAttribute("VisualOffset"))
+        r5 = r2 * CFrame.new(r3.model:GetAttribute("SeatOffset"))
+        for r9, r10 in r3.offsets do
+            r9.CFrame = r5 * r10
+        end
+    end
+    function r5_0.Head(r0: number) -- Line: 149 | Name: Head | Upvalues: ("r3_0" (copy))
+        local r1_0 = r3_0[r0]
+        local Head = r1_0 and r1_0.rider and r1_0.rider:FindFirstChild("Head")
+        if Head and Head:IsA("BasePart") then return Head end
+        return nil
+    end
+    function r5_0.Destroy() -- Line: 157 | Name: Destroy | Upvalues: ("r4_0" (ref), "r2" (copy), "FishRidersLocalPresentation" (copy), "r1" (copy), "r3_0" (copy))
+        if not r4_0 then return end
+        r4_0 = false
+        for r3, r4 in r2 do
+            r4:Disconnect()
+        end
+        FishRidersLocalPresentation:Destroy()
+        for r3, r4 in r1 do
+            if r3.Parent then r3[r4.property] = r4.value end
+        end
+        table.clear(r1)
+        table.clear(r2)
+        table.clear(r3_0)
+    end
+    return r5_0
+end
+return table.freeze(r1)

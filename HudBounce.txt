@@ -1,0 +1,56 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.HudBounce
+-- Took 1.28s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local TweenService = game:GetService("TweenService")
+local r1 = {}
+local new, Quad = TweenInfo.new, Enum.EasingStyle.Quad
+local new_2, Quad_2 = TweenInfo.new, Enum.EasingStyle.Quad
+Quad = TweenInfo.new
+local Quad_3 = Enum.EasingStyle.Quad
+local r2 = {
+    {scale = 0.85, info = new(0.07, Quad, Enum.EasingDirection.Out)},
+    {scale = 1.15, info = new_2(0.12, Quad_2, Enum.EasingDirection.Out)},
+    {scale = 1, info = Quad(0.16, Quad_3, Enum.EasingDirection.InOut)}
+}
+new_2, Quad_2 = TweenInfo.new, Enum.EasingStyle.Quad
+Quad, Quad_3 = TweenInfo.new, Enum.EasingStyle.Sine
+local r3 = {
+    {scale = 1.15, info = new_2(0.14, Quad_2, Enum.EasingDirection.Out)},
+    {scale = 1, info = Quad(0.26, Quad_3, Enum.EasingDirection.InOut)}
+}
+new = {}
+function r1.Stop(r0: userdata) -- Line: 54 | Name: Stop | Upvalues: ("new" (copy))
+    local r1_0 = new[r0]
+    if r1_0 == nil then return end
+    new[r0] = nil
+    if r1_0.thread and coroutine.status(r1_0.thread) ~= "dead" then task.cancel(r1_0.thread) end
+    if r1_0.tween then
+        r1_0.tween:Cancel()
+        r1_0.tween:Destroy()
+    end
+end
+local function run(r0_p2: userdata, r1_p2: { any }) -- Line: 68 | Name: run | Upvalues: ("r1" (copy), "new" (copy), "TweenService" (copy))
+    r1.Stop(r0_p2)
+    local r2 = {}
+    new[r0_p2] = r2
+    r2.thread = task.spawn(function() -- Line: 73 | Upvalues: ("r1_p2" (copy), "TweenService" (upval), "r0_p2" (copy), "r2" (copy), "new" (upval))
+        for r3, r4_arg1 in r1_p2 do
+            local r5 = TweenService:Create(r0_p2, r4_arg1.info, {Scale = r4_arg1.scale})
+            r2.tween = r5
+            r5:Play()
+            r5.Completed:Wait()
+            r2.tween = nil
+            r5:Destroy()
+        end
+        if new[r0_p2] == r2 then new[r0_p2] = nil end
+    end)
+end
+function r1.Play(r0: userdata) -- Line: 89 | Name: Play | Upvalues: ("run" (copy), "r2" (copy))
+    run(r0, r2)
+end
+function r1.Pulse(r0: userdata) -- Line: 96 | Name: Pulse | Upvalues: ("run" (copy), "r3" (copy))
+    run(r0, r3)
+end
+return table.freeze(r1)

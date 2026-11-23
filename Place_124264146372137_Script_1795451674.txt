@@ -1,0 +1,133 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishingHintController
+-- Took 1.41s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local ResponsiveLayout = require(script.Parent:WaitForChild("ResponsiveLayout"))
+local CastingArea = require(ReplicatedStorage:WaitForChild("CastingArea"))
+ReplicatedStorage = Players.LocalPlayer
+Players = ReplicatedStorage:WaitForChild("PlayerGui")
+local FishingHintGui = Players:WaitForChild("FishingHintGui")
+Players = FishingHintGui:WaitForChild("DockHint")
+local BaitHint = FishingHintGui:WaitForChild("BaitHint")
+local r7 = false
+local r8 = {}
+local function rodReady() -- Line: 56 | Name: rodReady | Upvalues: ("ReplicatedStorage" (copy))
+    return ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+end
+local function outOfBait() -- Line: 64 | Name: outOfBait | Upvalues: ("ReplicatedStorage" (copy))
+    local EquippedBaitCount = ReplicatedStorage:GetAttribute("EquippedBaitCount")
+    return typeof(EquippedBaitCount) == "number" and EquippedBaitCount <= 0
+end
+local function updateOnDock() -- Line: 72 | Name: updateOnDock | Upvalues: ("ReplicatedStorage" (copy), "r7" (ref), "CastingArea" (copy))
+    local Character = ReplicatedStorage.Character
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    r7 = Character ~= nil and Humanoid ~= nil and Humanoid.Health > 0 and CastingArea.Contains(Character)
+end
+local function render() -- Line: 81 | Name: render | Upvalues: ("ReplicatedStorage" (copy), "BaitHint" (copy), "Players" (copy), "r7" (ref))
+    local r0_p3 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+    local r2 = r0_p3
+    if r2 then
+        local EquippedBaitCount = ReplicatedStorage:GetAttribute("EquippedBaitCount")
+        r2 = typeof(EquippedBaitCount) == "number" and EquippedBaitCount <= 0
+    end
+    BaitHint.Visible = r2
+    Players.Visible = r0_p3 and not BaitHint.Visible and not r7
+end
+local function refresh() -- Line: 90 | Name: refresh | Upvalues: ("ReplicatedStorage" (copy), "r7" (ref), "CastingArea" (copy), "BaitHint" (copy), "Players" (copy))
+    local r0_p4 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+    if r0_p4 then
+        r0_p4 = ReplicatedStorage.Character
+        local Humanoid = r0_p4 and r0_p4:FindFirstChildOfClass("Humanoid")
+        r7 = r0_p4 ~= nil and Humanoid ~= nil and Humanoid.Health > 0 and CastingArea.Contains(r0_p4)
+    end
+    r0_p4 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+    local r2 = r0_p4
+    if r2 then
+        local EquippedBaitCount = ReplicatedStorage:GetAttribute("EquippedBaitCount")
+        r2 = typeof(EquippedBaitCount) == "number" and EquippedBaitCount <= 0
+    end
+    BaitHint.Visible = r2
+    Players.Visible = r0_p4 and not BaitHint.Visible and not r7
+end
+local r14 = task.spawn(function() -- Line: 99 | Upvalues: ("ReplicatedStorage" (copy), "r7" (ref), "CastingArea" (copy), "BaitHint" (copy), "Players" (copy))
+    while true do
+        task.wait(0.25)
+        local r0_p5 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+        if r0_p5 then
+            r0_p5 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+            if r0_p5 then
+                r0_p5 = ReplicatedStorage.Character
+                local Humanoid = r0_p5 and r0_p5:FindFirstChildOfClass("Humanoid")
+                r7 = r0_p5 ~= nil and Humanoid ~= nil and Humanoid.Health > 0 and CastingArea.Contains(r0_p5)
+            end
+            r0_p5 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+            local r2 = r0_p5
+            if r2 then
+                local EquippedBaitCount = ReplicatedStorage:GetAttribute("EquippedBaitCount")
+                r2 = typeof(EquippedBaitCount) == "number" and EquippedBaitCount <= 0
+            end
+            BaitHint.Visible = r2
+            Players.Visible = r0_p5 and not BaitHint.Visible and not r7
+        end
+    end
+end)
+for r18, r19 in {"RodEquipped", "RodState", "ExerciseActive", "EquippedBait", "EquippedBaitCount"} do
+    table.insert(r8, ReplicatedStorage:GetAttributeChangedSignal(r19):Connect(refresh))
+end
+table.insert(r8, ReplicatedStorage.CharacterAdded:Connect(function() -- Line: 111 | Upvalues: ("r7" (ref), "ReplicatedStorage" (copy), "CastingArea" (copy), "BaitHint" (copy), "Players" (copy))
+    r7 = false
+    local r0_p6 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+    if r0_p6 then
+        r0_p6 = ReplicatedStorage.Character
+        local Humanoid = r0_p6 and r0_p6:FindFirstChildOfClass("Humanoid")
+        r7 = r0_p6 ~= nil and Humanoid ~= nil and Humanoid.Health > 0 and CastingArea.Contains(r0_p6)
+    end
+    r0_p6 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+    local r2 = r0_p6
+    if r2 then
+        local EquippedBaitCount = ReplicatedStorage:GetAttribute("EquippedBaitCount")
+        r2 = typeof(EquippedBaitCount) == "number" and EquippedBaitCount <= 0
+    end
+    BaitHint.Visible = r2
+    Players.Visible = r0_p6 and not BaitHint.Visible and not r7
+end))
+local CurrentCamera = Workspace.CurrentCamera
+if CurrentCamera then
+    table.insert(r8, CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function() -- Line: 118 | Upvalues: ("ResponsiveLayout" (copy), "FishingHintGui" (copy))
+        ResponsiveLayout.Apply(FishingHintGui)
+    end))
+end
+local r18 = script.Destroying:Connect(function() -- Line: 122 | Upvalues: ("r14" (copy), "r8" (copy), "Players" (copy), "BaitHint" (copy))
+    task.cancel(r14)
+    for r3, r4 in r8 do
+        r4:Disconnect()
+    end
+    Players.Visible = false
+    BaitHint.Visible = false
+end)
+table.insert(r8, r18)
+ResponsiveLayout.Apply(FishingHintGui)
+local r16 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+if r16 then
+    CurrentCamera = ReplicatedStorage.Character
+    Workspace = CurrentCamera and CurrentCamera:FindFirstChildOfClass("Humanoid")
+    r16 = CurrentCamera ~= nil and Workspace ~= nil and Workspace.Health > 0 and CastingArea.Contains(CurrentCamera)
+    r7 = r16
+end
+r16 = ReplicatedStorage:GetAttribute("RodEquipped") == true and ReplicatedStorage:GetAttribute("RodState") == "Ready" and ReplicatedStorage:GetAttribute("ExerciseActive") ~= true
+local r17 = r16
+if r17 then
+    r18 = ReplicatedStorage:GetAttribute("EquippedBaitCount")
+    r17 = typeof(r18) == "number" and r18 <= 0
+end
+BaitHint.Visible = r17
+r17 = r16
+if r17 then
+    r17 = not BaitHint.Visible
+    if r17 then r17 = not r7 end
+end
+Players.Visible = r17

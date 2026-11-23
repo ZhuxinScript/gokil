@@ -1,0 +1,451 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.ExerciseController
+-- Took 1.02s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local ContextActionService = game:GetService("ContextActionService")
+local GuiService = game:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+Players = LocalPlayer:WaitForChild("PlayerGui")
+local ExerciseRequest = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ExerciseRequest")
+local TrainingUpgradeConfig = require(ReplicatedStorage:WaitForChild("TrainingUpgradeConfig"))
+assert(ExerciseRequest:IsA("RemoteEvent"), "ReplicatedStorage.Remotes.ExerciseRequest must be a RemoteEvent")
+local r8
+local r9
+local r10
+local r11
+local r12_0
+local r13_0
+local r14_0 = false
+local r15_0 = false
+ReplicatedStorage = Enum.KeyCode.E
+local ButtonB = Enum.KeyCode.ButtonB
+local r17_0
+local r18_0
+local r19_0
+local r20_0
+local r21_0
+local r22_0
+local r23_0
+local r24_0
+local r25_0
+local r26_0
+local r27_0
+local r28_0
+local r29 = Color3.fromRGB(46, 202, 255)
+local r30 = Color3.fromRGB(10, 134, 224)
+local r31 = Color3.fromRGB(255, 164, 45)
+local r32 = Color3.fromRGB(224, 74, 27)
+local r33 = Color3.fromRGB(34, 224, 255)
+local r34 = Color3.fromRGB(255, 210, 48)
+local function disconnectExitButton() -- Line: 117 | Name: disconnectExitButton | Upvalues: ("r13_0" (ref), "r10" (ref), "GuiService" (copy), "r11" (ref), "r12_0" (ref), "r27_0" (ref))
+    if r13_0 then
+        r13_0:Disconnect()
+        r13_0 = nil
+    end
+    if r10 and GuiService.SelectedObject == r10 then GuiService.SelectedObject = nil end
+    r10 = nil
+    r11 = nil
+    r12_0 = nil
+    if r27_0 then
+        r27_0:Disconnect()
+        r27_0 = nil
+    end
+end
+local function requestExit() -- Line: 137 | Name: requestExit | Upvalues: ("LocalPlayer" (copy), "r15_0" (ref), "ExerciseRequest" (copy))
+    if LocalPlayer:GetAttribute("ExerciseActive") ~= true or r15_0 then return end
+    r15_0 = true
+    ExerciseRequest:FireServer("Exit")
+end
+local function onExitAction(r0: string, r1_p2: any, r2_p2: userdata) -- Line: 148 | Name: onExitAction | Upvalues: ("LocalPlayer" (copy), "UserInputService" (copy), "GuiService" (copy), "r15_0" (ref), "ExerciseRequest" (copy))
+    if r0 ~= "ExerciseExit" or LocalPlayer:GetAttribute("ExerciseActive") ~= true or UserInputService:GetFocusedTextBox() ~= nil or GuiService.MenuIsOpen then
+        return Enum.ContextActionResult.Pass
+    end
+    if r1_p2 == Enum.UserInputState.Begin and LocalPlayer:GetAttribute("ExerciseActive") == true and not r15_0 then
+        r15_0 = true
+        ExerciseRequest:FireServer("Exit")
+    end
+    return Enum.ContextActionResult.Sink
+end
+local function updateExitAction() -- Line: 162 | Name: updateExitAction | Upvalues: ("LocalPlayer" (copy), "r14_0" (ref), "ContextActionService" (copy), "onExitAction" (copy), "ReplicatedStorage" (copy), "ButtonB" (copy), "r15_0" (ref), "r10" (ref), "GuiService" (copy))
+    if LocalPlayer:GetAttribute("ExerciseActive") == true then
+        if not r14_0 then
+            ContextActionService:BindAction("ExerciseExit", onExitAction, false, ReplicatedStorage, ButtonB)
+            r14_0 = true
+            return
+        end
+    else
+        if r14_0 then
+            ContextActionService:UnbindAction("ExerciseExit")
+            r14_0 = false
+        end
+        r15_0 = false
+        if r10 and GuiService.SelectedObject == r10 then GuiService.SelectedObject = nil end
+    end
+end
+local function updateExitHint() -- Line: 184 | Name: updateExitHint | Upvalues: ("r11" (ref), "r12_0" (ref), "UserInputService" (copy), "ButtonB" (copy))
+    if r11 == nil or r12_0 == nil then return end
+    local PreferredInput = UserInputService.PreferredInput
+    local r1 = PreferredInput == Enum.PreferredInput.Gamepad and "GamepadText" or PreferredInput == Enum.PreferredInput.Touch and "TouchText" or "KeyboardText"
+    local r2_p4 = r11:GetAttribute(r1)
+    local r4 = typeof(r2_p4) == "string"
+    assert(r4, "ExerciseGui.ExitButton.InputHint requires " .. r1)
+    r1 = if PreferredInput == Enum.PreferredInput.Gamepad then UserInputService:GetImageForKeyCode(ButtonB) else ""
+    r12_0.Image = r1
+    r12_0.Visible = not (r1 == "")
+    r11.Text = r12_0.Visible and "" or r2_p4
+    r4 = r12_0.Visible
+    r11.Visible = r4 or not (r2_p4 == "")
+end
+local function applyExitLayout() -- Line: 208 | Name: applyExitLayout | Upvalues: ("r8" (ref), "r9" (ref))
+    if r8 == nil or r9 == nil then return end
+    local AbsoluteSize = r8.AbsoluteSize
+    local r1 = AbsoluteSize.X < AbsoluteSize.Y and "Portrait" or AbsoluteSize.Y < 600 and "Compact" or "Landscape"
+    AbsoluteSize = r9:GetAttribute(r1 .. "Size")
+    local r2 = r9:GetAttribute(r1 .. "Position")
+    local r4 = typeof(AbsoluteSize) == "Vector2" and typeof(r2) == "Vector2"
+    assert(r4, "ExerciseGui.ExitContainer requires " .. r1 .. " layout")
+    r4 = UDim2.fromScale
+    r9.Size = r4(AbsoluteSize.X, AbsoluteSize.Y)
+    r4 = UDim2.fromScale
+    r9.Position = r4(r2.X, r2.Y)
+end
+local function stopProgressTask() -- Line: 227 | Name: stopProgressTask | Upvalues: ("r28_0" (ref))
+    if r28_0 then
+        task.cancel(r28_0)
+        r28_0 = nil
+    end
+end
+local function formatStrength(r0: number) -- Line: 236 | Name: formatStrength
+    local r4 = math.floor(r0)
+    local r2 = math.max(0, r4)
+    local r1 = tostring(r2)
+    local r2, r3 = string.gsub(r1, "^(-?%d+)(%d%d%d)", "%1,%2")
+    while r3 > 0 do
+        r2, r3 = string.gsub(r2, "^(-?%d+)(%d%d%d)", "%1,%2")
+    end
+    return r2
+end
+local function getActiveStrength() -- Line: 248 | Name: getActiveStrength | Upvalues: ("LocalPlayer" (copy))
+    local ExerciseType = LocalPlayer:GetAttribute("ExerciseType")
+    ExerciseType = LocalPlayer:GetAttribute(if ExerciseType == "Reeling" then "ReelingStrength" else "CastingStrength")
+    if typeof(ExerciseType) == "number" then
+        local r4 = math.floor(ExerciseType)
+        return math.max(0, r4)
+    end
+    return 0
+end
+local function getCycleGain() -- Line: 257 | Name: getCycleGain | Upvalues: ("LocalPlayer" (copy), "TrainingUpgradeConfig" (copy))
+    local r0 = LocalPlayer:GetAttribute("ExerciseType") == "Reeling" and "Reeling" or "Casting"
+    local r1 = LocalPlayer:GetAttribute(TrainingUpgradeConfig.LEVEL_ATTRIBUTES[r0])
+    local r4 = if typeof(r1) == "number" then r1 else TrainingUpgradeConfig.STARTING_LEVEL
+    return TrainingUpgradeConfig.GainForLevel(r0, r4)
+end
+local function applyExerciseTheme(r0: string) -- Line: 268 | Name: applyExerciseTheme | Upvalues: ("r17_0" (ref), "r18_0" (ref), "r19_0" (ref), "r20_0" (ref), "r24_0" (ref), "r25_0" (ref), "r26_0" (ref), "r34" (copy), "r33" (copy), "r31" (copy), "r29" (copy), "r32" (copy), "r30" (copy))
+    if r17_0 == nil or r18_0 == nil or r19_0 == nil or r20_0 == nil or r24_0 == nil or r25_0 == nil or r26_0 == nil then
+        return
+    end
+    local r1 = not not (r0 == "Reeling")
+    local r2 = if r1 then "REEL STRENGTH" else "CAST STRENGTH"
+    local r3 = if r1 then "WORKOUT TO CATCH BIGGER FISH" else "PRACTICE TO CAST FARTHER"
+    r19_0.Text = r2
+    r20_0.Text = r2
+    r25_0.Text = r3
+    r26_0.Text = r3
+    r24_0.BackgroundColor3 = if r1 then r34 else r33
+    r3 = r18_0:FindFirstChild("SurfaceGradient")
+    if r3 and r3:IsA("UIGradient") then
+        local new = ColorSequence.new
+        local r8 = if r1 then r31 else r29
+        local r9 = if r1 then r32 else r30
+        r3.Color = new({ColorSequenceKeypoint.new(0, r8), ColorSequenceKeypoint.new(1, r9)})
+    end
+end
+local function updateStrengthReadout() -- Line: 299 | Name: updateStrengthReadout | Upvalues: ("r21_0" (ref), "r22_0" (ref), "r23_0" (ref), "formatStrength" (copy), "LocalPlayer" (copy), "getCycleGain" (copy))
+    if r21_0 == nil or r22_0 == nil or r23_0 == nil then return end
+    local ExerciseType = LocalPlayer:GetAttribute("ExerciseType")
+    ExerciseType = LocalPlayer:GetAttribute(if ExerciseType == "Reeling" then "ReelingStrength" else "CastingStrength")
+    local r1 = if typeof(ExerciseType) == "number" then math.max(0, math.floor(ExerciseType)) else 0
+    local r0 = formatStrength(r1)
+    r21_0.Text = r0
+    r22_0.Text = r0
+    r23_0.Text = "+" .. formatStrength(getCycleGain())
+end
+local function startProgressTask() -- Line: 315 | Name: startProgressTask | Upvalues: ("r28_0" (ref), "r24_0" (ref), "LocalPlayer" (copy))
+    if r28_0 then
+        task.cancel(r28_0)
+        r28_0 = nil
+    end
+    if r24_0 == nil then return end
+    r28_0 = task.spawn(function() -- Line: 321 | Upvalues: ("LocalPlayer" (upval), "r24_0" (upval), "r28_0" (upval))
+        local r0 = os.clock()
+        local ExerciseType = LocalPlayer:GetAttribute("ExerciseType")
+        ExerciseType = LocalPlayer:GetAttribute(if ExerciseType == "Reeling" then "ReelingStrength" else "CastingStrength")
+        local r1
+        local r6
+        if typeof(ExerciseType) == "number" then
+            r6 = math.floor(ExerciseType)
+            r1 = math.max(0, r6)
+        else
+            r1 = 0
+        end
+        while true do
+            if LocalPlayer:GetAttribute("ExerciseActive") ~= true then break end
+            if r24_0 == nil then break end
+            local ExerciseType_2 = LocalPlayer:GetAttribute("ExerciseType")
+            ExerciseType_2 = LocalPlayer:GetAttribute(if ExerciseType_2 == "Reeling" then "ReelingStrength" else "CastingStrength")
+            ExerciseType = if typeof(ExerciseType_2) == "number" then math.max(0, math.floor(ExerciseType_2)) else 0
+            if r1 < ExerciseType then
+                r1 = ExerciseType
+                r0 = os.clock()
+            end
+            ExerciseType = LocalPlayer:GetAttribute("ExerciseAwardInterval")
+            ExerciseType_2 = if typeof(ExerciseType) == "number" and ExerciseType > 0 then ExerciseType else 5
+            local r6 = os.clock() - r0
+            ExerciseType = math.max(0, r6)
+            local r4 = math.clamp(ExerciseType / ExerciseType_2, 0, 1)
+            r24_0.Size = UDim2.fromScale(r4, 1)
+            task.wait(0.03333333333333333)
+        end
+        r28_0 = nil
+    end)
+end
+local function updatePresentation() -- Line: 353 | Name: updatePresentation | Upvalues: ("updateExitAction" (copy), "LocalPlayer" (copy), "r9" (ref), "r17_0" (ref), "r28_0" (ref), "r24_0" (ref), "applyExerciseTheme" (copy), "r21_0" (ref), "r22_0" (ref), "r23_0" (ref), "formatStrength" (copy), "getCycleGain" (copy))
+    updateExitAction()
+    local r0 = LocalPlayer:GetAttribute("ExerciseActive") == true
+    if r9 then r9.Visible = r0 end
+    if r17_0 then r17_0.Visible = r0 end
+    if not r0 then
+        if r28_0 then
+            task.cancel(r28_0)
+            r28_0 = nil
+        end
+        if r24_0 then r24_0.Size = UDim2.fromScale(0, 1) end
+        return
+    end
+    r0 = LocalPlayer:GetAttribute("ExerciseType")
+    if r0 == "Casting" or r0 == "Reeling" then
+        applyExerciseTheme(r0)
+        if r21_0 ~= nil and r22_0 ~= nil and r23_0 ~= nil then
+            local ExerciseType = LocalPlayer:GetAttribute("ExerciseType")
+            ExerciseType = LocalPlayer:GetAttribute(if ExerciseType == "Reeling" then "ReelingStrength" else "CastingStrength")
+            local r2 = if typeof(ExerciseType) == "number" then math.max(0, math.floor(ExerciseType)) else 0
+            local r1 = formatStrength(r2)
+            r21_0.Text = r1
+            r22_0.Text = r1
+            r23_0.Text = "+" .. formatStrength(getCycleGain())
+        end
+        if r28_0 == nil then
+            if r28_0 then
+                task.cancel(r28_0)
+                r28_0 = nil
+            end
+            if r24_0 == nil then return end
+            r28_0 = task.spawn(function() -- Line: 321 | Upvalues: ("LocalPlayer" (upval), "r24_0" (upval), "r28_0" (upval))
+                local r0 = os.clock()
+                local ExerciseType = LocalPlayer:GetAttribute("ExerciseType")
+                ExerciseType = LocalPlayer:GetAttribute(if ExerciseType == "Reeling" then "ReelingStrength" else "CastingStrength")
+                local r1
+                local r6
+                if typeof(ExerciseType) == "number" then
+                    r6 = math.floor(ExerciseType)
+                    r1 = math.max(0, r6)
+                else
+                    r1 = 0
+                end
+                while true do
+                    if LocalPlayer:GetAttribute("ExerciseActive") ~= true then break end
+                    if r24_0 == nil then break end
+                    local ExerciseType_2 = LocalPlayer:GetAttribute("ExerciseType")
+                    ExerciseType_2 = LocalPlayer:GetAttribute(if ExerciseType_2 == "Reeling" then "ReelingStrength" else "CastingStrength")
+                    ExerciseType = if typeof(ExerciseType_2) == "number" then math.max(0, math.floor(ExerciseType_2)) else 0
+                    if r1 < ExerciseType then
+                        r1 = ExerciseType
+                        r0 = os.clock()
+                    end
+                    ExerciseType = LocalPlayer:GetAttribute("ExerciseAwardInterval")
+                    ExerciseType_2 = if typeof(ExerciseType) == "number" and ExerciseType > 0 then ExerciseType else 5
+                    local r6 = os.clock() - r0
+                    ExerciseType = math.max(0, r6)
+                    local r4 = math.clamp(ExerciseType / ExerciseType_2, 0, 1)
+                    r24_0.Size = UDim2.fromScale(r4, 1)
+                    task.wait(0.03333333333333333)
+                end
+                r28_0 = nil
+            end)
+        end
+    end
+end
+local function bindGui(r0: userdata) -- Line: 382 | Name: bindGui | Upvalues: ("r13_0" (ref), "r10" (ref), "GuiService" (copy), "r11" (ref), "r12_0" (ref), "r27_0" (ref), "r28_0" (ref), "r8" (ref), "r9" (ref), "r17_0" (ref), "r18_0" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "r22_0" (ref), "r23_0" (ref), "r24_0" (ref), "r25_0" (ref), "r26_0" (ref), "requestExit" (copy), "applyExitLayout" (copy), "updateExitHint" (copy), "updatePresentation" (copy))
+    if r13_0 then
+        r13_0:Disconnect()
+        r13_0 = nil
+    end
+    if r10 and GuiService.SelectedObject == r10 then GuiService.SelectedObject = nil end
+    r10 = nil
+    r11 = nil
+    r12_0 = nil
+    if r27_0 then
+        r27_0:Disconnect()
+        r27_0 = nil
+    end
+    if r28_0 then
+        task.cancel(r28_0)
+        r28_0 = nil
+    end
+    local ExitContainer = r0:WaitForChild("ExitContainer")
+    assert(ExitContainer:IsA("GuiObject"), "ExerciseGui.ExitContainer must be a GuiObject")
+    local ExitButton = ExitContainer:WaitForChild("ExitButton")
+    assert(ExitButton:IsA("GuiButton"), "ExerciseGui.ExitContainer.ExitButton must be a GuiButton")
+    local InputHint = ExitButton:WaitForChild("InputHint")
+    assert(InputHint:IsA("TextLabel"), "ExerciseGui.ExitButton.InputHint must be TextLabel")
+    local GamepadGlyph = InputHint:WaitForChild("GamepadGlyph")
+    assert(GamepadGlyph:IsA("ImageLabel"), "ExerciseGui.ExitButton.InputHint.GamepadGlyph must be ImageLabel")
+    local StrengthPanel = r0:WaitForChild("StrengthPanel")
+    assert(StrengthPanel:IsA("Frame"), "ExerciseGui.StrengthPanel must be a Frame")
+    local Surface = StrengthPanel:WaitForChild("Surface")
+    assert(Surface:IsA("Frame"), "ExerciseGui.StrengthPanel.Surface must be a Frame")
+    local TitleLabel = Surface:WaitForChild("TitleLabel")
+    local TitleShadow = Surface:WaitForChild("TitleShadow")
+    local ValueLabel = Surface:WaitForChild("ValueLabel")
+    local ValueShadow = Surface:WaitForChild("ValueShadow")
+    local GainPill = Surface:WaitForChild("GainPill")
+    local MeterWell = Surface:WaitForChild("MeterWell")
+    assert(TitleLabel:IsA("TextLabel") and TitleShadow:IsA("TextLabel"), "StrengthPanel title labels are invalid")
+    assert(ValueLabel:IsA("TextLabel") and ValueShadow:IsA("TextLabel"), "StrengthPanel value labels are invalid")
+    assert(GainPill:IsA("Frame") and MeterWell:IsA("Frame"), "StrengthPanel meter hierarchy is invalid")
+    local GainLabel = GainPill:WaitForChild("GainLabel")
+    GainPill = MeterWell:WaitForChild("FillClip")
+    local ProgressLabel = MeterWell:WaitForChild("ProgressLabel")
+    local ProgressShadow = MeterWell:WaitForChild("ProgressShadow")
+    assert(GainLabel:IsA("TextLabel"), "StrengthPanel.GainPill.GainLabel must be TextLabel")
+    assert(GainPill:IsA("Frame"), "StrengthPanel.MeterWell.FillClip must be Frame")
+    MeterWell = GainPill:WaitForChild("MeterFill")
+    assert(MeterWell:IsA("Frame"), "StrengthPanel meter fill must be Frame")
+    assert(ProgressLabel:IsA("TextLabel") and ProgressShadow:IsA("TextLabel"), "StrengthPanel progress labels are invalid")
+    r8 = r0
+    r9 = ExitContainer
+    r10 = ExitButton
+    r11 = InputHint
+    r12_0 = GamepadGlyph
+    r17_0 = StrengthPanel
+    r18_0 = Surface
+    r19_0 = TitleLabel
+    r20_0 = TitleShadow
+    r21_0 = ValueLabel
+    r22_0 = ValueShadow
+    r23_0 = GainLabel
+    r24_0 = MeterWell
+    r25_0 = ProgressLabel
+    r26_0 = ProgressShadow
+    r27_0 = ExitButton.Activated:Connect(requestExit)
+    r13_0 = r0:GetPropertyChangedSignal("AbsoluteSize"):Connect(applyExitLayout)
+    applyExitLayout()
+    updateExitHint()
+    updatePresentation()
+end
+local function discoverGui() -- Line: 446 | Name: discoverGui | Upvalues: ("Players" (copy), "r8" (ref), "bindGui" (copy))
+    local ExerciseGui = Players:FindFirstChild("ExerciseGui")
+    if ExerciseGui and ExerciseGui:IsA("ScreenGui") and ExerciseGui ~= r8 then bindGui(ExerciseGui) end
+end
+local r51 = LocalPlayer:GetAttributeChangedSignal("ExerciseActive"):Connect(updatePresentation)
+local r52 = UserInputService:GetPropertyChangedSignal("PreferredInput"):Connect(updateExitHint)
+local r53 = UserInputService.GamepadConnected:Connect(updateExitHint)
+local r54 = UserInputService.GamepadDisconnected:Connect(updateExitHint)
+local r55 = UserInputService.JumpRequest:Connect(requestExit)
+local r56 = LocalPlayer:GetAttributeChangedSignal("ExerciseSessionId"):Connect(function() -- Line: 465 | Upvalues: ("r15_0" (ref), "updatePresentation" (copy))
+    r15_0 = false
+    updatePresentation()
+end)
+local r57 = LocalPlayer:GetAttributeChangedSignal("ExerciseType"):Connect(updatePresentation)
+local r58 = LocalPlayer:GetAttributeChangedSignal("CastingStrength"):Connect(updateStrengthReadout)
+local r59 = LocalPlayer:GetAttributeChangedSignal("ReelingStrength"):Connect(updateStrengthReadout)
+local r60 = LocalPlayer:GetAttributeChangedSignal(TrainingUpgradeConfig.LEVEL_ATTRIBUTES.Casting):Connect(updateStrengthReadout)
+local r61 = LocalPlayer:GetAttributeChangedSignal(TrainingUpgradeConfig.LEVEL_ATTRIBUTES.Reeling):Connect(updateStrengthReadout)
+local r62 = Players.ChildAdded:Connect(function(r0) -- Line: 480 | Upvalues: ("bindGui" (copy))
+    if r0.Name == "ExerciseGui" and r0:IsA("ScreenGui") then bindGui(r0) end
+end)
+local r63 = Players.ChildRemoved:Connect(function(r0) -- Line: 486 | Upvalues: ("r8" (ref), "r13_0" (ref), "r10" (ref), "GuiService" (copy), "r11" (ref), "r12_0" (ref), "r27_0" (ref), "r28_0" (ref), "r9" (ref), "r17_0" (ref), "r18_0" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "r22_0" (ref), "r23_0" (ref), "r24_0" (ref), "r25_0" (ref), "r26_0" (ref))
+    if r0 == r8 then
+        if r13_0 then
+            r13_0:Disconnect()
+            r13_0 = nil
+        end
+        if r10 and GuiService.SelectedObject == r10 then GuiService.SelectedObject = nil end
+        r10 = nil
+        r11 = nil
+        r12_0 = nil
+        if r27_0 then
+            r27_0:Disconnect()
+            r27_0 = nil
+        end
+        if r28_0 then
+            task.cancel(r28_0)
+            r28_0 = nil
+        end
+        r8 = nil
+        r9 = nil
+        r17_0 = nil
+        r18_0 = nil
+        r19_0 = nil
+        r20_0 = nil
+        r21_0 = nil
+        r22_0 = nil
+        r23_0 = nil
+        r24_0 = nil
+        r25_0 = nil
+        r26_0 = nil
+    end
+end)
+local r64
+local function cleanupController() -- Line: 509 | Name: cleanupController | Upvalues: ("r13_0" (ref), "r10" (ref), "GuiService" (copy), "r11" (ref), "r12_0" (ref), "r27_0" (ref), "r28_0" (ref), "r14_0" (ref), "ContextActionService" (copy), "r51" (copy), "r57" (copy), "r56" (copy), "r58" (copy), "r59" (copy), "r60" (copy), "r61" (copy), "r62" (copy), "r63" (copy), "r52" (copy), "r53" (copy), "r54" (copy), "r55" (copy), "r64" (ref))
+    if r13_0 then
+        r13_0:Disconnect()
+        r13_0 = nil
+    end
+    if r10 and GuiService.SelectedObject == r10 then GuiService.SelectedObject = nil end
+    r10 = nil
+    r11 = nil
+    r12_0 = nil
+    if r27_0 then
+        r27_0:Disconnect()
+        r27_0 = nil
+    end
+    if r28_0 then
+        task.cancel(r28_0)
+        r28_0 = nil
+    end
+    if r14_0 then
+        ContextActionService:UnbindAction("ExerciseExit")
+        r14_0 = false
+    end
+    for r4, r5 in {
+        r51, r57, r56, r58, r59, r60, r61, r62, r63, r52, r53, r54, r55
+    } do
+        r5:Disconnect()
+    end
+    if r64 then
+        r64:Disconnect()
+        r64 = nil
+    end
+end
+r64 = script.Destroying:Connect(cleanupController)
+updateExitAction()
+local ExerciseGui = Players:FindFirstChild("ExerciseGui")
+if ExerciseGui and ExerciseGui:IsA("ScreenGui") and ExerciseGui ~= r8 then bindGui(ExerciseGui) end
+if r8 == nil then
+    local ExerciseGui_2 = Players:WaitForChild("ExerciseGui")
+    assert(ExerciseGui_2:IsA("ScreenGui"), "PlayerGui.ExerciseGui must be a ScreenGui")
+    bindGui(ExerciseGui_2)
+end
+assert(r51.Connected, "ExerciseController lost its ExerciseActive connection")
+assert(r57.Connected, "ExerciseController lost its ExerciseType connection")
+assert(r58.Connected, "ExerciseController lost its CastingStrength connection")
+assert(r59.Connected, "ExerciseController lost its ReelingStrength connection")
+assert(r60.Connected, "ExerciseController lost its CastingUpgradeLevel connection")
+assert(r61.Connected, "ExerciseController lost its ReelingUpgradeLevel connection")
+assert(r62.Connected, "ExerciseController lost its PlayerGui ChildAdded connection")
+assert(r63.Connected, "ExerciseController lost its PlayerGui ChildRemoved connection")

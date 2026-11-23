@@ -1,0 +1,257 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.HarborbeakPresentation
+-- Took 1.96s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HarborbeakBehavior = require(script.Parent:WaitForChild("HarborbeakBehavior"))
+local HarborbeakMotion = require(ReplicatedStorage:WaitForChild("HarborbeakMotion"))
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+local HarborbeakEffects = ReplicatedStorage:WaitForChild("HarborbeakEffects")
+ReplicatedStorage = {
+    new = function(r0_p7: userdata, r1_p7: userdata) -- Line: 40 | Name: new | Upvalues: ("HarborbeakBehavior" (copy), "HarborbeakEffects" (copy), "Workspace" (copy), "PlayerSettings" (copy), "HarborbeakMotion" (copy), "RunService" (copy))
+        local HarborbeakGull = r0_p7:FindFirstChild("HarborbeakGull")
+        local AnimationController = r0_p7:FindFirstChildOfClass("AnimationController")
+        local Animator = AnimationController and AnimationController:FindFirstChildOfClass("Animator")
+        AnimationController = r0_p7:FindFirstChild("Animations")
+        local Body = HarborbeakGull and HarborbeakGull:FindFirstChild("Body", true)
+        assert(HarborbeakGull and Animator and AnimationController and Body, "HarborbeakPresentation requires the original complete Atomic rig")
+        local r6_p7 = {}
+        local r7 = true
+        local r8 = HarborbeakBehavior.new(r0_p7)
+        local r9 = 0
+        local r10_0
+        local r11_0 = true
+        local r12_0 = false
+        local r13
+        local r14_0 = false
+        local r15_0 = {}
+        local r16_0
+        local r17_0 = ""
+        local r18_0 = 0
+        local r19_0 = {}
+        local Descendants, r21, r22 = HarborbeakGull:GetDescendants()
+        for r23, r24 in Descendants, r21, r22 do
+            if r24:IsA("Bone") then r19_0[r24] = r24.Transform end
+        end
+        HarborbeakGull = HarborbeakEffects:WaitForChild("Feathers"):Clone()
+        Descendants = HarborbeakGull:FindFirstChild("SoftFeathers")
+        assert(Descendants, "Harborbeak feather template is incomplete")
+        HarborbeakGull.Parent = Body
+        Body = HarborbeakEffects:WaitForChild("GullCall"):Clone()
+        Body.Parent = HarborbeakGull
+        r21 = false
+        local function visible() -- Line: 88 | Name: visible | Upvalues: ("Workspace" (upval), "r7" (ref), "r0_p7" (copy), "PlayerSettings" (upval), "r1_p7" (copy))
+            local CurrentCamera = Workspace.CurrentCamera
+            local __up1 = r7
+            if __up1 then
+                __up1 = r0_p7:IsDescendantOf(Workspace)
+                if __up1 then
+                    __up1 = false
+                    if CurrentCamera ~= nil then
+                        __up1 = PlayerSettings.Get(r1_p7, "WorldAnimationsEnabled")
+                        if __up1 then
+                            __up1 = (CurrentCamera.CFrame.Position - r0_p7:GetPivot().Position).Magnitude <= 150
+                        end
+                    end
+                end
+            end
+            return __up1
+        end
+        local function suspend() -- Line: 98 | Name: suspend | Upvalues: ("r10_0" (ref), "r11_0" (ref), "r12_0" (ref), "r15_0" (copy), "r16_0" (ref), "r17_0" (ref), "r21" (ref), "Descendants" (copy), "Body" (copy), "r19_0" (copy))
+            r10_0 = nil
+            if r11_0 then return end
+            r11_0 = true
+            r12_0 = false
+            for r3, r4 in r15_0 do
+                if r4.IsPlaying then r4:Stop(0) end
+            end
+            r16_0 = nil
+            r17_0 = ""
+            r21 = false
+            Descendants.Enabled = false
+            Descendants:Clear()
+            Body:Stop()
+            for r3, r4 in r19_0 do
+                r3.Transform = r4
+            end
+        end
+        local function update() -- Line: 123 | Name: update | Upvalues: ("r14_0" (ref), "Workspace" (upval), "r7" (ref), "r0_p7" (copy), "PlayerSettings" (upval), "r1_p7" (copy), "suspend" (copy), "r10_0" (ref), "r9" (ref), "r11_0" (ref), "r8" (copy), "r12_0" (ref), "HarborbeakMotion" (upval), "r15_0" (copy), "r17_0" (ref), "r16_0" (ref), "r18_0" (ref), "r21" (ref), "Descendants" (copy), "Body" (copy))
+            if not r14_0 then
+                suspend()
+                return
+            end
+            local CurrentCamera = Workspace.CurrentCamera
+            local __up2 = r7
+            if __up2 then
+                __up2 = r0_p7:IsDescendantOf(Workspace)
+                if __up2 then
+                    __up2 = false
+                    if CurrentCamera ~= nil then
+                        __up2 = PlayerSettings.Get(r1_p7, "WorldAnimationsEnabled")
+                        if __up2 then
+                            __up2 = (CurrentCamera.CFrame.Position - r0_p7:GetPivot().Position).Magnitude <= 150
+                        end
+                    end
+                end
+            end
+            if not __up2 then
+                suspend()
+                return
+            end
+            __up2 = os.clock()
+            if r10_0 then r9 += __up2 - r10_0 end
+            r10_0 = __up2
+            r11_0 = false
+            __up2 = r9
+            local CurrentCamera, r2 = r8.Step(__up2)
+            r12_0 = CurrentCamera.kind ~= "Idle"
+            local r3, r4_arg4, r5_p2 = HarborbeakMotion.Animation(CurrentCamera, __up2)
+            local r6_0 = r15_0[r3]
+            local r7_p2 = tostring(CurrentCamera.revision) .. ":" .. r3
+            if r17_0 ~= r7_p2 or not r6_0.IsPlaying then
+                if r16_0 then r16_0:Stop(0.18) end
+                r6_0:Play(0.18, 1, r5_p2)
+                local r10 = math.max(0, r6_0.Length - 0.001)
+                r6_0.TimePosition = math.min(r4_arg4, r10)
+                r16_0 = r6_0
+                r17_0 = r7_p2
+                r18_0 = __up2 + 0.5
+            elseif r18_0 <= __up2 then
+                local r8_p2 = math.abs(r6_0.TimePosition - r4_arg4)
+                local r11
+                if r6_0.Looped then
+                    r11 = math.abs(r6_0.Length - r8_p2)
+                    r8_p2 = math.min(r8_p2, r11)
+                end
+                if r8_p2 > 0.15 then
+                    local r11 = math.max(0, r6_0.Length - 0.001)
+                    r6_0.TimePosition = math.min(r4_arg4, r11)
+                end
+                r18_0 = __up2 + 0.5
+            end
+            r0_p7:PivotTo(HarborbeakMotion.Sample(CurrentCamera, __up2))
+            r21 = if r3 == "takeoff" then true else not not (r3 == "fly")
+            Descendants.Enabled = r21 and PlayerSettings.Get(r1_p7, "VfxEnabled")
+            if r2 and not Body.IsPlaying then
+                Body.PlaybackSpeed = r2
+                Body:Play()
+            end
+        end
+        function r6_p7.Reconcile() -- Line: 167 | Name: Reconcile | Upvalues: ("Workspace" (upval), "r7" (ref), "r0_p7" (copy), "PlayerSettings" (upval), "r1_p7" (copy), "suspend" (copy), "update" (copy), "Descendants" (copy))
+            local CurrentCamera = Workspace.CurrentCamera
+            local __up1 = r7
+            if __up1 then
+                __up1 = r0_p7:IsDescendantOf(Workspace)
+                if __up1 then
+                    __up1 = false
+                    if CurrentCamera ~= nil then
+                        __up1 = PlayerSettings.Get(r1_p7, "WorldAnimationsEnabled")
+                        if __up1 then
+                            __up1 = (CurrentCamera.CFrame.Position - r0_p7:GetPivot().Position).Magnitude <= 150
+                        end
+                    end
+                end
+            end
+            if not __up1 then
+                suspend()
+            else
+                update()
+            end
+            if not PlayerSettings.Get(r1_p7, "VfxEnabled") then
+                Descendants.Enabled = false
+                Descendants:Clear()
+            end
+        end
+        function r6_p7.Destroy() -- Line: 180 | Name: Destroy | Upvalues: ("r7" (ref), "r13" (ref), "suspend" (copy), "r15_0" (copy), "Body" (copy), "HarborbeakGull" (copy), "r19_0" (copy))
+            if not r7 then return end
+            r7 = false
+            if r13 then
+                task.cancel(r13)
+                r13 = nil
+            end
+            suspend()
+            for r3, r4 in r15_0 do
+                r4:Destroy()
+            end
+            table.clear(r15_0)
+            Body:Destroy()
+            HarborbeakGull:Destroy()
+            table.clear(r19_0)
+        end
+        r13 = task.defer(function() -- Line: 199 | Upvalues: ("r7" (ref), "Workspace" (upval), "r0_p7" (copy), "PlayerSettings" (upval), "r1_p7" (copy), "AnimationController" (copy), "Animator" (copy), "r15_0" (copy), "r14_0" (ref), "update" (copy), "r12_0" (ref), "RunService" (upval), "r13" (ref), "r6_p7" (copy))
+            local traceback = debug.traceback
+            local r0_p6, r1_p6 = xpcall(function() -- Line: 201 | Upvalues: ("r7" (upval), "Workspace" (upval), "r0_p7" (upval), "PlayerSettings" (upval), "r1_p7" (upval), "AnimationController" (upval), "Animator" (upval), "r15_0" (upval), "r14_0" (upval), "update" (upval), "r12_0" (upval), "RunService" (upval))
+                while r7 do
+                    local CurrentCamera = Workspace.CurrentCamera
+                    local __up0 = r7
+                    if __up0 then
+                        __up0 = r0_p7:IsDescendantOf(Workspace)
+                        if __up0 then
+                            __up0 = false
+                            if CurrentCamera ~= nil then
+                                __up0 = PlayerSettings.Get(r1_p7, "WorldAnimationsEnabled")
+                                if __up0 then
+                                    __up0 = (CurrentCamera.CFrame.Position - r0_p7:GetPivot().Position).Magnitude <= 150
+                                end
+                            end
+                        end
+                    end
+                    if __up0 then break end
+                    task.wait(0.15)
+                end
+                if not r7 then return end
+                local r0_arg1 = {"idle", "walk", "takeoff", "fly", "land"}
+                for r3_arg2, r4_arg3 in r0_arg1 do
+                    local r5_arg5 = AnimationController:FindFirstChild(r4_arg3)
+                    assert(r5_arg5 and r5_arg5:IsA("Animation"), "HarborbeakGull missing animation " .. r4_arg3)
+                    local r6 = Animator:LoadAnimation(r5_arg5)
+                    r6.Priority = Enum.AnimationPriority.Movement
+                    r6.Looped = if r4_arg3 == "idle" then true else if r4_arg3 == "walk" then true else not not (r4_arg3 == "fly")
+                    r15_0[r4_arg3] = r6
+                end
+                r0_arg1 = os.clock() + 15
+                repeat
+                    r14_0 = true
+                    for r4_arg3, r5_arg5 in r15_0 do
+                        if not (r5_arg5.Length <= 0) then continue end
+                        r14_0 = false
+                        break
+                    end
+                    if not r14_0 then task.wait(0.1) end
+                until r14_0 or not r7 or r0_arg1 <= os.clock()
+                assert(r14_0, "HarborbeakGull animation assets did not become ready")
+                while r7 do
+                    update()
+                    r0_arg1 = Workspace.CurrentCamera
+                    local __up0 = r7
+                    if __up0 then
+                        __up0 = r0_p7:IsDescendantOf(Workspace)
+                        if __up0 then
+                            __up0 = false
+                            if r0_arg1 ~= nil then
+                                __up0 = PlayerSettings.Get(r1_p7, "WorldAnimationsEnabled")
+                                if __up0 then __up0 = (r0_arg1.CFrame.Position - r0_p7:GetPivot().Position).Magnitude <= 150 end
+                            end
+                        end
+                    end
+                    if __up0 and r12_0 then
+                        RunService.PreRender:Wait()
+                    else
+                        task.wait(0.15)
+                    end
+                end
+            end, traceback)
+            r13 = nil
+            if not r0_p6 then
+                traceback = warn
+                traceback("HarborbeakPresentation: " .. tostring(r1_p6))
+                r6_p7.Destroy()
+            end
+        end)
+        return r6_p7
+    end
+}
+return table.freeze(ReplicatedStorage)

@@ -1,0 +1,182 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.MenuNewsClient
+-- Took 1.21s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MenuNewsState = require(ReplicatedStorage:WaitForChild("MenuNewsState"))
+local MenuNewsVisibility = require(script.Parent:WaitForChild("MenuNewsVisibility"))
+local r4 = {}
+local r5 = {}
+local r6 = {}
+local LocalPlayer
+local PlayerGui
+local MenuNewsRequest
+local r10_0 = {}
+local r11_0
+local r12 = MenuNewsState.Decode(nil)
+local r13, r14_0, r15_0 = false, false, false
+local r16_0 = false
+local r17_0
+local r18_0
+local r19
+local r20
+local function scheduleScan() -- Line: 52 | Name: scheduleScan | Upvalues: ("r13" (ref), "r17_0" (ref), "r20" (ref))
+    if not r13 or r17_0 then return end
+    r17_0 = task.delay(0.15, function() -- Line: 54 | Upvalues: ("r17_0" (upval), "r13" (upval), "r20" (upval))
+        r17_0 = nil
+        if r13 then r20() end
+    end)
+end
+function r4.Register(r0: userdata, r1: string, r2_p3: string?) -- Line: 65 | Name: Register | Upvalues: ("MenuNewsState" (copy), "r5" (copy), "r13" (ref), "r17_0" (ref), "r20" (ref))
+    local find = table.find
+    assert(find(MenuNewsState.Categories, r1), "Unknown menu news category")
+    local r3 = r5[r0]
+    if r3 then r3.cleanup:Disconnect() end
+    r5[r0] = nil
+    if r2_p3 and r2_p3 ~= "" then
+        r5[r0] = {category = r1, key = r2_p3, cleanup = r0.Destroying:Connect(function() -- Line: 75 | Upvalues: ("r5" (upval), "r0" (copy))
+            r5[r0] = nil
+        end)}
+    end
+    if r13 then
+        if r17_0 then return end
+        r17_0 = task.delay(0.15, function() -- Line: 54 | Upvalues: ("r17_0" (upval), "r13" (upval), "r20" (upval))
+            r17_0 = nil
+            if r13 then r20() end
+        end)
+    end
+end
+local function consume(r0) -- Line: 85 | Name: consume | Upvalues: ("MenuNewsState" (copy), "r11_0" (ref), "r10_0" (copy), "r13" (ref), "r17_0" (ref), "r20" (ref))
+    if typeof(r0) ~= "table" or r0.ok ~= true or typeof(r0.snapshot) ~= "table" then return false end
+    local r1 = MenuNewsState.Decode(nil)
+    local _ipairs = ipairs
+    for r5, r6 in _ipairs(MenuNewsState.Categories) do
+        local r7 = r0.snapshot[r6]
+        if typeof(r7) ~= "table" then return false end
+        for r11, r12 in ipairs(r7) do
+            if typeof(r12) ~= "string" or r12 == "" then return false end
+            r1[r6][r12] = true
+        end
+    end
+    r11_0 = r1
+    local _ipairs = ipairs
+    for r5, r6 in _ipairs(MenuNewsState.Categories) do
+        local _next = next
+        r10_0[r6].Visible = _next(r1[r6]) ~= nil
+    end
+    if r13 and not r17_0 then
+        r17_0 = task.delay(0.15, function() -- Line: 54 | Upvalues: ("r17_0" (upval), "r13" (upval), "r20" (upval))
+            r17_0 = nil
+            if r13 then r20() end
+        end)
+    end
+    return true
+end
+r19 = function() -- Line: 108 | Upvalues: ("r13" (ref), "r15_0" (ref), "LocalPlayer" (ref), "MenuNewsState" (copy), "r12" (copy), "r16_0" (ref), "MenuNewsRequest" (ref), "consume" (copy), "r19" (ref), "r18_0" (ref))
+    if not r13 or r15_0 or not LocalPlayer or LocalPlayer:GetAttribute("ProfileLoaded") ~= true then
+        return
+    end
+    local r0 = {}
+    local r1 = false
+    local _ipairs = ipairs
+    for r5, r6 in _ipairs(MenuNewsState.Categories) do
+        local r7 = {}
+        local _pairs = pairs
+        for r11 in _pairs(r12[r6]) do
+            table.insert(r7, r11)
+        end
+        if #r7 > 0 then
+            r1 = true
+            r0[r6] = r7
+        end
+    end
+    if not r1 and not r16_0 then return end
+    r16_0 = false
+    r15_0 = true
+    local _ipairs, r3 = pcall(function() -- Line: 127 | Upvalues: ("MenuNewsRequest" (upval), "r1" (ref), "r0" (copy))
+        local r3 = if r1 then r0 else nil
+        return MenuNewsRequest:InvokeServer(r1 and "Acknowledge" or "Get", r3)
+    end)
+    r15_0 = false
+    if not r13 then return end
+    if _ipairs and consume(r3) then
+        for r7, r8 in pairs(r0) do
+            for r12_p7, r13_p7 in ipairs(r8) do
+                r12[r7][r13_p7] = nil
+            end
+        end
+        task.defer(r19)
+    else
+        warn("Menu news request unavailable: " .. (_ipairs and "server refused or returned invalid content" or tostring(r3)))
+        r16_0 = true
+        if not r18_0 then
+            r18_0 = task.delay(2, function() -- Line: 143 | Upvalues: ("r18_0" (upval), "r13" (upval), "r19" (upval))
+                r18_0 = nil
+                if r13 then r19() end
+            end)
+        end
+    end
+end
+r20 = function() -- Line: 155 | Upvalues: ("r13" (ref), "r11_0" (ref), "r5" (copy), "r12" (copy), "MenuNewsVisibility" (copy), "PlayerGui" (ref), "r19" (ref))
+    if not r13 or not r11_0 then return end
+    local r0 = false
+    for r4, r5_p8 in pairs(r5) do
+        if not (not r4.Parent or not r11_0[r5_p8.category][r5_p8.key] or r12[r5_p8.category][r5_p8.key] or not MenuNewsVisibility.IsVisible(r4, PlayerGui)) then
+            r12[r5_p8.category][r5_p8.key] = true
+            r0 = true
+        end
+    end
+    if r0 then task.defer(r19) end
+end
+function r4.Start() -- Line: 174 | Name: Start | Upvalues: ("r14_0" (ref), "r13" (ref), "LocalPlayer" (ref), "Players" (copy), "PlayerGui" (ref), "MenuNewsRequest" (ref), "ReplicatedStorage" (copy), "r10_0" (copy), "r16_0" (ref), "r19" (ref), "r6" (copy), "scheduleScan" (copy))
+    assert(not r14_0, "MenuNewsClient.Start must run once")
+    r14_0, r13 = true, true
+    LocalPlayer = Players.LocalPlayer
+    PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+    MenuNewsRequest = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("MenuNewsRequest")
+    r10_0.Bag = PlayerGui:WaitForChild("BackpackGui"):WaitForChild("BackpackDock"):WaitForChild("BackpackButton"):WaitForChild("NewsBadge")
+    r10_0.Index = PlayerGui:WaitForChild("FishIndexGui"):WaitForChild("IndexDock"):WaitForChild("IndexButton"):WaitForChild("NewsBadge")
+    r10_0.Pets = PlayerGui:WaitForChild("MainMenuGui"):WaitForChild("MenuPanel"):WaitForChild("Content"):WaitForChild("Pets"):WaitForChild("NewsBadge")
+    local function refresh() -- Line: 184 | Name: refresh | Upvalues: ("r16_0" (upval), "r19" (upval))
+        r16_0 = true
+        task.defer(r19)
+    end
+    for r4, r5 in ipairs({"ProfileLoaded", "CarriedFishCount", "CarriedFishRevision", "FishPetsRevision", "PendingCatchId", "FishCaught", "FusionQueueRevision", "OwnedRodCount", "OwnedAccessoryCount", "SnackTimeRevision"}) do
+        table.insert(r6, LocalPlayer:GetAttributeChangedSignal(r5):Connect(refresh))
+    end
+    local function watch(r0: userdata) -- Line: 194 | Name: watch | Upvalues: ("r6" (upval), "scheduleScan" (upval))
+        if r0:IsA("ScrollingFrame") then
+            table.insert(r6, r0:GetPropertyChangedSignal("CanvasPosition"):Connect(scheduleScan))
+            table.insert(r6, r0:GetPropertyChangedSignal("AbsoluteSize"):Connect(scheduleScan))
+        end
+    end
+    for r5, r6_p11 in ipairs({"BackpackGui", "FishPetsGui", "FishIndexGui"}) do
+        local r7 = PlayerGui:WaitForChild(r6_p11)
+        table.insert(r6, r7:GetPropertyChangedSignal("Enabled"):Connect(scheduleScan))
+        table.insert(r6, r7:GetAttributeChangedSignal("NewsReadOnly"):Connect(scheduleScan))
+        table.insert(r6, r7:WaitForChild("Dimmer"):GetPropertyChangedSignal("Visible"):Connect(scheduleScan))
+        local _ipairs = ipairs
+        for r11, r12 in _ipairs(r7:GetDescendants()) do
+            watch(r12)
+        end
+        table.insert(r6, r7.DescendantAdded:Connect(watch))
+    end
+    r16_0 = true
+    task.defer(r19)
+end
+function r4.Destroy() -- Line: 216 | Name: Destroy | Upvalues: ("r13" (ref), "r17_0" (ref), "r18_0" (ref), "r6" (copy), "r5" (copy))
+    r13 = false
+    if r17_0 then task.cancel(r17_0) end
+    if r18_0 then task.cancel(r18_0) end
+    for r3, r4 in ipairs(r6) do
+        r4:Disconnect()
+    end
+    for r3, r4 in pairs(r5) do
+        r4.cleanup:Disconnect()
+    end
+    table.clear(r5)
+    table.clear(r6)
+end
+return r4

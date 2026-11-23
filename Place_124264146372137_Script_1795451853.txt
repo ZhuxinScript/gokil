@@ -1,0 +1,556 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.AutoFishingController
+-- Took 2s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local LocalPlayer = Players.LocalPlayer
+Players = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("AutoFishingGui")
+local AutoFishingLauncherGui = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("AutoFishingLauncherGui")
+local MoreDock = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("TrayMoreGui"):WaitForChild("MoreDock")
+MoreDock = MoreDock:WaitForChild("Flyout"):WaitForChild("Launcher")
+local ActiveBar = AutoFishingLauncherGui:WaitForChild("ActiveBar")
+AutoFishingLauncherGui = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("AutoFishingRequest")
+local AutoFishingConfig = require(ReplicatedStorage:WaitForChild("AutoFishingConfig"))
+local MutantFishing = require(ReplicatedStorage:WaitForChild("MutantFishing"))
+local BaitCatalog = require(ReplicatedStorage:WaitForChild("BaitCatalog"))
+ReplicatedStorage = Players.Dimmer.Window
+local Inner = ReplicatedStorage.Inner
+ReplicatedStorage = {}
+local r12 = true
+local r13 = false
+local r14_0 = false
+local snapshot
+local r16_0 = 1
+local DEFAULT_BAIT_ID = BaitCatalog.DEFAULT_BAIT_ID
+local r18_0 = false
+local r19_0 = 0
+local r20_0 = 0
+local r21_0 = false
+local r22_0 = {
+    blue = Color3.fromRGB(24, 101, 149), gold = Color3.fromRGB(255, 221, 55),
+    cyan = Color3.fromRGB(19, 218, 250), muted = Color3.fromRGB(112, 149, 169),
+    green = Color3.fromRGB(101, 244, 20), red = Color3.fromRGB(235, 47, 83)
+}
+local function clock(r0: number) -- Line: 75 | Name: clock
+    local r2 = math.max(0, r0)
+    local r1 = math.ceil(r2)
+    if r1 >= 3600 then return string.format("%d:%02d:%02d", r1 // 3600, r1 // 60 % 60, r1 % 60) end
+    return string.format("%02d:%02d", r1 // 60, r1 % 60)
+end
+local function showActiveBar() -- Line: 86 | Name: showActiveBar | Upvalues: ("ActiveBar" (copy), "r21_0" (ref), "Players" (copy), "LocalPlayer" (copy))
+    local __up1 = r21_0
+    if __up1 then
+        __up1 = not Players.Dimmer.Visible
+        if __up1 then __up1 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+    end
+    ActiveBar.Visible = __up1
+end
+local function updateLauncherVisibility() -- Line: 92 | Name: updateLauncherVisibility | Upvalues: ("Players" (copy), "LocalPlayer" (copy), "MoreDock" (copy), "ActiveBar" (copy), "r21_0" (ref))
+    Players.Enabled = LocalPlayer:GetAttribute("ExerciseActive") ~= true
+    MoreDock.Visible = LocalPlayer:GetAttribute("RodEquipped") == true and LocalPlayer:GetAttribute("ExerciseActive") ~= true
+    if LocalPlayer:GetAttribute("ExerciseActive") == true then Players.Dimmer.Visible = false end
+    local __up4 = r21_0
+    if __up4 then
+        __up4 = not Players.Dimmer.Visible
+        if __up4 then __up4 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+    end
+    ActiveBar.Visible = __up4
+end
+local function showStatus(r0) -- Line: 102 | Name: showStatus | Upvalues: ("Inner" (copy))
+    if typeof(r0) == "string" and r0 ~= "" then Inner.Status.Text = r0 end
+end
+local function applyLayout() -- Line: 108 | Name: applyLayout | Upvalues: ("Players" (copy), "ActiveBar" (copy), "Inner" (copy))
+    local CurrentCamera = workspace.CurrentCamera
+    local r1 = CurrentCamera ~= nil and CurrentCamera.ViewportSize.X < CurrentCamera.ViewportSize.Y
+    local r2 = false
+    if CurrentCamera ~= nil then
+        r2 = not r1
+        if r2 then r2 = CurrentCamera.ViewportSize.Y < 550 end
+    end
+    CurrentCamera = if r1 then "Portrait" else "Landscape"
+    local Descendants = Players:GetDescendants()
+    table.insert(Descendants, ActiveBar)
+    local Descendants_2, fromScale, r6 = ActiveBar:GetDescendants()
+    for r7_p4, r8 in Descendants_2, fromScale, r6 do
+        table.insert(Descendants, r8)
+    end
+    for r7_p4, r8 in Descendants do
+        if not r8:IsA("GuiObject") then continue end
+        local r9 = r8:GetAttribute(r2 and r8:GetAttribute("ShortPosition") and "ShortPosition" or CurrentCamera .. "Position")
+        local r10 = r8:GetAttribute(r2 and r8:GetAttribute("ShortSize") and "ShortSize" or CurrentCamera .. "Size")
+        if typeof(r9) == "UDim2" then r8.Position = r9 end
+        if typeof(r10) == "UDim2" then r8.Size = r10 end
+    end
+    fromScale = UDim2.fromScale
+    Inner.Ponds.List.CanvasSize = fromScale(0, (if r1 then 6.6 else if r2 then 6 else 3.8) * Inner.Ponds.List.Size.Y.Scale)
+end
+local function redraw() -- Line: 139 | Name: redraw | Upvalues: ("snapshot" (ref), "r21_0" (ref), "r16_0" (ref), "DEFAULT_BAIT_ID" (ref), "r18_0" (ref), "Inner" (copy), "MutantFishing" (copy), "r22_0" (copy), "BaitCatalog" (copy), "ActiveBar" (copy), "Players" (copy), "LocalPlayer" (copy))
+    if not snapshot then return end
+    local baitState = snapshot.baitState
+    if not baitState then baitState = {counts = {}} end
+    if r21_0 then
+        r16_0 = snapshot.pond or r16_0
+        DEFAULT_BAIT_ID = snapshot.bait or DEFAULT_BAIT_ID
+        r18_0 = snapshot.fallback == true
+    end
+    for r4_p5, r5 in snapshot.ponds do
+        local r6 = Inner.Ponds.List["Pond" .. r5.index]
+        local r8
+        if MutantFishing.Get(r5.index) then
+            r8 = string.format("MUTANT \226\128\162 %dm", r5.meters)
+        else
+            r8 = string.format
+            r8 = r8("%dm", r5.meters)
+        end
+        r6.Label.Text = r8
+        r6.BackgroundColor3 = if r16_0 == r5.index then Color3.fromRGB(89, 70, 10) else r22_0.blue
+        r8 = if r16_0 == r5.index then r22_0.gold else r22_0.muted
+        r6.Outline.Color = r8
+        r8 = if r5.reachable then Color3.new(1, 1, 1) else r22_0.muted
+        r6.Label.TextColor3 = r8
+        r8 = not r5.reachable and "LOCK" or r16_0 == r5.index and "\226\156\147" or "\226\151\139"
+        r6.Selection.Text = r8
+        r8 = if r16_0 == r5.index then r22_0.gold else r22_0.muted
+        r6.Selection.TextColor3 = r8
+    end
+    Inner.Ponds.Range.Text = "CAST RANGE: " .. tostring(snapshot.ponds[snapshot.reach].meters) .. "m"
+    for r4_p5, r5 in BaitCatalog.GetAll() do
+        local r6 = Inner.Bait.Cards[r5.Id]
+        local r7_p5 = baitState.counts[r5.Id] or 0
+        r6.Count.Text = tostring(r7_p5) .. " left"
+        r6.Icon.ImageTransparency = if r7_p5 > 0 then 0 else 0.6
+        local r9_p5 = if r7_p5 > 0 then Color3.new(1, 1, 1) else r22_0.muted
+        r6.DisplayName.TextColor3 = r9_p5
+        local r8 = if DEFAULT_BAIT_ID == r5.Id then Color3.fromRGB(89, 70, 10) else r22_0.blue
+        r6.BackgroundColor3 = r8
+        r9_p5 = if DEFAULT_BAIT_ID == r5.Id then r22_0.gold else r22_0.muted
+        r6.Outline.Color = r9_p5
+        r9_p5 = r7_p5 <= 0 and "\226\128\148" or DEFAULT_BAIT_ID == r5.Id and "\226\156\147" or "\226\151\139"
+        r6.Selection.Text = r9_p5
+    end
+    Inner.Bait.Fallback.Indicator.Text = r18_0 and "ON" or "OFF"
+    local r2 = if r18_0 then r22_0.green else r22_0.muted
+    Inner.Bait.Fallback.Indicator.TextColor3 = r2
+    r2 = if r18_0 then r22_0.green else Color3.fromRGB(55, 83, 115)
+    Inner.Bait.Fallback.Track.BackgroundColor3 = r2
+    Inner.Bait.Fallback.Track.Knob.Position = UDim2.fromScale(r18_0 and 0.51 or 0.05, 0.1)
+    local r3 = tostring(snapshot.count)
+    Inner.Summary.Bag.Text = r3 .. " / " .. tostring(snapshot.capacity)
+    r2 = if MutantFishing.Get(r16_0) then "MUTANT \226\128\162 " .. tostring(snapshot.ponds[r16_0].meters) .. "m" else tostring(snapshot.ponds[r16_0].meters) .. "m POND"
+    Inner.Summary.Pond.Text = r2
+    baitState = BaitCatalog.Get(DEFAULT_BAIT_ID)
+    Inner.Summary.Bait.Text = baitState.DisplayName .. " \194\183 x" .. tostring(baitState.LuckMultiplier) .. " Luck"
+    Inner.StartStop.Label.Text = r21_0 and "STOP AUTO FISHING" or "START AUTO FISHING"
+    r2 = if r21_0 then r22_0.red else r22_0.green
+    Inner.StartStop.BackgroundColor3 = r2
+    Inner.StartStop.Gloss.Enabled = not r21_0
+    r2 = r21_0
+    if r2 then
+        r2 = not Players.Dimmer.Visible
+        if r2 then r2 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+    end
+    ActiveBar.Visible = r2
+    local message = snapshot.message
+    if typeof(message) == "string" and message ~= "" then Inner.Status.Text = message end
+end
+local function invoke(r0_p7: string) -- Line: 190 | Name: invoke | Upvalues: ("r13" (ref), "r14_0" (ref), "r16_0" (ref), "DEFAULT_BAIT_ID" (ref), "r18_0" (ref), "AutoFishingLauncherGui" (copy), "r12" (ref), "snapshot" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "redraw" (copy), "Players" (copy), "ActiveBar" (copy), "LocalPlayer" (copy), "Inner" (copy))
+    if r13 then
+        if r0_p7 == "Stop" then r14_0 = true end
+        return
+    end
+    r13 = true
+    local r1 = r0_p7 == "Start" and {pond = r16_0, bait = DEFAULT_BAIT_ID, fallback = r18_0} or nil
+    task.spawn(function() -- Line: 198 | Upvalues: ("AutoFishingLauncherGui" (upval), "r0_p7" (copy), "r1" (copy), "r12" (upval), "r13" (upval), "snapshot" (upval), "r19_0" (upval), "r20_0" (upval), "r21_0" (upval), "redraw" (upval), "Players" (upval), "ActiveBar" (upval), "LocalPlayer" (upval), "Inner" (upval))
+        local r0_p6, r1_p6 = pcall(AutoFishingLauncherGui.InvokeServer, AutoFishingLauncherGui, r0_p7, r1)
+        if not r12 then return end
+        r13 = false
+        local r2
+        if r0_p6 and typeof(r1_p6) == "table" then
+            if r1_p6.snapshot then
+                snapshot = r1_p6.snapshot
+                r19_0 = snapshot.seconds
+                r20_0 = snapshot.serverTime
+                r21_0 = snapshot.active == true
+                redraw()
+                if r0_p7 == "Start" and r1_p6.ok and r21_0 then
+                    Players.Dimmer.Visible = false
+                    local __up8 = r21_0
+                    if __up8 then
+                        __up8 = not Players.Dimmer.Visible
+                        if __up8 then __up8 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+                    end
+                    ActiveBar.Visible = __up8
+                end
+            end
+            r2 = r1_p6.message
+            if typeof(r2) == "string" and r2 ~= "" then
+                Inner.Status.Text = r2
+                return
+            end
+        else
+            r2 = warn
+            r2("AutoFishingController request failed: " .. tostring(r1_p6))
+            Inner.Status.Text = "Could not load Auto Fishing. Please try again."
+        end
+    end)
+end
+local function open() -- Line: 224 | Name: open | Upvalues: ("Players" (copy), "ActiveBar" (copy), "r21_0" (ref), "LocalPlayer" (copy), "applyLayout" (copy), "r13" (ref), "AutoFishingLauncherGui" (copy), "r12" (ref), "snapshot" (ref), "r19_0" (ref), "r20_0" (ref), "redraw" (copy), "Inner" (copy))
+    Players.Dimmer.Visible = true
+    local __up2 = r21_0
+    if __up2 then
+        __up2 = not Players.Dimmer.Visible
+        if __up2 then __up2 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+    end
+    ActiveBar.Visible = __up2
+    applyLayout()
+    if r13 then return end
+    r13 = true
+    local r2, r3 = "Get", nil
+    task.spawn(function() -- Line: 198 | Upvalues: ("AutoFishingLauncherGui" (upval), "r2" (copy), "r3" (copy), "r12" (upval), "r13" (upval), "snapshot" (upval), "r19_0" (upval), "r20_0" (upval), "r21_0" (upval), "redraw" (upval), "Players" (upval), "ActiveBar" (upval), "LocalPlayer" (upval), "Inner" (upval))
+        local r0_arg1, r1 = pcall(AutoFishingLauncherGui.InvokeServer, AutoFishingLauncherGui, r2, r3)
+        if not r12 then return end
+        r13 = false
+        local r2_p6
+        if r0_arg1 and typeof(r1) == "table" then
+            if r1.snapshot then
+                snapshot = r1.snapshot
+                r19_0 = snapshot.seconds
+                r20_0 = snapshot.serverTime
+                r21_0 = snapshot.active == true
+                redraw()
+                if r2 == "Start" and r1.ok and r21_0 then
+                    Players.Dimmer.Visible = false
+                    local __up8 = r21_0
+                    if __up8 then
+                        __up8 = not Players.Dimmer.Visible
+                        if __up8 then __up8 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+                    end
+                    ActiveBar.Visible = __up8
+                end
+            end
+            r2_p6 = r1.message
+            if typeof(r2_p6) == "string" and r2_p6 ~= "" then
+                Inner.Status.Text = r2_p6
+                return
+            end
+        else
+            r2_p6 = warn
+            r2_p6("AutoFishingController request failed: " .. tostring(r1))
+            Inner.Status.Text = "Could not load Auto Fishing. Please try again."
+        end
+    end)
+end
+local function mirror() -- Line: 232 | Name: mirror | Upvalues: ("LocalPlayer" (copy), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "ActiveBar" (copy), "Players" (copy), "Inner" (copy))
+    local AutoFishingSeconds = LocalPlayer:GetAttribute("AutoFishingSeconds")
+    local AutoFishingUpdatedAt = LocalPlayer:GetAttribute("AutoFishingUpdatedAt")
+    if typeof(AutoFishingSeconds) == "number" and typeof(AutoFishingUpdatedAt) == "number" then
+        r19_0, r20_0 = AutoFishingSeconds, AutoFishingUpdatedAt
+    end
+    r21_0 = LocalPlayer:GetAttribute("AutoFishingActive") == true
+    local __up3 = r21_0
+    if __up3 then
+        __up3 = not Players.Dimmer.Visible
+        if __up3 then __up3 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+    end
+    ActiveBar.Visible = __up3
+    local AutoFishingStatus = LocalPlayer:GetAttribute("AutoFishingStatus")
+    if typeof(AutoFishingStatus) == "string" and AutoFishingStatus ~= "" then
+        Inner.Status.Text = AutoFishingStatus
+    end
+end
+local Children, r33, r34 = Inner.Ponds.List:GetChildren()
+for r35, r36 in Children, r33, r34 do
+    if r36:IsA("GuiButton") then
+        table.insert(ReplicatedStorage, r36.Activated:Connect(function() -- Line: 244 | Upvalues: ("r36" (copy), "r21_0" (ref), "snapshot" (ref), "r16_0" (ref), "redraw" (copy))
+            local PondIndex = r36:GetAttribute("PondIndex")
+            if not r21_0 and snapshot and snapshot.ponds[PondIndex].reachable then
+                r16_0 = PondIndex
+                redraw()
+            end
+        end))
+    end
+end
+for r35, r36 in BaitCatalog.GetAll() do
+    table.insert(ReplicatedStorage, Inner.Bait.Cards[r36.Id].Activated:Connect(function() -- Line: 252 | Upvalues: ("r21_0" (ref), "snapshot" (ref), "r36" (copy), "DEFAULT_BAIT_ID" (ref), "redraw" (copy))
+        if not r21_0 and snapshot and snapshot.baitState and (snapshot.baitState.counts[r36.Id] or 0) > 0 then
+            DEFAULT_BAIT_ID = r36.Id
+            redraw()
+        end
+    end))
+end
+table.insert(ReplicatedStorage, Inner.Bait.Fallback.Activated:Connect(function() -- Line: 259 | Upvalues: ("r21_0" (ref), "r18_0" (ref), "redraw" (copy))
+    if not r21_0 then
+        r18_0 = not r18_0
+        redraw()
+    end
+end))
+table.insert(ReplicatedStorage, MoreDock.Activated:Connect(open))
+table.insert(ReplicatedStorage, LocalPlayer:GetAttributeChangedSignal("RodEquipped"):Connect(updateLauncherVisibility))
+table.insert(ReplicatedStorage, LocalPlayer:GetAttributeChangedSignal("ExerciseActive"):Connect(updateLauncherVisibility))
+table.insert(ReplicatedStorage, Players.OpenRequested.Event:Connect(open))
+table.insert(ReplicatedStorage, Inner.Header.Close.Activated:Connect(function() -- Line: 268 | Upvalues: ("Players" (copy), "ActiveBar" (copy), "r21_0" (ref), "LocalPlayer" (copy))
+    Players.Dimmer.Visible = false
+    local __up2 = r21_0
+    if __up2 then
+        __up2 = not Players.Dimmer.Visible
+        if __up2 then __up2 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+    end
+    ActiveBar.Visible = __up2
+end))
+table.insert(ReplicatedStorage, Inner.StartStop.Activated:Connect(function() -- Line: 272 | Upvalues: ("invoke" (copy), "r21_0" (ref))
+    invoke(r21_0 and "Stop" or "Start")
+end))
+table.insert(ReplicatedStorage, Inner.AddTime.Activated:Connect(function() -- Line: 273 | Upvalues: ("r13" (ref), "AutoFishingLauncherGui" (copy), "r12" (ref), "snapshot" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "redraw" (copy), "Players" (copy), "ActiveBar" (copy), "LocalPlayer" (copy), "Inner" (copy))
+    if r13 then return end
+    r13 = true
+    local r2_0, r3_0 = "Buy", nil
+    task.spawn(function() -- Line: 198 | Upvalues: ("AutoFishingLauncherGui" (upval), "r2_0" (copy), "r3_0" (copy), "r12" (upval), "r13" (upval), "snapshot" (upval), "r19_0" (upval), "r20_0" (upval), "r21_0" (upval), "redraw" (upval), "Players" (upval), "ActiveBar" (upval), "LocalPlayer" (upval), "Inner" (upval))
+        local r0_arg2, r1 = pcall(AutoFishingLauncherGui.InvokeServer, AutoFishingLauncherGui, r2_0, r3_0)
+        if not r12 then return end
+        r13 = false
+        local r2
+        if r0_arg2 and typeof(r1) == "table" then
+            if r1.snapshot then
+                snapshot = r1.snapshot
+                r19_0 = snapshot.seconds
+                r20_0 = snapshot.serverTime
+                r21_0 = snapshot.active == true
+                redraw()
+                if r2_0 == "Start" and r1.ok and r21_0 then
+                    Players.Dimmer.Visible = false
+                    local __up8 = r21_0
+                    if __up8 then
+                        __up8 = not Players.Dimmer.Visible
+                        if __up8 then __up8 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+                    end
+                    ActiveBar.Visible = __up8
+                end
+            end
+            r2 = r1.message
+            if typeof(r2) == "string" and r2 ~= "" then
+                Inner.Status.Text = r2
+                return
+            end
+        else
+            r2 = warn
+            r2("AutoFishingController request failed: " .. tostring(r1))
+            Inner.Status.Text = "Could not load Auto Fishing. Please try again."
+        end
+    end)
+end))
+table.insert(ReplicatedStorage, ActiveBar.Stop.Activated:Connect(function() -- Line: 274 | Upvalues: ("r13" (ref), "r14_0" (ref), "AutoFishingLauncherGui" (copy), "r12" (ref), "snapshot" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "redraw" (copy), "Players" (copy), "ActiveBar" (copy), "LocalPlayer" (copy), "Inner" (copy))
+    if r13 then
+        r14_0 = true
+        return
+    end
+    r13 = true
+    local r2_0, r3_0 = "Stop", nil
+    task.spawn(function() -- Line: 198 | Upvalues: ("AutoFishingLauncherGui" (upval), "r2_0" (copy), "r3_0" (copy), "r12" (upval), "r13" (upval), "snapshot" (upval), "r19_0" (upval), "r20_0" (upval), "r21_0" (upval), "redraw" (upval), "Players" (upval), "ActiveBar" (upval), "LocalPlayer" (upval), "Inner" (upval))
+        local r0_arg3, r1 = pcall(AutoFishingLauncherGui.InvokeServer, AutoFishingLauncherGui, r2_0, r3_0)
+        if not r12 then return end
+        r13 = false
+        local r2
+        if r0_arg3 and typeof(r1) == "table" then
+            if r1.snapshot then
+                snapshot = r1.snapshot
+                r19_0 = snapshot.seconds
+                r20_0 = snapshot.serverTime
+                r21_0 = snapshot.active == true
+                redraw()
+                if r2_0 == "Start" and r1.ok and r21_0 then
+                    Players.Dimmer.Visible = false
+                    local __up8 = r21_0
+                    if __up8 then
+                        __up8 = not Players.Dimmer.Visible
+                        if __up8 then __up8 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+                    end
+                    ActiveBar.Visible = __up8
+                end
+            end
+            r2 = r1.message
+            if typeof(r2) == "string" and r2 ~= "" then
+                Inner.Status.Text = r2
+                return
+            end
+        else
+            r2 = warn
+            r2("AutoFishingController request failed: " .. tostring(r1))
+            Inner.Status.Text = "Could not load Auto Fishing. Please try again."
+        end
+    end)
+end))
+for r35, r36 in {"AutoFishingActive", "AutoFishingSeconds", "AutoFishingStatus"} do
+    table.insert(ReplicatedStorage, LocalPlayer:GetAttributeChangedSignal(r36):Connect(mirror))
+end
+local Children = 0
+table.insert(ReplicatedStorage, RunService.Heartbeat:Connect(function(r0_p17: number) -- Line: 280 | Upvalues: ("r19_0" (ref), "r21_0" (ref), "r20_0" (ref), "Inner" (copy), "ActiveBar" (copy), "Children" (ref), "r14_0" (ref), "r13" (ref), "AutoFishingLauncherGui" (copy), "r12" (ref), "snapshot" (ref), "redraw" (copy), "Players" (copy), "LocalPlayer" (copy))
+    local r5_p17 = if r21_0 then math.max(0, workspace:GetServerTimeNow() - r20_0) else 0
+    local r1 = math.max(0, r19_0 - r5_p17)
+    r5_p17 = math.max(0, r1)
+    local r4_p17 = math.ceil(r5_p17)
+    local r3 = if r4_p17 >= 3600 then string.format("%d:%02d:%02d", r4_p17 // 3600, r4_p17 // 60 % 60, r4_p17 % 60) else string.format("%02d:%02d", r4_p17 // 60, r4_p17 % 60)
+    Inner.Summary.Time.Text = r3
+    r5_p17 = math.max(0, r1)
+    r4_p17 = math.ceil(r5_p17)
+    r3 = if r4_p17 >= 3600 then string.format("%d:%02d:%02d", r4_p17 // 3600, r4_p17 // 60 % 60, r4_p17 % 60) else string.format("%02d:%02d", r4_p17 // 60, r4_p17 % 60)
+    ActiveBar.Time.Text = r3
+    Children += r0_p17
+    if r14_0 and not r13 then
+        r14_0 = false
+        if r13 then
+            r14_0 = true
+        else
+            r13 = true
+            r4_p17, r5_p17 = "Stop", nil
+            task.spawn(function() -- Line: 198 | Upvalues: ("AutoFishingLauncherGui" (upval), "r4_p17" (copy), "r5_p17" (copy), "r12" (upval), "r13" (upval), "snapshot" (upval), "r19_0" (upval), "r20_0" (upval), "r21_0" (upval), "redraw" (upval), "Players" (upval), "ActiveBar" (upval), "LocalPlayer" (upval), "Inner" (upval))
+                local r0_arg4, r1 = pcall(AutoFishingLauncherGui.InvokeServer, AutoFishingLauncherGui, r4_p17, r5_p17)
+                if not r12 then return end
+                r13 = false
+                local r2
+                if r0_arg4 and typeof(r1) == "table" then
+                    if r1.snapshot then
+                        snapshot = r1.snapshot
+                        r19_0 = snapshot.seconds
+                        r20_0 = snapshot.serverTime
+                        r21_0 = snapshot.active == true
+                        redraw()
+                        if r4_p17 == "Start" and r1.ok and r21_0 then
+                            Players.Dimmer.Visible = false
+                            local __up8 = r21_0
+                            if __up8 then
+                                __up8 = not Players.Dimmer.Visible
+                                if __up8 then __up8 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+                            end
+                            ActiveBar.Visible = __up8
+                        end
+                    end
+                    r2 = r1.message
+                    if typeof(r2) == "string" and r2 ~= "" then
+                        Inner.Status.Text = r2
+                        return
+                    end
+                else
+                    r2 = warn
+                    r2("AutoFishingController request failed: " .. tostring(r1))
+                    Inner.Status.Text = "Could not load Auto Fishing. Please try again."
+                end
+            end)
+        end
+    end
+    if Children >= 1 then
+        Children = 0
+        if Players.Dimmer.Visible or r21_0 then
+            if r13 then return end
+            r13 = true
+            r4_p17, r5_p17 = "Get", nil
+            task.spawn(function() -- Line: 198 | Upvalues: ("AutoFishingLauncherGui" (upval), "r4_p17" (copy), "r5_p17" (copy), "r12" (upval), "r13" (upval), "snapshot" (upval), "r19_0" (upval), "r20_0" (upval), "r21_0" (upval), "redraw" (upval), "Players" (upval), "ActiveBar" (upval), "LocalPlayer" (upval), "Inner" (upval))
+                local r0_arg5, r1 = pcall(AutoFishingLauncherGui.InvokeServer, AutoFishingLauncherGui, r4_p17, r5_p17)
+                if not r12 then return end
+                r13 = false
+                local r2
+                if r0_arg5 and typeof(r1) == "table" then
+                    if r1.snapshot then
+                        snapshot = r1.snapshot
+                        r19_0 = snapshot.seconds
+                        r20_0 = snapshot.serverTime
+                        r21_0 = snapshot.active == true
+                        redraw()
+                        if r4_p17 == "Start" and r1.ok and r21_0 then
+                            Players.Dimmer.Visible = false
+                            local __up8 = r21_0
+                            if __up8 then
+                                __up8 = not Players.Dimmer.Visible
+                                if __up8 then __up8 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+                            end
+                            ActiveBar.Visible = __up8
+                        end
+                    end
+                    r2 = r1.message
+                    if typeof(r2) == "string" and r2 ~= "" then
+                        Inner.Status.Text = r2
+                        return
+                    end
+                else
+                    r2 = warn
+                    r2("AutoFishingController request failed: " .. tostring(r1))
+                    Inner.Status.Text = "Could not load Auto Fishing. Please try again."
+                end
+            end)
+        end
+    end
+end))
+local r33
+local function bindCamera() -- Line: 295 | Name: bindCamera | Upvalues: ("r33" (ref), "applyLayout" (copy))
+    if r33 then r33:Disconnect() end
+    local CurrentCamera = workspace.CurrentCamera
+    if CurrentCamera then
+        r33 = CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(applyLayout)
+    end
+    applyLayout()
+end
+local r36 = workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera)
+table.insert(ReplicatedStorage, r36)
+r36 = script.Destroying:Connect(function() -- Line: 303 | Upvalues: ("r12" (ref), "r33" (ref), "ReplicatedStorage" (copy))
+    r12 = false
+    if r33 then r33:Disconnect() end
+    for r3, r4 in ReplicatedStorage do
+        r4:Disconnect()
+    end
+end)
+table.insert(ReplicatedStorage, r36)
+task.spawn(function() -- Line: 309 | Upvalues: ("MarketplaceService" (copy), "AutoFishingConfig" (copy), "r12" (ref), "Inner" (copy))
+    local Product = Enum.InfoType.Product
+    local r0, r1 = pcall(MarketplaceService.GetProductInfo, MarketplaceService, AutoFishingConfig.PRODUCT_ID, Product)
+    if (r12 and r0) and typeof(r1.PriceInRobux) == "number" then
+        Inner.AddTime.PriceValue.Text = tostring(r1.PriceInRobux)
+    end
+end)
+updateLauncherVisibility()
+if r33 then r33:Disconnect() end
+local CurrentCamera = workspace.CurrentCamera
+if CurrentCamera then
+    r33 = CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(applyLayout)
+end
+applyLayout()
+if not r13 then
+    r13 = true
+    r36 = "Get"
+    local r37
+    task.spawn(function() -- Line: 198 | Upvalues: ("AutoFishingLauncherGui" (copy), "r36" (copy), "r37" (copy), "r12" (ref), "r13" (ref), "snapshot" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "redraw" (copy), "Players" (copy), "ActiveBar" (copy), "LocalPlayer" (copy), "Inner" (copy))
+        local r0_p6, r1 = pcall(AutoFishingLauncherGui.InvokeServer, AutoFishingLauncherGui, r36, r37)
+        if not r12 then return end
+        r13 = false
+        local r2
+        if r0_p6 and typeof(r1) == "table" then
+            if r1.snapshot then
+                snapshot = r1.snapshot
+                r19_0 = snapshot.seconds
+                r20_0 = snapshot.serverTime
+                r21_0 = snapshot.active == true
+                redraw()
+                if r36 == "Start" and r1.ok and r21_0 then
+                    Players.Dimmer.Visible = false
+                    local __up8 = r21_0
+                    if __up8 then
+                        __up8 = not Players.Dimmer.Visible
+                        if __up8 then __up8 = LocalPlayer:GetAttribute("ExerciseActive") ~= true end
+                    end
+                    ActiveBar.Visible = __up8
+                end
+            end
+            r2 = r1.message
+            if typeof(r2) == "string" and r2 ~= "" then
+                Inner.Status.Text = r2
+                return
+            end
+        else
+            r2 = warn
+            r2("AutoFishingController request failed: " .. tostring(r1))
+            Inner.Status.Text = "Could not load Auto Fishing. Please try again."
+        end
+    end)
+end

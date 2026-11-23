@@ -1,0 +1,58 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.ClientLogReporter
+-- Took 0.66s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local LogService = game:GetService("LogService")
+local ClientLogReport = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClientLogReport")
+local r1 = {[Enum.MessageType.MessageError] = "Error", [Enum.MessageType.MessageWarning] = "Warning"}
+local r3 = {}
+local r4 = {}
+local r5_0 = 0
+local function recordMessage(r0: string, r1_p0: any) -- Line: 58 | Name: recordMessage | Upvalues: ("r1" (copy), "r4" (ref), "r3" (ref), "r5_0" (ref))
+    local r2_0 = r1[r1_p0]
+    if r2_0 == nil then return end
+    local r3_p0 = r0
+    if #r3_p0 > 2000 then
+        local r4_p0 = utf8.offset(r3_p0, 0, 2001)
+        r3_p0 = string.sub(r3_p0, 1, r4_p0 - 1)
+    end
+    local r4_p0 = r2_0 .. ":" .. r3_p0
+    local r5 = r4[r4_p0]
+    if r5 then
+        r5.Count += 1
+        return
+    end
+    if #r3 < 24 then
+        local r6 = {Severity = r2_0, Message = r3_p0, Count = 1}
+        r4[r4_p0] = r6
+        table.insert(r3, r6)
+        return
+    end
+    r5_0 += 1
+end
+local function sendBatch() -- Line: 90 | Name: sendBatch | Upvalues: ("r5_0" (ref), "r3" (ref), "ClientLogReport" (copy), "r4" (ref))
+    if r5_0 > 0 then
+        table.insert(r3, {Severity = "Warning", Message = "ClientLogReporter: further warnings and errors in this interval were not reported (batch full)", Count = r5_0})
+    end
+    if #r3 == 0 then return end
+    ClientLogReport:FireServer(r3)
+    r3 = {}
+    r4 = {}
+    r5_0 = 0
+end
+local LogHistory, r9, r10 = LogService:GetLogHistory()
+for r11, r12 in LogHistory, r9, r10 do
+    recordMessage(r12.message, r12.messageType)
+end
+LogHistory = LogService.MessageOut:Connect(recordMessage)
+local r6 = task.spawn(function() -- Line: 111 | Upvalues: ("sendBatch" (copy))
+    while true do
+        task.wait(10)
+        sendBatch()
+    end
+end)
+script.Destroying:Connect(function() -- Line: 119 | Upvalues: ("r6" (copy), "LogHistory" (copy))
+    task.cancel(r6)
+    LogHistory:Disconnect()
+end)

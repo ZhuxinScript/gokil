@@ -1,0 +1,185 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishPetPresentation
+-- Took 0.63s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local CollectionService = game:GetService("CollectionService")
+local Workspace = game:GetService("Workspace")
+local FishPetReactions = require(script.Parent:WaitForChild("FishPetReactions"))
+local r4 = {
+    ["+X"] = vector.create(1, 0, 0), ["-X"] = vector.create(-1, -0, -0),
+    ["+Y"] = vector.create(0, 1, 0), ["-Y"] = vector.create(-0, -1, -0),
+    ["+Z"] = vector.create(0, 0, 1), ["-Z"] = vector.create(-0, -0, -1)
+}
+local r3 = {
+    Spring = function(r0: vector, r1: vector, r2: vector, r3: number) -- Line: 65 | Name: Spring
+        local r4_0 = r0 - r2
+        local r5 = math.exp(r3 * -18)
+        local r6 = r1 + r4_0 * 18
+        return r2 + (r4_0 + r6 * r3) * r5, (r1 - r6 * 18 * r3) * r5
+    end
+}
+local function heading(r0: userdata) -- Line: 75 | Name: heading
+    local r1 = r0.CFrame.LookVector * vector.create(1, 0, 1)
+    if r1.Magnitude < 0.001 then r1 = vector.create(-0, -0, -1) end
+    return CFrame.lookAt(vector.create(0, 0, 0), r1.Unit)
+end
+function r3.Create(r0_p6: userdata, r1_p6: userdata, r2_p6: userdata?, r3_p6: number, r4_p6: userdata) -- Line: 84 | Name: Create | Upvalues: ("r4" (copy), "CollectionService" (copy), "FishPetReactions" (copy), "r3" (copy), "Workspace" (copy))
+    local r5 = r4[r0_p6:GetAttribute("NoseAxis")]
+    local r6 = r4[r0_p6:GetAttribute("UprightAxis")]
+    if not r5 or not r6 or math.abs(r5:Dot(r6)) > 0.001 then
+        warn("Fish pet has invalid authored axes: " .. r0_p6.Name)
+        return nil
+    end
+    local r7 = r0_p6:Clone()
+    r7.Name = "Pet_" .. tostring(r3_p6)
+    local ExtentsSize = r7:GetExtentsSize()
+    local r9 = math.max(ExtentsSize.X, ExtentsSize.Y, ExtentsSize.Z)
+    if r9 <= 0 then
+        r7:Destroy()
+        warn("Fish pet has no geometry: " .. r0_p6.Name)
+        return nil
+    end
+    ExtentsSize = r0_p6:GetAttribute("FishClass") == "WorldBoss"
+    local r10 = r0_p6:GetAttribute("FishClass") == "Colossal"
+    local r11 = r0_p6:GetAttribute("PetRarity") == "Exotic"
+    local r12 = ExtentsSize and 10.85 or r10 and 7.75 or r11 and 4.65 or 3.1
+    local r13 = ExtentsSize and vector.create(7.5, 0.4000000059604645, 6.800000190734863) or r10 and vector.create(5.400000095367432, 0.4000000059604645, 4.800000190734863) or r11 and vector.create(4.099999904632568, 0.4000000059604645, 3.799999952316284) or vector.create(3.0999999046325684, 0.4000000059604645, 2.799999952316284)
+    r11 = math.min(1, r12 / r9)
+    r7:ScaleTo(r7:GetScale() * r11)
+    r12 = {}
+    for walk, r18 in {r7, table.unpack(r7:GetDescendants())} do
+        local r19, r20, new = CollectionService:GetTags(r18)
+        for r22, r23 in r19, r20, new do
+            CollectionService:RemoveTag(r18, r23)
+        end
+        if r18:IsA("LuaSourceContainer") or r18:IsA("ValueBase") or r18:IsA("ProximityPrompt") or r18:IsA("Sound") then
+            r18:Destroy()
+        elseif r18:IsA("BasePart") then
+            r18.Anchored = true
+            r18.CanCollide = false
+            r18.CanTouch = false
+            r18.CanQuery = false
+            r18.Massless = true
+            r18.CastShadow = false
+        elseif r18:IsA("ParticleEmitter") then
+            r11 = r18:GetAttribute("PetEmitterRate")
+            r19 = if typeof(r11) == "number" then r11 else r18.Rate
+            r18.Rate = r19
+            table.insert(r12, {node = r18, enabled = r18.Enabled})
+        elseif not r18:IsA("Beam") and not r18:IsA("Trail") and not r18:IsA("Light") then
+        else
+            table.insert(r12, {node = r18, enabled = r18.Enabled})
+        end
+    end
+    r10 = r7:GetBoundingBox()
+    r9 = r7:GetPivot():PointToObjectSpace(r10.Position)
+    r10 = CFrame.lookAt(vector.create(0, 0, 0), r5, r6):Inverse() * CFrame.new(- r9)
+    local Position = r1_p6.Position
+    local r15 = vector.create(0, 0, 0)
+    r9 = r1_p6.CFrame.LookVector * vector.create(1, 0, 1)
+    if r9.Magnitude < 0.001 then r9 = vector.create(-0, -0, -1) end
+    local r16 = CFrame.lookAt(vector.create(0, 0, 0), r9.Unit)
+    ExtentsSize = if r2_p6 then math.clamp(r2_p6.Position.Y - r1_p6.Position.Y - 0.4, 0.8, 3) else 1.1
+    local new, r23 = CFrame.new, Position + r16:VectorToWorldSpace(r13)
+    r7:PivotTo(new(r23 + vector.create(0, 1, 0) * ExtentsSize) * r16 * r10)
+    r7.Parent = r4_p6
+    r6 = r7:FindFirstChildOfClass("AnimationController")
+    r5 = r6 and r6:FindFirstChildOfClass("Animator")
+    r6 = r7:FindFirstChild("Animations")
+    local walk = r6 and r6:FindFirstChild("walk")
+    local r18
+    local r19
+    if r5 and walk and walk:IsA("Animation") and walk.AnimationId ~= "" then
+        local r19, r20 = pcall(function() -- Line: 159 | Upvalues: ("r5" (copy), "walk" (copy))
+            return r5:LoadAnimation(walk)
+        end)
+        if r19 then
+            r18 = r20
+            r18.Looped = true
+            r18.Priority = Enum.AnimationPriority.Movement
+            r18:Play(0.18)
+        else
+            new = warn
+            new("Fish pet walk failed for " .. r0_p6.Name .. ": " .. tostring(r20))
+        end
+    else
+        r19 = warn
+        r19("Fish pet has no authored walk: " .. r0_p6.Name)
+    end
+    r19 = true
+    local r20 = true
+    new = true
+    local r22 = FishPetReactions.new(r7, r5, r6)
+    r6 = {
+        Model = r7,
+        SetOptions = function(r0: { any }, r1: boolean, r2: boolean) -- Line: 183 | Name: SetOptions | Upvalues: ("r19" (ref), "r20" (ref), "r18" (ref), "r22" (copy), "new" (ref), "r12" (copy))
+            if not r19 then return end
+            if r20 ~= r1 then
+                r20 = r1
+                if r18 then r18:AdjustSpeed(r20 and 1 or 0) end
+                r22:SetEnabled(r20)
+            end
+            if new ~= r2 then
+                new = r2
+                for r6, r7 in r12 do
+                    r7.node.Enabled = new and r7.enabled
+                    if not (new or not r7.node:IsA("ParticleEmitter")) then r7.node:Clear() end
+                end
+            end
+        end,
+        Step = function(r0: { any }, r1_p4: number) -- Line: 201 | Name: Step | Upvalues: ("r19" (ref), "r1_p6" (copy), "Position" (ref), "r15" (ref), "r16" (ref), "r12" (copy), "r3" (upval), "r20" (ref), "Workspace" (upval), "r3_p6" (copy), "r13" (copy), "ExtentsSize" (copy), "r7" (copy), "r10" (copy))
+            if not r19 or not r1_p6.Parent then return end
+            local r3_p4
+            local r4
+            local r5
+            local r2
+            if (r1_p6.Position - Position).Magnitude > 48 then
+                Position = r1_p6.Position
+                r15 = vector.create(0, 0, 0)
+                r3_p4 = r1_p6
+                r4 = r3_p4.CFrame.LookVector * vector.create(1, 0, 1)
+                if r4.Magnitude < 0.001 then r4 = vector.create(-0, -0, -1) end
+                r5 = CFrame.lookAt
+                r2 = r5(vector.create(0, 0, 0), r4.Unit)
+                r16 = r2
+                for r5, r6 in r12 do
+                    if r6.node:IsA("ParticleEmitter") then r6.node:Clear() end
+                end
+            else
+                Position, r15 = r3.Spring(Position, r15, r1_p6.Position, r1_p4)
+                r5 = r1_p6
+                local r6 = r5.CFrame.LookVector * vector.create(1, 0, 1)
+                if r6.Magnitude < 0.001 then r6 = vector.create(-0, -0, -1) end
+                r4 = CFrame.lookAt(vector.create(0, 0, 0), r6.Unit)
+                r5 = 1 - math.exp(r1_p4 * -10)
+                r16 = r16:Lerp(r4, r5)
+            end
+            if r20 then
+                r5 = Workspace:GetServerTimeNow() * 1.6534698176788385
+                r4 = r5 + r3_p6 % 37
+                r2 = math.sin(r4) * 0.55
+            else
+                r2 = 0
+            end
+            r4 = Position + r16:VectorToWorldSpace(r13)
+            r3_p4 = r4 + vector.create(0, 1, 0) * (ExtentsSize + r2)
+            local r7_p4 = CFrame.new(r3_p4) * r16
+            r7:PivotTo(r7_p4 * r10)
+        end,
+        Destroy = function(r0) -- Line: 223 | Name: Destroy | Upvalues: ("r19" (ref), "r22" (copy), "r18" (ref), "r7" (copy), "r12" (copy))
+            if not r19 then return end
+            r19 = false
+            r22:Destroy()
+            if r18 then
+                r18:Stop(0)
+                r18:Destroy()
+                r18 = nil
+            end
+            r7:Destroy()
+            table.clear(r12)
+        end
+    }
+    return r6
+end
+return table.freeze(r3)

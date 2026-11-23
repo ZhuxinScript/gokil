@@ -1,0 +1,10 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.MenuNewsController
+-- Took 1.33s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local MenuNewsClient = require(script.Parent:WaitForChild("MenuNewsClient"))
+MenuNewsClient.Start()
+script.Destroying:Once(function() -- Line: 15 | Upvalues: ("MenuNewsClient" (copy))
+    MenuNewsClient.Destroy()
+end)

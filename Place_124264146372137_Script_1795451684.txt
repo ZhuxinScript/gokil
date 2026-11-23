@@ -1,0 +1,999 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishingCameraController
+-- Took 2.77s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local FishHookJump = require(game:GetService("ReplicatedStorage"):WaitForChild("FishHookJump"))
+local CastFlightArc = require(game:GetService("ReplicatedStorage"):WaitForChild("CastFlightArc"))
+local FishingReelVFX = require(script.Parent:WaitForChild("FishingReelVFX"))
+local FishingCastVFX = require(script.Parent:WaitForChild("FishingCastVFX"))
+local CastDistancePresentation = require(script.Parent:WaitForChild("CastDistancePresentation"))
+local r8
+local function stopCastPresentation() -- Line: 77 | Name: stopCastPresentation | Upvalues: ("r8" (ref), "CastDistancePresentation" (copy), "FishingCastVFX" (copy))
+    r8 = nil
+    CastDistancePresentation.Stop()
+    FishingCastVFX.Update(nil)
+end
+local RodCastRequest = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RodCastRequest")
+local LocalPlayer = Players.LocalPlayer
+Players = string.format("FishingLureCamera_%d", LocalPlayer.UserId)
+local r12 = Enum.RenderPriority.Camera.Value + 1
+local r13 = {
+    ["+X"] = vector.create(1, 0, 0),
+    ["-X"] = vector.create(-1, -0, -0),
+    ["+Y"] = vector.create(0, 1, 0),
+    ["-Y"] = vector.create(-0, -1, -0),
+    ["+Z"] = vector.create(0, 0, 1),
+    ["-Z"] = vector.create(-0, -0, -1)
+}
+local r14 = "Idle"
+local _ManualCastShotAt
+local r16_0
+local r17_0 = 1
+local r18_0
+local r19_0
+local r20_0
+local r21_0
+local r22_0 = false
+local r23_0
+local r24_0
+local r25_0
+local r26_0
+local r27_0
+local r28_0
+local r29_0
+local r30_0
+local r31_0 = vector.create(0, 0, -1)
+local r32_0
+local r33_0 = 0
+local identity = CFrame.identity
+local identity_2 = CFrame.identity
+local r36_0 = 70
+local r37_0 = false
+local r38_0 = 0
+local r39_0
+local r40_0
+local r41_0
+local r42_0 = {}
+local r43_0 = {}
+local function flattenDirection(r0: vector) -- Line: 243 | Name: flattenDirection
+    local r1 = Vector3.new(r0.X, 0, r0.Z)
+    if r1.Magnitude <= 0.01 then return nil end
+    return r1.Unit
+end
+local function captureCameraState(r0: userdata) -- Line: 254 | Name: captureCameraState
+    local r2 = if r0.CameraType == Enum.CameraType.Scriptable then Enum.CameraType.Custom else r0.CameraType
+    return {
+        cameraType = r2,
+        cameraSubject = r0.CameraSubject,
+        fieldOfView = r0.FieldOfView,
+        cframe = r0.CFrame,
+        focus = r0.Focus
+    }
+end
+local function resolveRestorationSubject(r0: userdata?) -- Line: 268 | Name: resolveRestorationSubject | Upvalues: ("LocalPlayer" (copy))
+    if r0 and r0.Parent then return r0 end
+    local Character = LocalPlayer.Character
+    if Character then
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid then return Humanoid end
+    end
+    return nil
+end
+local function releaseBirdPresentation() -- Line: 286 | Name: releaseBirdPresentation | Upvalues: ("r26_0" (ref), "Workspace" (copy), "r27_0" (ref), "r28_0" (ref))
+    local __up0 = r26_0
+    if __up0 and __up0:IsDescendantOf(Workspace) then
+        local BirdReturnPose = __up0:GetAttribute("BirdReturnPose")
+        if typeof(BirdReturnPose) == "CFrame" then __up0.CFrame = BirdReturnPose end
+    end
+    r26_0 = nil
+    r27_0 = nil
+    r28_0 = nil
+end
+local function stopRenderBinding() -- Line: 301 | Name: stopRenderBinding | Upvalues: ("r37_0" (ref), "RunService" (copy), "Players" (copy))
+    if not r37_0 then return end
+    RunService:UnbindFromRenderStep(Players)
+    r37_0 = false
+end
+local function finishRestoration(r0_p6: userdata) -- Line: 311 | Name: finishRestoration | Upvalues: ("FishingReelVFX" (copy), "r8" (ref), "CastDistancePresentation" (copy), "FishingCastVFX" (copy), "r16_0" (ref), "r30_0" (ref), "r37_0" (ref), "RunService" (copy), "Players" (copy), "r38_0" (ref), "r14" (ref), "r18_0" (ref), "r19_0" (ref), "r20_0" (ref), "r23_0" (ref), "r24_0" (ref), "r25_0" (ref), "r26_0" (ref), "Workspace" (copy), "r27_0" (ref), "r28_0" (ref), "r29_0" (ref), "r21_0" (ref), "r22_0" (ref), "r32_0" (ref), "r33_0" (ref), "LocalPlayer" (copy))
+    FishingReelVFX.Stop()
+    r8 = nil
+    CastDistancePresentation.Stop()
+    FishingCastVFX.Update(nil)
+    r16_0 = nil
+    local __up5 = r30_0
+    if r37_0 then
+        RunService:UnbindFromRenderStep(Players)
+        r37_0 = false
+    end
+    r38_0 += 1
+    r14 = "Idle"
+    r18_0 = nil
+    r19_0 = nil
+    r20_0 = nil
+    r23_0 = nil
+    r24_0 = nil
+    r25_0 = nil
+    local __up17 = r26_0
+    if __up17 and __up17:IsDescendantOf(Workspace) then
+        local BirdReturnPose = __up17:GetAttribute("BirdReturnPose")
+        if typeof(BirdReturnPose) == "CFrame" then __up17.CFrame = BirdReturnPose end
+    end
+    r26_0 = nil
+    r27_0 = nil
+    r28_0 = nil
+    r29_0 = nil
+    r21_0 = nil
+    r22_0 = false
+    r32_0 = nil
+    r33_0 = 0
+    if __up5 == nil then return end
+    r0_p6.CFrame = __up5.cframe
+    r0_p6.Focus = __up5.focus
+    r0_p6.FieldOfView = __up5.fieldOfView
+    local cameraSubject = __up5.cameraSubject
+    if cameraSubject and cameraSubject.Parent then
+        __up17 = cameraSubject
+    else
+        local Character = LocalPlayer.Character
+        if Character then
+            local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+            __up17 = if Humanoid then Humanoid else nil
+        else
+            __up17 = nil
+        end
+    end
+    if __up17 then r0_p6.CameraSubject = __up17 end
+    r0_p6.CameraType = __up5.cameraType
+    r0_p6.CFrame = __up5.cframe
+    r0_p6.Focus = __up5.focus
+    r30_0 = nil
+end
+local function beginRestoration() -- Line: 352 | Name: beginRestoration | Upvalues: ("FishingReelVFX" (copy), "r8" (ref), "CastDistancePresentation" (copy), "FishingCastVFX" (copy), "r16_0" (ref), "r14" (ref), "Workspace" (copy), "r18_0" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "r22_0" (ref), "r32_0" (ref), "r30_0" (ref), "r37_0" (ref), "RunService" (copy), "Players" (copy), "r29_0" (ref), "r33_0" (ref), "identity" (ref), "identity_2" (ref), "r36_0" (ref), "r38_0" (ref), "finishRestoration" (copy))
+    FishingReelVFX.Stop()
+    r8 = nil
+    CastDistancePresentation.Stop()
+    FishingCastVFX.Update(nil)
+    r16_0 = nil
+    if r14 == "Idle" or r14 == "Restore" then return end
+    local CurrentCamera_2 = Workspace.CurrentCamera
+    r18_0 = nil
+    r19_0 = nil
+    r20_0 = nil
+    r21_0 = nil
+    r22_0 = false
+    r32_0 = nil
+    if CurrentCamera_2 == nil or r30_0 == nil then
+        if not r37_0 then
+        else
+            RunService:UnbindFromRenderStep(Players)
+            r37_0 = false
+        end
+        r14 = "Idle"
+        r30_0 = nil
+        return
+    end
+    if r14 == "BirdEscape" then r29_0 = nil end
+    r14 = "Restore"
+    r33_0 = 0
+    identity = CurrentCamera_2.CFrame
+    identity_2 = CurrentCamera_2.Focus
+    r36_0 = CurrentCamera_2.FieldOfView
+    r38_0 += 1
+    CurrentCamera_2 = r38_0
+    task.delay(1.25, function() -- Line: 385 | Upvalues: ("r14" (upval), "r38_0" (upval), "CurrentCamera_2" (copy), "Workspace" (upval), "finishRestoration" (upval))
+        if r14 == "Restore" and r38_0 == CurrentCamera_2 then
+            local CurrentCamera = Workspace.CurrentCamera
+            if CurrentCamera then finishRestoration(CurrentCamera) end
+        end
+    end)
+end
+local function presentPilotFlight(r0: userdata, r1: userdata, r2_p9: any) -- Line: 397 | Name: presentPilotFlight | Upvalues: ("r8" (ref), "Workspace" (copy), "CastFlightArc" (copy))
+    local __up0 = r8
+    if __up0 and __up0.cast ~= r0 then
+        r8 = nil
+        __up0 = nil
+    end
+    local r5
+    if r2_p9 ~= "Flying" then
+        r8 = nil
+        if not __up0 or r2_p9 ~= "Landed" and r2_p9 ~= "Floating" then return nil end
+        if (r1.Position - __up0.landing).Magnitude > 0.3 then
+            r5 = CFrame.new
+            r1.CFrame = r5(__up0.landing) * __up0.rotation
+        end
+        return nil
+    end
+    if not __up0 and typeof(r0:GetAttribute("FlightStartedAt")) ~= "number" then return nil end
+    local ServerTimeNow = Workspace:GetServerTimeNow()
+    if not __up0 then
+        local FlightStartedAt = r0:GetAttribute("FlightStartedAt")
+        local FlightDurationSeconds = r0:GetAttribute("FlightDurationSeconds")
+        local FlightStartPose = r0:GetAttribute("FlightStartPose")
+        local FlightControlPoint = r0:GetAttribute("FlightControlPoint")
+        local LandingPosition = r0:GetAttribute("LandingPosition")
+        if typeof(FlightStartedAt) ~= "number" or typeof(FlightDurationSeconds) ~= "number" or FlightDurationSeconds <= 0 or typeof(FlightStartPose) ~= "CFrame" or typeof(FlightControlPoint) ~= "Vector3" or typeof(LandingPosition) ~= "Vector3" or FlightStartedAt + FlightDurationSeconds <= ServerTimeNow then
+            return nil
+        end
+        __up0 = {
+            cast = r0, origin = FlightStartPose.Position, rotation = FlightStartPose.Rotation,
+            control = FlightControlPoint, landing = LandingPosition, joinedAt = ServerTimeNow,
+            contactAt = FlightStartedAt + FlightDurationSeconds,
+            joinedAlpha = CastFlightArc.EstimateManualAlpha(FlightStartPose.Position, LandingPosition, r1.Position)
+        }
+        r8 = __up0
+    end
+    local r5 = math.clamp((ServerTimeNow - __up0.joinedAt) / (__up0.contactAt - __up0.joinedAt), 0, 1)
+    ServerTimeNow = math.min(0.9995, __up0.joinedAlpha + (1 - __up0.joinedAlpha) * r5)
+    r5 = CastFlightArc.ManualEase(ServerTimeNow)
+    r1.CFrame = CastFlightArc.LurePose(CastFlightArc.Evaluate(__up0.origin, __up0.control, __up0.landing, r5), __up0.rotation, r5)
+    return ServerTimeNow
+end
+local function updateCastDirection(r0: userdata, r1: userdata) -- Line: 447 | Name: updateCastDirection | Upvalues: ("r31_0" (ref), "r32_0" (ref))
+    local FlightTangent = r0:GetAttribute("FlightTangent")
+    local r4
+    if typeof(FlightTangent) == "Vector3" then
+        r4 = Vector3.new(FlightTangent.X, 0, FlightTangent.Z)
+        local LandingPosition = if r4.Magnitude <= 0.01 then nil else r4.Unit
+        if LandingPosition then r31_0 = LandingPosition end
+    end
+    local LandingPosition = r0:GetAttribute("LandingPosition")
+    local r5, r6
+    if typeof(LandingPosition) == "Vector3" then
+        r5 = LandingPosition - r1.Position
+        r6 = Vector3.new(r5.X, 0, r5.Z)
+        local r4 = if r6.Magnitude <= 0.01 then nil else r6.Unit
+        if r4 and typeof(FlightTangent) ~= "Vector3" then r31_0 = r4 end
+    end
+    if r32_0 then
+        local r5 = r1.Position - r32_0
+        local r6 = Vector3.new(r5.X, 0, r5.Z)
+        local r4 = if r6.Magnitude <= 0.01 then nil else r6.Unit
+        if not r4 or typeof(FlightTangent) == "Vector3" or typeof(LandingPosition) == "Vector3" then
+            r32_0 = r1.Position
+            return r31_0
+        end
+        r31_0 = r4
+    end
+    r32_0 = r1.Position
+    return r31_0
+end
+local function makeShotCFrame(r0: vector, r1: number, r2: number, r3: vector) -- Line: 480 | Name: makeShotCFrame
+    local r4_0 = r0 - r3 * r1 + Vector3.new(0, r2, 0)
+    return CFrame.lookAt(r4_0, r0, vector.create(0, 1, 0))
+end
+local function calculateFishFrameDistance(r0: CFrame, r1: vector, r2: number, r3: Vector2, r4: vector, r5: vector?) -- Line: 491 | Name: calculateFishFrameDistance
+    local r6 = r3.Y > 0 and r3.X / r3.Y or 1.7777777777777777
+    local r8 = math.clamp(r2, 1, 120)
+    local r7 = math.rad(r8)
+    local r10 = math.tan(r7 * 0.5) * r6
+    r8 = math.atan(r10) * 2
+    r6 = math.tan(r7 * 0.5) * 0.72
+    r7 = math.tan(r8 * 0.5) * 0.72
+    r8 = CFrame.lookAt(vector.create(0, 0, 0), - r4, vector.create(0, 1, 0)).Rotation
+    local r9 = if r5 then r0.Position - r5 else vector.create(0, 0, 0)
+    r10 = 0
+    for i_0 = -1, 1, 2 do
+        for i_1 = -1, 1, 2 do
+            for i_2 = -1, 1, 2 do
+                local r20 = Vector3.new(r1.X * i_0 * 0.5, r1.Y * i_1 * 0.5, r1.Z * i_2 * 0.5)
+                r20 = r8:VectorToObjectSpace(r0:VectorToWorldSpace(r20) + r9)
+                local r21 = r20.Z + math.abs(r20.X) / r7
+                local r22 = r20.Z + math.abs(r20.Y) / r6
+                r10 = math.max(r10, r21, r22, r20.Z + 0.1)
+            end
+        end
+    end
+    return math.max(r10 + 2.5, 14)
+end
+local function getFishForward(r0: userdata) -- Line: 532 | Name: getFishForward | Upvalues: ("r13" (copy))
+    local NoseAxis = r0:GetAttribute("NoseAxis")
+    local r2 = typeof(NoseAxis) == "string" and r13[NoseAxis] or vector.create(-1, -0, -0)
+    return r0:GetPivot():VectorToWorldSpace(r2 or vector.create(-1, -0, -0))
+end
+local function updateFishReturnShot(r0: userdata, r1: userdata, r2_p14: userdata?, r3: any, r4: number) -- Line: 543 | Name: updateFishReturnShot | Upvalues: ("r26_0" (ref), "Workspace" (copy), "r27_0" (ref), "r28_0" (ref), "r31_0" (ref), "r13" (copy), "r25_0" (ref), "r22_0" (ref), "r24_0" (ref), "calculateFishFrameDistance" (copy))
+    local BoundingBox, r6 = r1:GetBoundingBox()
+    local Position = BoundingBox.Position
+    if r2_p14 and typeof(r3) == "CFrame" and r2_p14:GetAttribute("BirdReturnPose") == nil then
+        if r26_0 ~= r2_p14 then
+            local __up0 = r26_0
+            if __up0 and __up0:IsDescendantOf(Workspace) then
+                local BirdReturnPose = __up0:GetAttribute("BirdReturnPose")
+                if typeof(BirdReturnPose) == "CFrame" then __up0.CFrame = BirdReturnPose end
+            end
+            r26_0 = nil
+            r27_0 = nil
+            r28_0 = nil
+            r26_0 = r2_p14
+        end
+        local r10 = math.max(0, r4) * -16
+        local r8 = 1 - math.exp(r10)
+        local r9 = (r27_0 or r3):Lerp(r3, r8)
+        r27_0 = r9
+        r28_0 = r9 + Position
+        r2_p14.CFrame = r9 + Position
+    else
+        r2_p14 = nil
+    end
+    local r8 = - r31_0
+    local r9 = (vector.create(0, 1, 0)):Cross(r8)
+    local NoseAxis = r1:GetAttribute("NoseAxis")
+    local r13_p14 = typeof(NoseAxis) == "string" and r13[NoseAxis] or vector.create(-1, -0, -0)
+    local r11 = r1:GetPivot():VectorToWorldSpace(r13_p14 or vector.create(-1, -0, -0))
+    NoseAxis = Vector3.new(r11.X, 0, r11.Z)
+    local r10 = if NoseAxis.Magnitude <= 0.01 then nil else NoseAxis.Unit
+    if r10 and r10:Dot(r8) > 0 then
+        NoseAxis = r10:Dot(r9) * 0.6
+        r11 = math.clamp(NoseAxis, -0.2, 0.2)
+    else
+        r11 = 0
+    end
+    r10 = (r8 + r9 * (r11 + 0.32) + vector.create(0, 0.4000000059604645, 0)).Unit
+    if r25_0 == nil and not r22_0 then
+        r11 = 1
+    else
+        r13_p14 = math.max(0, r4) * -9
+        r11 = 1 - math.exp(r13_p14)
+    end
+    local r14 = CFrame.lookAt(vector.create(0, 0, 0), - r10)
+    r9 = - r0.CFrame.Rotation:Lerp(r14, r11).LookVector
+    r24_0 = r9
+    r10 = 0
+    r8 = Position
+    if r2_p14 then
+        NoseAxis = math.max(r2_p14.Size.X, r2_p14.Size.Y, r2_p14.Size.Z)
+        r13_p14 = NoseAxis * 0.8
+        r14 = math.max(145, NoseAxis * 2)
+        NoseAxis = math.clamp((r14 - (r2_p14.Position - Position).Magnitude) / (r14 - r13_p14), 0, 1)
+        r10 = NoseAxis * NoseAxis * (3 - NoseAxis * 2)
+        r8 = Position:Lerp(r2_p14.Position, r10 * 0.34)
+    end
+    NoseAxis = if r25_0 then r0.Focus.Position + (Position - r25_0) else Position
+    r13_p14 = NoseAxis:Lerp(r8, r11)
+    NoseAxis = calculateFishFrameDistance(BoundingBox, r6, r0.FieldOfView, r0.ViewportSize, r9, r13_p14)
+    r8 = NoseAxis
+    if r2_p14 and r10 > 0 then
+        r6 = calculateFishFrameDistance(r2_p14.CFrame, r2_p14.Size, r0.FieldOfView, r0.ViewportSize, r9, r13_p14)
+        r8 += math.max(0, r6 - NoseAxis) * r10
+    end
+    NoseAxis = r8 * 1.16
+    r10 = if r25_0 or r22_0 then (r0.CFrame.Position - r0.Focus.Position).Magnitude else NoseAxis
+    BoundingBox = math.lerp(r10, NoseAxis, r11)
+    NoseAxis = r8 - BoundingBox
+    r11 = if NoseAxis >= 2.5 then NoseAxis else NoseAxis <= -2.5 and 0 or (NoseAxis + 2.5) ^ 2 / 10
+    NoseAxis = BoundingBox + r11
+    r0.CFrame = CFrame.lookAt(r13_p14 + r9 * NoseAxis, r13_p14, vector.create(0, 1, 0))
+    r0.Focus = CFrame.new(r13_p14)
+    r25_0 = Position
+    return Position
+end
+local function resolveBirdMesh(r0) -- Line: 625 | Name: resolveBirdMesh | Upvalues: ("Workspace" (copy))
+    if typeof(r0) ~= "string" then return nil end
+    local r1 = Workspace:FindFirstChild(r0)
+    if r1 and r1:IsA("Model") then return r1:FindFirstChildWhichIsA("MeshPart") end
+    return nil
+end
+local function makeBirdShot(r0: userdata, r1: userdata, r2: userdata, r3: number) -- Line: 635 | Name: makeBirdShot | Upvalues: ("r24_0" (ref), "r31_0" (ref), "calculateFishFrameDistance" (copy))
+    local BoundingBox, r5 = r2:GetBoundingBox()
+    local r6 = BoundingBox.Position:Lerp(r1.Position, r3)
+    local __up0 = r24_0
+    if not __up0 then
+        local LookVector = r1.CFrame.LookVector
+        local r10 = Vector3.new(LookVector.X, 0, LookVector.Z)
+        local r8 = if r10.Magnitude <= 0.01 then nil else r10.Unit
+        if not r8 then r8 = - r31_0 end
+        __up0 = (- r31_0 + r8 * 0.65 + vector.create(0, 0.5199999809265137, 0)).Unit
+        r24_0 = __up0
+    end
+    local r8 = math.max(calculateFishFrameDistance(BoundingBox, r5, r0.FieldOfView, r0.ViewportSize, __up0, r6), calculateFishFrameDistance(r1.CFrame, r1.Size, r0.FieldOfView, r0.ViewportSize, __up0, r6))
+    return CFrame.lookAt(r6 + __up0 * r8, r6, vector.create(0, 1, 0)), r6
+end
+local function canShowBirdEscape() -- Line: 658 | Name: canShowBirdEscape | Upvalues: ("LocalPlayer" (copy), "r23_0" (ref))
+    local ActiveFishingCastToken = LocalPlayer:GetAttribute("ActiveFishingCastToken")
+    local Character = LocalPlayer.Character
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    local r3 = if ActiveFishingCastToken ~= nil then ActiveFishingCastToken == r23_0 and Humanoid ~= nil and Humanoid.Health > 0 and LocalPlayer:GetAttribute("RodEquipped") == true and LocalPlayer:GetAttribute("ExerciseActive") ~= true and LocalPlayer:GetAttribute("WorldBossActive") ~= true and LocalPlayer:GetAttribute("SnackTimeActive") ~= true and LocalPlayer:GetAttribute("FishRidersActive") ~= true else Humanoid ~= nil and Humanoid.Health > 0 and LocalPlayer:GetAttribute("RodEquipped") == true and LocalPlayer:GetAttribute("ExerciseActive") ~= true and LocalPlayer:GetAttribute("WorldBossActive") ~= true and LocalPlayer:GetAttribute("SnackTimeActive") ~= true and LocalPlayer:GetAttribute("FishRidersActive") ~= true
+    return r3
+end
+local function applyFishReturnPresentation(r0: userdata, r1: userdata, r2: userdata, r3: number) -- Line: 673 | Name: applyFishReturnPresentation | Upvalues: ("r22_0" (ref), "r21_0" (ref))
+    local ReturnFishPivot = r0:GetAttribute("ReturnFishPivot")
+    local ReturnLureRelativeToFish = r0:GetAttribute("ReturnLureRelativeToFish")
+    if typeof(ReturnFishPivot) ~= "CFrame" or typeof(ReturnLureRelativeToFish) ~= "CFrame" then
+        if not r22_0 then r21_0 = nil end
+        return
+    end
+    local r6 = r21_0 or r1:GetPivot()
+    local r9 = math.max(0, r3) * -16
+    local r7 = 1 - math.exp(r9)
+    local r8 = r6:Lerp(ReturnFishPivot, r7)
+    r21_0 = r8
+    r1:PivotTo(r8)
+    r2.CFrame = r8 * ReturnLureRelativeToFish
+end
+local function makeFishHookJumpShot(r0: userdata, r1: userdata, r2: number) -- Line: 696 | Name: makeFishHookJumpShot | Upvalues: ("r13" (copy), "r31_0" (ref), "calculateFishFrameDistance" (copy))
+    local BoundingBox, r4 = r1:GetBoundingBox()
+    local NoseAxis = r1:GetAttribute("NoseAxis")
+    local r8 = typeof(NoseAxis) == "string" and r13[NoseAxis] or vector.create(-1, -0, -0)
+    local r6 = r1:GetPivot():VectorToWorldSpace(r8 or vector.create(-1, -0, -0))
+    NoseAxis = Vector3.new(r6.X, 0, r6.Z)
+    local r5 = if NoseAxis.Magnitude <= 0.01 then nil else NoseAxis.Unit
+    if not r5 then r5 = r31_0 end
+    r6 = (vector.create(0, 1, 0)):Cross(r5).Unit
+    NoseAxis = r2 * r2 * (3 - r2 * 2)
+    r8 = (- r5 + r6 * (0.7 - NoseAxis * 0.35) + vector.create(0, 0.30000001192092896, 0)).Unit
+    NoseAxis = calculateFishFrameDistance(BoundingBox, r4, r0.FieldOfView, r0.ViewportSize, r8)
+    return CFrame.lookAt(BoundingBox.Position + r8 * NoseAxis, BoundingBox.Position, vector.create(0, 1, 0)), BoundingBox.Position
+end
+local function fitSmoothedFishShot(r0: userdata, r1: userdata, r2: CFrame) -- Line: 715 | Name: fitSmoothedFishShot
+    local r3 = CFrame.lookAt(r2.Position, r2.Position + r2.LookVector, vector.create(0, 1, 0))
+    local BoundingBox, r5 = r1:GetBoundingBox()
+    local r9 = math.clamp(r0.FieldOfView, 1, 120) * 0.5
+    local r8 = math.rad(r9)
+    local r6 = math.tan(r8) * 0.72
+    r8 = r6 * (r0.ViewportSize.Y > 0 and r0.ViewportSize.X / r0.ViewportSize.Y or 1.7777777777777777)
+    local r7 = 0
+    for i_0 = -1, 1, 2 do
+        for i_1 = -1, 1, 2 do
+            for i_2 = -1, 1, 2 do
+                local r22 = r5 * Vector3.new(i_0, i_1, i_2) * 0.5
+                local r18 = r3:PointToObjectSpace(BoundingBox:PointToWorldSpace(r22))
+                local r21 = r18.Z + math.abs(r18.X) / r8
+                r22 = r18.Z + math.abs(r18.Y) / r6
+                r7 = math.max(r7, r21, r22, r18.Z + 0.1)
+            end
+        end
+    end
+    return r3 * CFrame.new(0, 0, r7)
+end
+local function applyFishHookJumpPresentation(r0: userdata, r1: userdata, r2_p21: userdata) -- Line: 750 | Name: applyFishHookJumpPresentation | Upvalues: ("FishHookJump" (copy), "Workspace" (copy), "r21_0" (ref))
+    local r3_p21 = FishHookJump.Read(r0)
+    local FishMouthPivotOffset = r0:GetAttribute("FishMouthPivotOffset")
+    local LineAttachment = r2_p21:FindFirstChild("LineAttachment")
+    local ServerTimeNow = Workspace:GetServerTimeNow()
+    if not r3_p21 or typeof(FishMouthPivotOffset) ~= "Vector3" or not LineAttachment or not LineAttachment:IsA("Attachment") then
+        return nil
+    end
+    local r7, r8, r9 = FishHookJump.Pose(r1, FishMouthPivotOffset, r3_p21, ServerTimeNow)
+    if not r7 or not r8 or not r9 then return nil end
+    r1:PivotTo(r7)
+    r2_p21.CFrame = FishHookJump.LurePose(r3_p21, LineAttachment.Position, r8)
+    r21_0 = r7
+    return r9
+end
+local function isCurrentCast(r0: userdata?) -- Line: 769 | Name: isCurrentCast | Upvalues: ("LocalPlayer" (copy), "r39_0" (ref))
+    local RodSessionId = LocalPlayer:GetAttribute("RodSessionId")
+    local ActiveFishingCastToken = LocalPlayer:GetAttribute("ActiveFishingCastToken")
+    local RodState = LocalPlayer:GetAttribute("RodState")
+    local r4 = false
+    if r0 ~= nil then
+        r4 = false
+        if r0:GetAttribute("CaveId") == nil then
+            r4 = false
+            if r0.Parent == r39_0 then
+                r4 = false
+                if r39_0 ~= nil then
+                    r4 = false
+                    if typeof(RodSessionId) == "string" then
+                        r4 = false
+                        if RodSessionId ~= "" then
+                            r4 = false
+                            if typeof(ActiveFishingCastToken) == "number" then
+                                r4 = false
+                                if r0:GetAttribute("OwnerUserId") == LocalPlayer.UserId then
+                                    r4 = false
+                                    if r0:GetAttribute("RodSessionId") == RodSessionId then
+                                        r4 = false
+                                        if r0:GetAttribute("CastToken") == ActiveFishingCastToken then
+                                            r4 = false
+                                            if LocalPlayer:GetAttribute("RodEquipped") == true then
+                                                r4 = false
+                                                if LocalPlayer:GetAttribute("ExerciseActive") ~= true then
+                                                    r4 = true
+                                                    if RodState ~= "Casting" then
+                                                        r4 = true
+                                                        if RodState ~= "Fishing" then r4 = RodState == "Reeling" end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return r4
+end
+local function getSwingAge(r0: number?) -- Line: 789 | Name: getSwingAge | Upvalues: ("LocalPlayer" (copy), "Workspace" (copy))
+    if r0 == nil or r0 ~= LocalPlayer:GetAttribute("ManualCastShotAt") or LocalPlayer:GetAttribute("RodEquipped") ~= true or LocalPlayer:GetAttribute("ExerciseActive") == true then
+        return nil
+    end
+    local RodState = LocalPlayer:GetAttribute("RodState")
+    if RodState ~= "Windup" and RodState ~= "Casting" then return nil end
+    RodState = Workspace:GetServerTimeNow() - r0
+    if RodState >= -0.15 and RodState < 2.45 then return math.max(0, RodState) end
+    return nil
+end
+local function updateSwingCamera(r0: userdata, r1: number) -- Line: 802 | Name: updateSwingCamera | Upvalues: ("getSwingAge" (copy), "_ManualCastShotAt" (ref), "LocalPlayer" (copy), "r16_0" (ref), "r17_0" (ref), "Workspace" (copy))
+    local r2_p24 = getSwingAge(_ManualCastShotAt)
+    local Character = LocalPlayer.Character
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    local __up3 = r16_0
+    if r2_p24 == nil or not Character or not HumanoidRootPart or not HumanoidRootPart:IsA("BasePart") or not __up3 or not __up3:IsDescendantOf(Character) then
+        return false
+    end
+    local r6 = HumanoidRootPart.Position + vector.create(0, 0.550000011920929, 0)
+    local r7 = __up3.WorldPosition - r6
+    __up3 = r6 + r7 * 0.28
+    r6 = math.clamp(r2_p24 / 1.08, 0, 1)
+    local r8 = math.clamp((r2_p24 - 1.08) / 0.5, 0, 1)
+    local r10 = r0.ViewportSize.Y / math.max(r0.ViewportSize.X, 1)
+    r2_p24 = math.clamp(r10, 1, 1.5)
+    r10 = Vector3.new(r17_0 * (9.5 - r8 * 1.8), 3.2 - r6 * 0.8, r8 * 3.6 + 2.2) * r2_p24
+    local r9 = r10 * math.max(1, r7.Magnitude / 6)
+    r7 = __up3 + HumanoidRootPart.CFrame:VectorToWorldSpace(r9)
+    r9 = RaycastParams.new()
+    r9.ExcludeInstances = {Character}
+    r9.IgnoreWater = true
+    r9.RespectCanCollide = true
+    HumanoidRootPart = Workspace:Raycast(__up3, r7 - __up3, r9)
+    if HumanoidRootPart then r7 = HumanoidRootPart.Position:Lerp(__up3, 0.12) end
+    local r11_p24 = math.max(0, r1) * -15
+    r9 = 1 - math.exp(r11_p24)
+    HumanoidRootPart = (1 - r6) * 5 + 57 - r8 * 2
+    r0.CameraType = Enum.CameraType.Scriptable
+    r0.FieldOfView += (HumanoidRootPart - r0.FieldOfView) * r9
+    local r12 = CFrame.lookAt(r7, __up3)
+    r0.CFrame = r0.CFrame:Lerp(r12, r9)
+    r0.Focus = CFrame.new(__up3)
+    return true
+end
+local function updateCamera(r0: number) -- Line: 840 | Name: updateCamera | Upvalues: ("Workspace" (copy), "FishingReelVFX" (copy), "r8" (ref), "CastDistancePresentation" (copy), "FishingCastVFX" (copy), "r14" (ref), "updateSwingCamera" (copy), "beginRestoration" (copy), "r26_0" (ref), "r28_0" (ref), "r29_0" (ref), "canShowBirdEscape" (copy), "r30_0" (ref), "makeBirdShot" (copy), "isCurrentCast" (copy), "r18_0" (ref), "r19_0" (ref), "applyFishHookJumpPresentation" (copy), "r20_0" (ref), "r22_0" (ref), "makeFishHookJumpShot" (copy), "fitSmoothedFishShot" (copy), "r21_0" (ref), "applyFishReturnPresentation" (copy), "r23_0" (ref), "updateFishReturnShot" (copy), "finishRestoration" (copy), "r33_0" (ref), "identity" (ref), "identity_2" (ref), "r36_0" (ref), "presentPilotFlight" (copy), "updateCastDirection" (copy))
+    local CurrentCamera = Workspace.CurrentCamera
+    if CurrentCamera == nil then
+        FishingReelVFX.Stop()
+        r8 = nil
+        CastDistancePresentation.Stop()
+        FishingCastVFX.Update(nil)
+        return
+    end
+    if r14 == "CastSwing" then
+        if not updateSwingCamera(CurrentCamera, r0) then beginRestoration() end
+        return
+    end
+    local __up8 = r26_0
+    local __up15, __up16, CastState, r6_p25
+    if __up8 and __up8:IsDescendantOf(Workspace) then
+        __up15 = __up8:GetAttribute("BirdReturnPose")
+        if typeof(__up15) == "CFrame" then
+            r6_p25 = math.max(0, r0) * -16
+            __up16 = 1 - math.exp(r6_p25)
+            CastState = (r28_0 or __up15):Lerp(__up15, __up16)
+            r28_0 = CastState
+            __up8.CFrame = CastState
+        end
+    end
+    __up8 = r29_0
+    local r7_p25, Position
+    if __up8 then
+        local ServerTimeNow = Workspace:GetServerTimeNow()
+        local __up15 = ServerTimeNow - __up8.startedAt
+        if canShowBirdEscape() and __up15 < 1.05 then
+            local modelName = __up8.modelName
+            local r6_p25
+            if typeof(modelName) ~= "string" then
+                ServerTimeNow = nil
+            else
+                r6_p25 = Workspace:FindFirstChild(modelName)
+                ServerTimeNow = if r6_p25 and r6_p25:IsA("Model") then r6_p25:FindFirstChildWhichIsA("MeshPart") else nil
+            end
+            modelName = Workspace:FindFirstChild(__up8.cargoName)
+            if ServerTimeNow and modelName and modelName:IsA("Model") and modelName:FindFirstChildWhichIsA("BasePart", true) and (r14 == "BirdEscape" or __up15 <= 0.4) then
+                if r14 ~= "BirdEscape" then
+                    r14 = "BirdEscape"
+                    r8 = nil
+                    CastDistancePresentation.Stop()
+                    FishingCastVFX.Update(nil)
+                    FishingReelVFX.Stop()
+                end
+                if r30_0 then CurrentCamera.FieldOfView = r30_0.fieldOfView end
+                local BirdCarryOffset = modelName:GetAttribute("BirdCarryOffset")
+                if ServerTimeNow == r26_0 and typeof(BirdCarryOffset) == "CFrame" then
+                    modelName:PivotTo(ServerTimeNow.CFrame * BirdCarryOffset)
+                end
+                r7_p25, Position = makeBirdShot(CurrentCamera, ServerTimeNow, modelName, 0.63)
+                local r10 = math.max(0, r0) * -17
+                BirdCarryOffset = 1 - math.exp(r10)
+                local r9 = if __up8.lastFocus then Position - __up8.lastFocus else vector.create(0, 0, 0)
+                __up8.lastFocus = Position
+                CurrentCamera.CameraType = Enum.CameraType.Scriptable
+                CurrentCamera.CFrame = (CurrentCamera.CFrame + r9):Lerp(r7_p25, BirdCarryOffset)
+                CurrentCamera.Focus = CFrame.new(Position)
+                return
+            end
+        end
+        if r14 == "BirdEscape" then
+            beginRestoration()
+        elseif __up15 > 0.4 then
+            r29_0 = nil
+        end
+    end
+    if r14 ~= "Idle" and r14 ~= "Restore" and not isCurrentCast(r18_0) then
+        beginRestoration()
+        return
+    end
+    if r14 ~= "Restore" and r18_0 and r19_0 and r18_0:GetAttribute("CastState") == "Hooked" then
+        __up8 = r18_0:FindFirstChild("HookedFish")
+        if __up8 and __up8:IsA("Model") then
+            local __up15 = applyFishHookJumpPresentation(r18_0, __up8, r19_0)
+            if __up15 then
+                if r14 ~= "HookJump" then
+                    r8 = nil
+                    CastDistancePresentation.Stop()
+                    FishingCastVFX.Update(nil)
+                end
+                r14 = "HookJump"
+                r20_0 = __up8
+                r22_0 = true
+                FishingReelVFX.Stop()
+                CurrentCamera.CameraType = Enum.CameraType.Scriptable
+                if r30_0 then CurrentCamera.FieldOfView = r30_0.fieldOfView end
+                local __up16, CastState = makeFishHookJumpShot(CurrentCamera, __up8, __up15)
+                local Position = math.max(0, r0) * -12
+                local r6_p25 = 1 - math.exp(Position)
+                CurrentCamera.CFrame = fitSmoothedFishShot(CurrentCamera, __up8, CurrentCamera.CFrame:Lerp(__up16, r6_p25))
+                CurrentCamera.Focus = CFrame.new(CastState)
+                return
+            end
+        end
+    end
+    if r14 ~= "Restore" and r14 ~= "FishReturn" and r18_0 and r18_0:IsDescendantOf(Workspace) and r18_0:GetAttribute("CastState") == "Retrieving" then
+        local HookedFish = r18_0:FindFirstChild("HookedFish")
+        if HookedFish == nil or not HookedFish:IsA("Model") then
+            beginRestoration()
+            return
+        end
+        r20_0 = HookedFish
+        r21_0 = r22_0 and HookedFish:GetPivot() or nil
+        r8 = nil
+        CastDistancePresentation.Stop()
+        FishingCastVFX.Update(nil)
+        r14 = "FishReturn"
+    end
+    if r14 == "FishReturn" then
+        local __up18 = r20_0
+        local __up15_2 = r18_0
+        local __up16_2 = r19_0
+        if __up18 == nil or __up18.Parent == nil or __up15_2 == nil or __up15_2.Parent == nil or __up16_2 == nil or not __up16_2:IsDescendantOf(__up15_2) or __up15_2:GetAttribute("CastState") ~= "Retrieving" then
+            beginRestoration()
+            return
+        end
+        applyFishReturnPresentation(__up15_2, __up18, __up16_2, r0)
+        CurrentCamera.CameraType = Enum.CameraType.Scriptable
+        if r30_0 then CurrentCamera.FieldOfView = r30_0.fieldOfView end
+        __up16_2 = __up15_2:GetAttribute("CastToken")
+        if typeof(__up16_2) == "number" then r23_0 = __up16_2 end
+        local BirdChaseModel = __up15_2:GetAttribute("BirdChaseModel")
+        if typeof(BirdChaseModel) ~= "string" then
+            __up16_2 = nil
+        else
+            local r7_p25 = Workspace:FindFirstChild(BirdChaseModel)
+            __up16_2 = if r7_p25 and r7_p25:IsA("Model") then r7_p25:FindFirstChildWhichIsA("MeshPart") else nil
+        end
+        BirdChaseModel = updateFishReturnShot(CurrentCamera, __up18, __up16_2, __up15_2:GetAttribute("BirdReelPose"), r0)
+        FishingReelVFX.Update(CurrentCamera, __up18, BirdChaseModel, r0)
+        return
+    end
+    if r14 == "Restore" then
+        local __up12 = r30_0
+        if __up12 == nil then
+            finishRestoration(CurrentCamera)
+            return
+        end
+        CurrentCamera.CameraType = Enum.CameraType.Scriptable
+        r33_0 += math.max(0, r0)
+        local __up16 = math.clamp(r33_0 / 0.55, 0, 1)
+        local CastState = __up16 * __up16 * (3 - __up16 * 2)
+        CurrentCamera.CFrame = identity:Lerp(__up12.cframe, CastState)
+        CurrentCamera.Focus = identity_2:Lerp(__up12.focus, CastState)
+        CurrentCamera.FieldOfView = r36_0 + (__up12.fieldOfView - r36_0) * CastState
+        if __up16 >= 1 then finishRestoration(CurrentCamera) end
+        return
+    end
+    local __up15 = r18_0
+    local __up16 = r19_0
+    if __up15 == nil or __up16 == nil or not __up15:IsDescendantOf(Workspace) or not __up16:IsDescendantOf(__up15) then
+        beginRestoration()
+        return
+    end
+    local CastState = __up15:GetAttribute("CastState")
+    if CastState == "Flying" then
+        r14 = "Flight"
+    else
+        if CastState ~= "Landed" and CastState ~= "Floating" and CastState ~= "Struck" and CastState ~= "Submerged" and CastState ~= "Hooked" then
+            beginRestoration()
+            return
+        end
+        r14 = "Observe"
+    end
+    CurrentCamera.CameraType = Enum.CameraType.Scriptable
+    if r30_0 then CurrentCamera.FieldOfView = r30_0.fieldOfView end
+    local r6_p25 = presentPilotFlight(__up15, __up16, CastState)
+    local r7_p25 = updateCastDirection(__up15, __up16)
+    local Position = __up16.Position
+    local r9 = r14 == "Flight" and __up15:GetAttribute("ManualCastCinematic") == true
+    CastDistancePresentation.Update(__up15, CastState, r0, r6_p25)
+    local r10
+    local r13
+    local r14_p25
+    local r11
+    local r12
+    if r9 then
+        CastState = r6_p25 or __up15:GetAttribute("FlightAlpha")
+        r10 = __up15:GetAttribute("CastPower")
+        r13 = if typeof(CastState) == "number" then CastState else nil
+        r14_p25 = if typeof(r10) == "number" then r10 else nil
+        FishingCastVFX.Update(__up16, r13, r14_p25)
+        r10 = if typeof(CastState) == "number" then math.clamp((CastState - 0.73) / 0.25, 0, 1) else 0
+        CastState = r10 * r10 * (3 - r10 * 2)
+        r10 = CastState * 10 + 15
+        r11 = CastState * 4 + 6
+        r12 = CurrentCamera.FieldOfView
+        r13 = math.max(r12, 72)
+        CurrentCamera.FieldOfView = r13 + (r12 - r13) * CastState
+        r13 = Position - r7_p25 * r10 + Vector3.new(0, r11, 0)
+        r14_p25 = CFrame.lookAt(r13, Position, vector.create(0, 1, 0))
+        CurrentCamera.CFrame = r14_p25
+    else
+        FishingCastVFX.Update(nil)
+        r10 = r14 == "Flight" and 10 or 25
+        r11 = r14 == "Flight" and 4 or 10
+        r12 = r14 == "Flight" and 8 or 3.2
+        r14_p25 = Position - r7_p25 * r10 + Vector3.new(0, r11, 0)
+        r13 = CFrame.lookAt(r14_p25, Position, vector.create(0, 1, 0))
+        local r15 = - r12 * math.max(0, r0)
+        r11 = 1 - math.exp(r15)
+        CurrentCamera.CFrame = CurrentCamera.CFrame:Lerp(r13, r11)
+    end
+    CurrentCamera.Focus = CFrame.new(Position)
+end
+local function ensureRenderBinding() -- Line: 1067 | Name: ensureRenderBinding | Upvalues: ("r37_0" (ref), "RunService" (copy), "Players" (copy), "r12" (copy), "updateCamera" (copy))
+    if r37_0 then return end
+    RunService:BindToRenderStep(Players, r12, updateCamera)
+    r37_0 = true
+end
+local function startCinematic(r0_p27: userdata, r1_p27: userdata) -- Line: 1077 | Name: startCinematic | Upvalues: ("isCurrentCast" (copy), "r18_0" (ref), "r19_0" (ref), "r14" (ref), "Workspace" (copy), "r30_0" (ref), "captureCameraState" (copy), "FishingReelVFX" (copy), "r8" (ref), "CastDistancePresentation" (copy), "FishingCastVFX" (copy), "r16_0" (ref), "r38_0" (ref), "r23_0" (ref), "r24_0" (ref), "r25_0" (ref), "r26_0" (ref), "r27_0" (ref), "r28_0" (ref), "r29_0" (ref), "r20_0" (ref), "r21_0" (ref), "r22_0" (ref), "r32_0" (ref), "r31_0" (ref), "r37_0" (ref), "RunService" (copy), "Players" (copy), "r12" (copy), "updateCamera" (copy))
+    if not isCurrentCast(r0_p27) or r1_p27.Parent ~= r0_p27 then return end
+    local CastState = r0_p27:GetAttribute("CastState")
+    if CastState ~= "Flying" and CastState ~= "Landed" and CastState ~= "Floating" and CastState ~= "Struck" and CastState ~= "Submerged" and CastState ~= "Hooked" and CastState ~= "Retrieving" then
+        return
+    end
+    if r18_0 == r0_p27 and r19_0 == r1_p27 and r14 ~= "Restore" then return end
+    local CurrentCamera = Workspace.CurrentCamera
+    if CurrentCamera == nil then return end
+    if r30_0 == nil then r30_0 = captureCameraState(CurrentCamera) end
+    FishingReelVFX.Stop()
+    r8 = nil
+    CastDistancePresentation.Stop()
+    FishingCastVFX.Update(nil)
+    r16_0 = nil
+    r38_0 += 1
+    r23_0 = nil
+    r24_0 = nil
+    r25_0 = nil
+    local __up16 = r26_0
+    if __up16 and __up16:IsDescendantOf(Workspace) then
+        local BirdReturnPose = __up16:GetAttribute("BirdReturnPose")
+        if typeof(BirdReturnPose) == "CFrame" then __up16.CFrame = BirdReturnPose end
+    end
+    r26_0 = nil
+    r27_0 = nil
+    r28_0 = nil
+    r29_0 = nil
+    r18_0 = r0_p27
+    r19_0 = r1_p27
+    __up16 = r0_p27:FindFirstChild("HookedFish")
+    local r5_p27
+    if __up16 and __up16:IsA("Model") then
+        r5_p27 = __up16
+        if not r5_p27 then r5_p27 = nil end
+    else
+        r5_p27 = nil
+    end
+    r20_0 = r5_p27
+    r21_0 = nil
+    r22_0 = false
+    r5_p27 = if r0_p27:GetAttribute("ManualCastCinematic") == true then nil else r1_p27.Position
+    r32_0 = r5_p27
+    __up16 = r0_p27:GetAttribute("LandingPosition")
+    if typeof(__up16) == "Vector3" then
+        local r6_p27 = __up16 - r1_p27.Position
+        local r7_p27 = Vector3.new(r6_p27.X, 0, r6_p27.Z)
+        r5_p27 = if r7_p27.Magnitude <= 0.01 then nil else r7_p27.Unit
+        if r5_p27 then r31_0 = r5_p27 end
+    end
+    r14 = if CastState == "Flying" then "Flight" else if CastState == "Retrieving" then "FishReturn" else "Observe"
+    CurrentCamera.CameraType = Enum.CameraType.Scriptable
+    if r37_0 then return end
+    RunService:BindToRenderStep(Players, r12, updateCamera)
+    r37_0 = true
+end
+local function considerCastInstance(r0: userdata) -- Line: 1131 | Name: considerCastInstance | Upvalues: ("r39_0" (ref), "r42_0" (copy), "considerCastInstance" (copy), "startCinematic" (copy))
+    local r1
+    local r2
+    local r3
+    if r0.Name == "Lure" and r0:IsA("BasePart") then
+        r1 = r0
+        r3 = r0.Parent
+        if r3 and r3:IsA("Model") then r2 = r3 end
+    elseif r0:IsA("Model") then
+        r2 = r0
+        r3 = r0:FindFirstChild("Lure")
+        if r3 and r3:IsA("BasePart") then r1 = r3 end
+    end
+    if r2 and r2.Parent == r39_0 then
+        if r42_0[r2] == nil then
+            r42_0[r2] = r2.AttributeChanged:Connect(function(r0: string) -- Line: 1153 | Upvalues: ("considerCastInstance" (upval), "r2" (ref))
+                if r0 == "OwnerUserId" or r0 == "RodSessionId" or r0 == "CastToken" or r0 == "CastState" then
+                    considerCastInstance(r2)
+                end
+            end)
+        end
+        if r1 then startCinematic(r2, r1) end
+    end
+end
+local function bindCastsFolder(r0: userdata) -- Line: 1165 | Name: bindCastsFolder | Upvalues: ("r39_0" (ref), "r40_0" (ref), "r41_0" (ref), "r42_0" (copy), "considerCastInstance" (copy))
+    if r0.Name ~= "FishingCasts" or not r0:IsA("Folder") or r0 == r39_0 then return end
+    if r40_0 then
+        r40_0:Disconnect()
+        r40_0 = nil
+    end
+    if r41_0 then r41_0:Disconnect() end
+    for r4, r5 in r42_0 do
+        r5:Disconnect()
+    end
+    table.clear(r42_0)
+    r39_0 = r0
+    r41_0 = r0.DescendantRemoving:Connect(function(r0: userdata) -- Line: 1181 | Upvalues: ("r42_0" (upval))
+        if r0:IsA("Model") then
+            local r1 = r42_0[r0]
+            if r1 then
+                r1:Disconnect()
+                r42_0[r0] = nil
+            end
+        end
+    end)
+    r40_0 = r0.DescendantAdded:Connect(function(r0: userdata) -- Line: 1192 | Upvalues: ("considerCastInstance" (upval))
+        considerCastInstance(r0)
+    end)
+    local Children, r2, r3 = r0:GetChildren()
+    for r4, r5 in Children, r2, r3 do
+        considerCastInstance(r5)
+    end
+end
+local FishingCasts = Workspace:FindFirstChild("FishingCasts")
+if FishingCasts then bindCastsFolder(FishingCasts) end
+Workspace.ChildAdded:Connect(function(r0: userdata) -- Line: 1207 | Upvalues: ("bindCastsFolder" (copy))
+    bindCastsFolder(r0)
+end)
+LocalPlayer.CharacterRemoving:Connect(function(r0_p34: userdata) -- Line: 1212 | Upvalues: ("r8" (ref), "CastDistancePresentation" (copy), "FishingCastVFX" (copy), "r16_0" (ref), "r23_0" (ref), "r24_0" (ref), "r25_0" (ref), "r26_0" (ref), "Workspace" (copy), "r27_0" (ref), "r28_0" (ref), "r29_0" (ref), "FishingReelVFX" (copy), "r30_0" (ref), "finishRestoration" (copy), "r37_0" (ref), "RunService" (copy), "Players" (copy), "r14" (ref), "r18_0" (ref), "r19_0" (ref), "r20_0" (ref), "r21_0" (ref), "r32_0" (ref))
+    r8 = nil
+    CastDistancePresentation.Stop()
+    FishingCastVFX.Update(nil)
+    r16_0 = nil
+    r23_0 = nil
+    r24_0 = nil
+    r25_0 = nil
+    local __up7 = r26_0
+    if __up7 and __up7:IsDescendantOf(Workspace) then
+        local BirdReturnPose = __up7:GetAttribute("BirdReturnPose")
+        if typeof(BirdReturnPose) == "CFrame" then __up7.CFrame = BirdReturnPose end
+    end
+    r26_0 = nil
+    r27_0 = nil
+    r28_0 = nil
+    r29_0 = nil
+    FishingReelVFX.Stop()
+    __up7 = Workspace.CurrentCamera
+    if __up7 and r30_0 then
+        finishRestoration(__up7)
+        return
+    end
+    if r37_0 then
+        RunService:UnbindFromRenderStep(Players)
+        r37_0 = false
+    end
+    r14 = "Idle"
+    r18_0 = nil
+    r19_0 = nil
+    r20_0 = nil
+    r21_0 = nil
+    r32_0 = nil
+    r30_0 = nil
+end)
+local function considerSwing() -- Line: 1241 | Name: considerSwing | Upvalues: ("r14" (ref), "LocalPlayer" (copy), "_ManualCastShotAt" (ref), "getSwingAge" (copy), "Workspace" (copy), "r30_0" (ref), "captureCameraState" (copy), "r17_0" (ref), "r16_0" (ref), "r38_0" (ref), "r37_0" (ref), "RunService" (copy), "Players" (copy), "r12" (copy), "updateCamera" (copy))
+    if r14 ~= "Idle" and r14 ~= "Restore" then return end
+    local ManualCastShotAt = LocalPlayer:GetAttribute("ManualCastShotAt")
+    if typeof(ManualCastShotAt) ~= "number" or ManualCastShotAt == _ManualCastShotAt then return end
+    local r1_p35 = getSwingAge(ManualCastShotAt)
+    if r1_p35 == nil or r1_p35 > 0.75 then return end
+    r1_p35 = LocalPlayer.Character
+    local Tool = r1_p35 and r1_p35:FindFirstChildOfClass("Tool")
+    local RodTipAttachment = Tool and Tool:FindFirstChild("RodTipAttachment", true)
+    Tool = Workspace.CurrentCamera
+    if not r1_p35 or not RodTipAttachment or not RodTipAttachment:IsA("Attachment") or not Tool then
+        return
+    end
+    if r14 == "Idle" and Tool.CameraType == Enum.CameraType.Scriptable then return end
+    if r30_0 == nil then r30_0 = captureCameraState(Tool) end
+    local Pivot = r1_p35:GetPivot()
+    r17_0 = if (Tool.CFrame.Position - Pivot.Position):Dot(Pivot.RightVector) < -0.75 then -1 else 1
+    r16_0 = RodTipAttachment
+    _ManualCastShotAt = ManualCastShotAt
+    r38_0 += 1
+    r14 = "CastSwing"
+    Tool.CameraType = Enum.CameraType.Scriptable
+    if r37_0 then return end
+    RunService:BindToRenderStep(Players, r12, updateCamera)
+    r37_0 = true
+end
+local function handleEligibilityChanged() -- Line: 1269 | Name: handleEligibilityChanged | Upvalues: ("r14" (ref), "canShowBirdEscape" (copy), "beginRestoration" (copy), "getSwingAge" (copy), "_ManualCastShotAt" (ref), "isCurrentCast" (copy), "r18_0" (ref), "r39_0" (ref), "considerCastInstance" (copy), "considerSwing" (copy))
+    if r14 == "BirdEscape" then
+        if not canShowBirdEscape() then beginRestoration() end
+    elseif r14 == "CastSwing" then
+        if getSwingAge(_ManualCastShotAt) == nil then beginRestoration() end
+    elseif r14 ~= "Idle" and r14 ~= "Restore" and not isCurrentCast(r18_0) then
+        beginRestoration()
+    end
+    if r39_0 then
+        local Children, r1, r2 = r39_0:GetChildren()
+        for r3, r4 in Children, r1, r2 do
+            considerCastInstance(r4)
+        end
+    end
+    considerSwing()
+end
+for r77, r78 in {"RodEquipped", "ExerciseActive", "RodState", "RodSessionId", "ActiveFishingCastToken", "ManualCastShotAt"} do
+    table.insert(r43_0, LocalPlayer:GetAttributeChangedSignal(r78):Connect(handleEligibilityChanged))
+end
+table.insert(r43_0, RodCastRequest.OnClientEvent:Connect(function(r0, r1, r2_p37, r3, r4) -- Line: 1293 | Upvalues: ("r23_0" (ref), "r14" (ref), "canShowBirdEscape" (copy), "Workspace" (copy), "r29_0" (ref))
+    if r0 ~= "BirdTheftCamera" or typeof(r1) ~= "number" or r1 ~= r23_0 or typeof(r2_p37) ~= "string" or typeof(r3) ~= "string" or typeof(r4) ~= "number" then
+        return
+    end
+    if r14 ~= "FishReturn" and r14 ~= "Restore" or not canShowBirdEscape() then return end
+    local r5 = Workspace:GetServerTimeNow() - r4
+    if not (r5 >= -0.1) or not (r5 <= 0.4) then return end
+    r29_0 = {modelName = r2_p37, cargoName = r3, startedAt = r4}
+end))
+script.Destroying:Connect(function() -- Line: 1304 | Upvalues: ("r8" (ref), "CastDistancePresentation" (copy), "FishingCastVFX" (copy), "r16_0" (ref), "r40_0" (ref), "r41_0" (ref), "r42_0" (copy), "r43_0" (copy), "Workspace" (copy), "r30_0" (ref), "finishRestoration" (copy), "r37_0" (ref), "RunService" (copy), "Players" (copy), "FishingReelVFX" (copy))
+    r8 = nil
+    CastDistancePresentation.Stop()
+    FishingCastVFX.Update(nil)
+    r16_0 = nil
+    if r40_0 then r40_0:Disconnect() end
+    if r41_0 then r41_0:Disconnect() end
+    for r3, r4 in r42_0 do
+        r4:Disconnect()
+    end
+    table.clear(r42_0)
+    for r3, r4 in r43_0 do
+        r4:Disconnect()
+    end
+    table.clear(r43_0)
+    local CurrentCamera = Workspace.CurrentCamera
+    if CurrentCamera and r30_0 then
+        finishRestoration(CurrentCamera)
+        return
+    end
+    if r37_0 then
+        RunService:UnbindFromRenderStep(Players)
+        r37_0 = false
+    end
+    FishingReelVFX.Stop()
+end)

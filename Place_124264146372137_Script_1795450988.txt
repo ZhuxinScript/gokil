@@ -1,0 +1,390 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.GourdgrinPresentation
+-- Took 1.65s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players_2 = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+local CosmeticRange = require(script.Parent:WaitForChild("CosmeticRange"))
+local Splash = ReplicatedStorage:WaitForChild("GourdgrinEffects"):WaitForChild("Splash")
+ReplicatedStorage = {}
+local function livingRoot(r0_p0: userdata) -- Line: 45 | Name: livingRoot | Upvalues: ("Players_2" (copy), "Workspace" (copy))
+    local Character = r0_p0.Character
+    local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if r0_p0.Parent ~= Players_2 or not Character or not Character:IsDescendantOf(Workspace) or not Humanoid or Humanoid.Health <= 0 or not HumanoidRootPart or not HumanoidRootPart:IsA("BasePart") then
+        return nil
+    end
+    return HumanoidRootPart
+end
+local function chooseTarget(r0_p1: vector, r1: userdata) -- Line: 59 | Name: chooseTarget | Upvalues: ("Players_2" (copy), "livingRoot" (copy), "CosmeticRange" (copy))
+    local r2_0 = {}
+    local Players, r4, r5_p1 = Players_2:GetPlayers()
+    for r6, r7 in Players, r4, r5_p1 do
+        local r8 = livingRoot(r7)
+        if not (not r8 or not ((r8.Position - r0_p1).Magnitude <= 70) or not CosmeticRange.Contains(r8.Position, 90)) then
+            table.insert(r2_0, r7)
+        end
+    end
+    if #r2_0 > 0 then return r2_0[r1:NextInteger(1, #r2_0)] end
+    return nil
+end
+local function arc(r0: vector, r1: vector, r2: number, r3: number) -- Line: 73 | Name: arc
+    return r0:Lerp(r1, r2) + vector.create(0, 1, 0) * (r3 * 4 * r2 * (1 - r2))
+end
+function ReplicatedStorage.new(r0: userdata, r1: userdata) -- Line: 80 | Name: new | Upvalues: ("Workspace" (copy), "PlayerSettings" (copy), "CosmeticRange" (copy), "livingRoot" (copy), "Splash" (copy), "RunService" (copy), "chooseTarget" (copy))
+    local GourdgrinMonkeyV2 = r0:FindFirstChild("GourdgrinMonkeyV2")
+    local GourdgrinPumpkin = r0:FindFirstChild("GourdgrinPumpkin")
+    local Hand_R = GourdgrinMonkeyV2 and GourdgrinMonkeyV2:FindFirstChild("Hand_R", true)
+    local GourdgrinThrowSocket = Hand_R and Hand_R:FindFirstChild("GourdgrinThrowSocket")
+    local AnimationController = r0:FindFirstChildOfClass("AnimationController")
+    local Animator = AnimationController and AnimationController:FindFirstChildOfClass("Animator")
+    AnimationController = r0:FindFirstChild("animations")
+    local idle = AnimationController and AnimationController:FindFirstChild("idle")
+    local attack = AnimationController and AnimationController:FindFirstChild("attack")
+    AnimationController = r0:FindFirstChild("monkey")
+    local attack_2 = r0:FindFirstChild("attack")
+    assert(GourdgrinMonkeyV2 and GourdgrinPumpkin and Hand_R and GourdgrinThrowSocket and Animator and idle and idle:IsA("Animation") and attack and attack:IsA("Animation") and AnimationController and AnimationController:IsA("Sound") and attack_2 and attack_2:IsA("Sound"), "GourdgrinMonkey requires its authored body, hand socket, pumpkin, Animator, clips and sounds")
+    local r11 = {}
+    local r12 = true
+    local r13 = Random.new()
+    local Pivot = r0:GetPivot()
+    local Unit = Vector3.new(GourdgrinMonkeyV2.CFrame.LookVector.X, 0, GourdgrinMonkeyV2.CFrame.LookVector.Z).Unit
+    local LocalTransparencyModifier = GourdgrinPumpkin.LocalTransparencyModifier
+    local r17
+    local r18
+    local r19
+    local r20_0 = 0
+    local r21_0 = true
+    local r22_0 = {}
+    local Descendants, r24, r25 = GourdgrinMonkeyV2:GetDescendants()
+    for GourdgrinLocalEffects, r27 in Descendants, r24, r25 do
+        if r27:IsA("Bone") then r22_0[r27] = r27.Transform end
+    end
+    Descendants = {}
+    r24 = nil
+    r25 = nil
+    local GourdgrinLocalEffects = Instance.new("Folder")
+    GourdgrinLocalEffects.Name = "GourdgrinLocalEffects"
+    GourdgrinLocalEffects.Parent = Workspace
+    local function active() -- Line: 127 | Name: active | Upvalues: ("r12" (ref), "r0" (copy), "Workspace" (upval), "PlayerSettings" (upval), "r1" (copy), "CosmeticRange" (upval), "r17" (ref))
+        local __up0 = r12
+        if __up0 then
+            __up0 = r0:IsDescendantOf(Workspace)
+            if __up0 then
+                __up0 = PlayerSettings.Get(r1, "WorldAnimationsEnabled")
+                if __up0 then
+                    __up0 = CosmeticRange.Contains(r0:GetPivot().Position, 90)
+                    if __up0 then
+                        __up0 = true
+                        if r17 ~= nil then
+                        end
+                        __up0 = CosmeticRange.Contains(r17.Position, 90)
+                    end
+                end
+            end
+        end
+        return __up0
+    end
+    local function removeEffects(r0: boolean) -- Line: 135 | Name: removeEffects | Upvalues: ("Descendants" (copy), "Workspace" (upval), "CosmeticRange" (upval))
+        local r1 = os.clock()
+        for r5_arg4, r6 in Descendants do
+            if not (r0 and not (r6 <= r1) and r5_arg4.Parent ~= nil and r5_arg4:IsDescendantOf(Workspace) and CosmeticRange.Contains(r5_arg4.WorldPosition, 90)) then
+                r5_arg4:Destroy()
+                Descendants[r5_arg4] = nil
+            end
+        end
+    end
+    local function resetMotion() -- Line: 148 | Name: resetMotion | Upvalues: ("r20_0" (ref), "r17" (ref), "r18" (ref), "r25" (ref), "r24" (ref), "r0" (copy), "Pivot" (copy))
+        r20_0 += 1
+        if r17 then
+            r17:Destroy()
+            r17 = nil
+        end
+        if r18 then
+            r18:Destroy()
+            r18 = nil
+        end
+        if r25 then r25:Stop(0) end
+        if r24 then r24:Stop(0) end
+        if r0.Parent then r0:PivotTo(Pivot) end
+    end
+    local function suspend() -- Line: 170 | Name: suspend | Upvalues: ("r21_0" (ref), "resetMotion" (copy), "Descendants" (copy))
+        if r21_0 then return end
+        r21_0 = true
+        resetMotion()
+        local r0 = os.clock()
+        for r4, r5 in Descendants do
+            r4:Destroy()
+            Descendants[r4] = nil
+        end
+    end
+    local function playVoice() -- Line: 181 | Name: playVoice | Upvalues: ("r18" (ref), "AnimationController" (copy), "GourdgrinMonkeyV2" (copy))
+        if r18 and r18.IsPlaying then return end
+        if r18 then r18:Destroy() end
+        r18 = AnimationController:Clone()
+        r18.Looped = false
+        r18.RollOffMode = Enum.RollOffMode.InverseTapered
+        r18.RollOffMinDistance = 8
+        r18.RollOffMaxDistance = 85
+        r18.Parent = GourdgrinMonkeyV2
+        r18:Play()
+    end
+    local function splash(r0: userdata, r1_p8: userdata) -- Line: 197 | Name: splash | Upvalues: ("livingRoot" (upval), "active" (copy), "CosmeticRange" (upval), "Pivot" (copy), "Splash" (upval), "Descendants" (copy), "attack_2" (copy), "PlayerSettings" (upval), "r1" (copy))
+        if livingRoot(r0) ~= r1_p8 or not active() or not CosmeticRange.Contains(r1_p8.Position, 90) then
+            return
+        end
+        local Parent = r1_p8.Parent
+        local UpperTorso = Parent:FindFirstChild("UpperTorso") or Parent:FindFirstChild("Torso") or r1_p8
+        Parent = Vector3.new(Pivot.Position.X - UpperTorso.Position.X, 0, Pivot.Position.Z - UpperTorso.Position.Z)
+        Parent = Parent.Magnitude < 0.01 and vector.create(0, 0, 1) or Parent.Unit
+        local r4_arg5 = Splash:Clone()
+        r4_arg5.Position = UpperTorso.CFrame:PointToObjectSpace(UpperTorso.Position + Parent * 0.8 + vector.create(0, 0.25, 0))
+        r4_arg5.Parent = UpperTorso
+        local r7 = os.clock()
+        Descendants[r4_arg5] = r7 + Splash:GetAttribute("CleanupSeconds")
+        UpperTorso = attack_2:Clone()
+        UpperTorso.Looped = false
+        UpperTorso.RollOffMode = Enum.RollOffMode.InverseTapered
+        UpperTorso.RollOffMinDistance = 6
+        UpperTorso.RollOffMaxDistance = 75
+        UpperTorso.Parent = r4_arg5
+        UpperTorso:Play()
+        if PlayerSettings.Get(r1, "VfxEnabled") then
+            local Children, r6_arg6, r7 = r4_arg5:GetChildren()
+            for r8, r9 in Children, r6_arg6, r7 do
+                if r9:IsA("ParticleEmitter") then r9:Emit(r9:GetAttribute("BurstCount")) end
+            end
+        end
+    end
+    local function throw(r0_p9: userdata) -- Line: 232 | Name: throw | Upvalues: ("livingRoot" (upval), "r20_0" (ref), "Pivot" (copy), "Unit" (copy), "r17" (ref), "GourdgrinPumpkin" (copy), "Hand_R" (copy), "GourdgrinThrowSocket" (copy), "GourdgrinLocalEffects" (copy), "r25" (ref), "r18" (ref), "AnimationController" (copy), "GourdgrinMonkeyV2" (copy), "active" (copy), "r0" (copy), "RunService" (upval), "CosmeticRange" (upval), "splash" (copy), "Descendants" (copy), "Workspace" (upval))
+        local r1 = livingRoot(r0_p9)
+        if not r1 then return end
+        local __up1 = r20_0
+        local r3_p9 = Vector3.new(r1.Position.X - Pivot.Position.X, 0, r1.Position.Z - Pivot.Position.Z)
+        r3_p9 = if r3_p9.Magnitude < 0.01 then Unit else r3_p9.Unit
+        local r4_p9 = math.atan2(Unit:Cross(r3_p9).Y, Unit:Dot(r3_p9))
+        r3_p9 = CFrame.new(Pivot.Position) * CFrame.Angles(0, r4_p9, 0) * Pivot.Rotation
+        r17 = GourdgrinPumpkin:Clone()
+        r17.Name = "GourdgrinThrownPumpkin"
+        r17.Size = GourdgrinPumpkin.Size * 0.9
+        r17.Anchored = true
+        r17.CanCollide = false
+        r17.CanTouch = false
+        r17.CanQuery = false
+        r17.CastShadow = false
+        r17.LocalTransparencyModifier = 0
+        r4_p9 = GourdgrinPumpkin:GetAttribute("GourdgrinVisibleTransparency")
+        local r6_p9 = typeof(r4_p9) == "number"
+        assert(r6_p9, "Gourdgrin pumpkin needs authored visible transparency")
+        r17.Transparency = r4_p9
+        local Children, r6_p9, r7 = r17:GetChildren()
+        for r8, r9 in Children, r6_p9, r7 do
+            if r9:IsA("Texture") then
+                r4_p9 = r9:GetAttribute("GourdgrinVisibleTransparency")
+                local r11 = typeof(r4_p9) == "number"
+                assert(r11, "Gourdgrin pumpkin overlay needs authored visible transparency")
+                r9.Transparency = r4_p9
+            end
+        end
+        r17.CFrame = Hand_R.TransformedWorldCFrame * GourdgrinThrowSocket.CFrame
+        r17.Parent = GourdgrinLocalEffects
+        r25:Play(0.12)
+        if r18 and r18.IsPlaying then
+        else
+            if r18 then r18:Destroy() end
+            r18 = AnimationController:Clone()
+            r18.Looped = false
+            r18.RollOffMode = Enum.RollOffMode.InverseTapered
+            r18.RollOffMinDistance = 8
+            r18.RollOffMaxDistance = 85
+            r18.Parent = GourdgrinMonkeyV2
+            r18:Play()
+        end
+        Children = os.clock()
+        while r20_0 == __up1 do
+            if not active() or livingRoot(r0_p9) ~= r1 or not ((r1.Position - Pivot.Position).Magnitude <= 70) or not r25.IsPlaying or not (r25.TimePosition < 1.1) then
+                break
+            end
+            r6_p9 = os.clock() - Children
+            local r12 = math.min(1, r6_p9 / 0.25)
+            r0:PivotTo(Pivot:Lerp(r3_p9, r12))
+            r17.CFrame = Hand_R.TransformedWorldCFrame * GourdgrinThrowSocket.CFrame
+            RunService.PreRender:Wait()
+        end
+        if r20_0 ~= __up1 or not active() or livingRoot(r0_p9) ~= r1 or (r1.Position - Pivot.Position).Magnitude > 70 or not r25.IsPlaying then
+            return
+        end
+        r3_p9 = Hand_R.TransformedWorldCFrame * GourdgrinThrowSocket.CFrame
+        r6_p9 = math.clamp((r1.Position - r3_p9.Position).Magnitude / 48, 0.7, 1.35)
+        r7 = math.clamp((r1.Position - r3_p9.Position).Magnitude * 0.12, 3, 8)
+        Children = os.clock()
+        while r20_0 == __up1 do
+            if not active() or livingRoot(r0_p9) ~= r1 or not ((r1.Position - Pivot.Position).Magnitude <= 70) then
+                break
+            end
+            local r9 = (os.clock() - Children) / r6_p9
+            local r8 = math.clamp(r9, 0, 1)
+            r9 = r3_p9.Position:Lerp(r1.Position + vector.create(0, 0.3499999940395355, 0), r8) + vector.create(0, 1, 0) * (r7 * 4 * r8 * (1 - r8))
+            if not CosmeticRange.Contains(r9, 90) then return end
+            local r12 = CFrame.new(r9) * r3_p9.Rotation
+            r17.CFrame = r12 * CFrame.Angles(r8 * 3.141592653589793 * 3, r8 * 3.141592653589793 * 2, 0)
+            if r8 >= 1 then
+                r17:Destroy()
+                r17 = nil
+                splash(r0_p9, r1)
+                break
+            end
+            RunService.PreRender:Wait()
+        end
+        if r17 then return end
+        while r20_0 == __up1 do
+            if not active() or not r25.IsPlaying then break end
+            r7 = os.clock()
+            for r11, r12 in Descendants do
+                if not (not (r12 <= r7) and r11.Parent ~= nil and r11:IsDescendantOf(Workspace) and CosmeticRange.Contains(r11.WorldPosition, 90)) then
+                    r11:Destroy()
+                    Descendants[r11] = nil
+                end
+            end
+            task.wait(0.1)
+        end
+    end
+    function r11.Reconcile() -- Line: 315 | Name: Reconcile | Upvalues: ("PlayerSettings" (upval), "r1" (copy), "Descendants" (copy), "active" (copy), "r21_0" (ref), "resetMotion" (copy))
+        if not PlayerSettings.Get(r1, "VfxEnabled") then
+            for r3 in Descendants do
+                local Children, r6, r7 = r3:GetChildren()
+                for r8, r9 in Children, r6, r7 do
+                    if r9:IsA("ParticleEmitter") then r9:Clear() end
+                end
+            end
+        end
+        if not active() then
+            if r21_0 then return end
+            r21_0 = true
+            resetMotion()
+            local r0 = os.clock()
+            for r4_arg7, r5 in Descendants do
+                r4_arg7:Destroy()
+                Descendants[r4_arg7] = nil
+            end
+        end
+    end
+    function r11.Destroy() -- Line: 332 | Name: Destroy | Upvalues: ("r12" (ref), "r19" (ref), "resetMotion" (copy), "Descendants" (copy), "r24" (ref), "r25" (ref), "r22_0" (copy), "GourdgrinPumpkin" (copy), "LocalTransparencyModifier" (copy), "GourdgrinLocalEffects" (copy))
+        if not r12 then return end
+        r12 = false
+        if r19 then
+            task.cancel(r19)
+            r19 = nil
+        end
+        resetMotion()
+        local r0 = os.clock()
+        for r4, r5 in Descendants do
+            r4:Destroy()
+            Descendants[r4] = nil
+        end
+        if r24 then
+            r24:Destroy()
+            r24 = nil
+        end
+        if r25 then
+            r25:Destroy()
+            r25 = nil
+        end
+        for r3_p11, r4 in r22_0 do
+            r3_p11.Transform = r4
+        end
+        table.clear(r22_0)
+        GourdgrinPumpkin.LocalTransparencyModifier = LocalTransparencyModifier
+        GourdgrinLocalEffects:Destroy()
+    end
+    GourdgrinPumpkin.LocalTransparencyModifier = 1
+    r19 = task.defer(function() -- Line: 359 | Upvalues: ("r12" (ref), "active" (copy), "CosmeticRange" (upval), "r24" (ref), "Animator" (copy), "idle" (copy), "r25" (ref), "attack" (copy), "r13" (copy), "Descendants" (copy), "Workspace" (upval), "r21_0" (ref), "chooseTarget" (upval), "Pivot" (copy), "throw" (copy), "resetMotion" (copy), "r18" (ref), "AnimationController" (copy), "GourdgrinMonkeyV2" (copy), "r19" (ref), "r11" (copy))
+        local traceback = debug.traceback
+        local r0, r1 = xpcall(function() -- Line: 360 | Upvalues: ("r12" (upval), "active" (upval), "CosmeticRange" (upval), "r24" (upval), "Animator" (upval), "idle" (upval), "r25" (upval), "attack" (upval), "r13" (upval), "Descendants" (upval), "Workspace" (upval), "r21_0" (upval), "chooseTarget" (upval), "Pivot" (upval), "throw" (upval), "resetMotion" (upval), "r18" (upval), "AnimationController" (upval), "GourdgrinMonkeyV2" (upval))
+            while r12 do
+                if active() then break end
+                task.wait(CosmeticRange.INTERVAL)
+            end
+            if not r12 then return end
+            r24 = Animator:LoadAnimation(idle)
+            r25 = Animator:LoadAnimation(attack)
+            r24.Priority = Enum.AnimationPriority.Idle
+            r24.Looped = true
+            r25.Priority = Enum.AnimationPriority.Action
+            r25.Looped = false
+            local r0 = os.clock() + 15
+            while r12 do
+                if r24.Length ~= 0 and r25.Length ~= 0 or not (os.clock() < r0) then break end
+                task.wait(0.1)
+            end
+            assert(r24.Length > 0 and r25.Length > 1.1, "Gourdgrin animations failed to become ready")
+            r0 = os.clock() + r13:NextNumber(6, 12)
+            local r2_arg1 = os.clock()
+            local r1 = r2_arg1 + r13:NextNumber(8, 18)
+            while r12 do
+                r2_arg1 = os.clock()
+                for r6_arg2, r7_arg3 in Descendants do
+                    if not (not (r7_arg3 <= r2_arg1) and r6_arg2.Parent ~= nil and r6_arg2:IsDescendantOf(Workspace) and CosmeticRange.Contains(r6_arg2.WorldPosition, 90)) then
+                        r6_arg2:Destroy()
+                        Descendants[r6_arg2] = nil
+                    end
+                end
+                if active() then
+                    if r21_0 then
+                        r21_0 = false
+                        r2_arg1 = os.clock()
+                        r0 = r2_arg1 + r13:NextNumber(6, 12)
+                        r2_arg1 = os.clock()
+                        r1 = r2_arg1 + r13:NextNumber(8, 18)
+                    end
+                    if not r24.IsPlaying then r24:Play(0.15) end
+                    if r0 <= os.clock() then
+                        r2_arg1 = chooseTarget(Pivot.Position, r13)
+                        if r2_arg1 then
+                            throw(r2_arg1)
+                            resetMotion()
+                        end
+                        r0 = os.clock() + r13:NextNumber(6, 12)
+                    end
+                    if active() and r1 <= os.clock() then
+                        if r18 and r18.IsPlaying then
+                        else
+                            if r18 then r18:Destroy() end
+                            r18 = AnimationController:Clone()
+                            r18.Looped = false
+                            r18.RollOffMode = Enum.RollOffMode.InverseTapered
+                            r18.RollOffMinDistance = 8
+                            r18.RollOffMaxDistance = 85
+                            r18.Parent = GourdgrinMonkeyV2
+                            r18:Play()
+                        end
+                        r2_arg1 = os.clock()
+                        r1 = r2_arg1 + r13:NextNumber(8, 18)
+                    end
+                elseif not r21_0 then
+                    r21_0 = true
+                    resetMotion()
+                    r2_arg1 = os.clock()
+                    for r6_arg2, r7_arg3 in Descendants do
+                        r6_arg2:Destroy()
+                        Descendants[r6_arg2] = nil
+                    end
+                end
+                task.wait(0.25)
+            end
+        end, traceback)
+        if not r0 then
+            traceback = warn
+            traceback("GourdgrinPresentation failed: " .. tostring(r1))
+            r19 = nil
+            r11.Destroy()
+        end
+        r19 = nil
+    end)
+    return r11
+end
+return table.freeze(ReplicatedStorage)

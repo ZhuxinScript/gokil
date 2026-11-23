@@ -1,0 +1,372 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishPetsView
+-- Took 0.94s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ResponsiveLayout = require(script.Parent:WaitForChild("ResponsiveLayout"))
+local UserInputService = game:GetService("UserInputService")
+local FishViewportPresenter = require(script.Parent:WaitForChild("FishViewportPresenter"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FishRarity = require(ReplicatedStorage:WaitForChild("FishRarity"))
+ReplicatedStorage = require(script.Parent:WaitForChild("FishStatsPresenter"))
+local MenuNewsClient = require(script.Parent:WaitForChild("MenuNewsClient"))
+local ColossalRainbow_2 = require(script.Parent:WaitForChild("ColossalRainbow"))
+local r9 = {}
+local r10 = Color3.fromRGB(255, 212, 35)
+local function rarityColor(r0: string?) -- Line: 43 | Name: rarityColor | Upvalues: ("FishRarity" (copy))
+    return (FishRarity.Get(r0) or FishRarity.Get("Common")).Color
+end
+local function rarityCaption(r0: string) -- Line: 51 | Name: rarityCaption | Upvalues: ("FishRarity" (copy))
+    local r1 = FishRarity.Get(r0)
+    local upper = string.upper
+    local r3 = if r1 then r1.DisplayName else r0
+    return upper(r3)
+end
+local function applyCardSkin(r0: userdata, r1: string?) -- Line: 59 | Name: applyCardSkin | Upvalues: ("ReplicatedStorage" (copy), "FishRarity" (copy), "ColossalRainbow_2" (copy))
+    ReplicatedStorage.ApplyRarityStyle(r0, r1)
+    local Color = (FishRarity.Get(r1) or FishRarity.Get("Common")).Color
+    r0.Outline.Color = Color
+    local r6_p2 = Color3.new(1, 1, 1)
+    r0.InnerRim.Outline.Color = Color:Lerp(r6_p2, 0.35)
+    local ColossalRainbow = r0.RarityBadge:FindFirstChild("ColossalRainbow")
+    if ColossalRainbow then
+        ColossalRainbow.Enabled = not not (r1 == "Colossal")
+        r0.RarityBadge.BackgroundColor3 = if ColossalRainbow.Enabled then Color3.new(1, 1, 1) else Color
+        if ColossalRainbow.Enabled then
+            ColossalRainbow_2.Register(ColossalRainbow, r0)
+        else
+            ColossalRainbow_2.Remove(ColossalRainbow)
+        end
+    end
+    r0.FishViewport:SetAttribute("ColossalTightFraming", not not (r1 == "Colossal"))
+end
+function r9.Mount(r0_p22: { any }) -- Line: 79 | Name: Mount | Upvalues: ("Players" (copy), "Workspace" (copy), "ResponsiveLayout" (copy), "FishViewportPresenter" (copy), "FishRarity" (copy), "applyCardSkin" (copy), "r10" (copy), "MenuNewsClient" (copy), "UserInputService" (copy))
+    local FishPetsGui = Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("FishPetsGui")
+    local PetsDock = FishPetsGui:WaitForChild("PetsDock")
+    local PetsButton = PetsDock:WaitForChild("PetsButton")
+    local Dimmer = FishPetsGui:WaitForChild("Dimmer")
+    local Window = Dimmer:WaitForChild("Window")
+    local Header = Window:WaitForChild("Header")
+    local Collection = Window:WaitForChild("Collection")
+    local FishGrid = Collection:WaitForChild("FishGrid")
+    local Detail = Window:WaitForChild("Detail")
+    local FishCard = FishPetsGui:WaitForChild("Templates"):WaitForChild("FishCard")
+    local r11 = {}
+    local r12 = {}
+    local r13_0 = {equippedCatchId = "", fish = {}}
+    local r14 = ""
+    local r15_0 = false
+    local r16_0 = true
+    local r17
+    local r18_0 = {}
+    local function layout() -- Line: 112 | Name: layout | Upvalues: ("Workspace" (upval), "Window" (copy), "Header" (copy), "Collection" (copy), "Detail" (copy), "ResponsiveLayout" (upval), "PetsDock" (copy), "FishGrid" (copy), "r13_0" (ref))
+        local CurrentCamera = Workspace.CurrentCamera
+        if not CurrentCamera then return end
+        local ViewportSize = CurrentCamera.ViewportSize
+        if ViewportSize.X <= 0 or ViewportSize.Y <= 0 then return end
+        CurrentCamera = ViewportSize.X < ViewportSize.Y
+        local r3 = if CurrentCamera then UDim2.fromScale(0.94, 0.8) else UDim2.fromScale(0.86, 0.8)
+        Window.Size = r3
+        Window.Position = UDim2.fromScale(0.5, 0.52)
+        r3 = if CurrentCamera then UDim2.fromScale(0.964, 0.13) else UDim2.fromScale(0.964, 0.18)
+        Header.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.4, 0.54) else UDim2.fromScale(0.405, 0.59)
+        Header.Title.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.57, 0.16) else UDim2.fromScale(0.57, 0.1)
+        Header.CountPill.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.27, 0.34) else UDim2.fromScale(0.26, 0.41)
+        Header.CountPill.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.025, 0.16) else UDim2.fromScale(0.022, 0.21)
+        Collection.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.95, 0.44) else UDim2.fromScale(0.595, 0.75)
+        Collection.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.025, 0.625) else UDim2.fromScale(0.637, 0.21)
+        Detail.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.95, 0.33) else UDim2.fromScale(0.341, 0.75)
+        Detail.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.4, 0.055) else UDim2.fromScale(0.05, 0.035)
+        Detail.FishName.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.56, 0.16) else UDim2.fromScale(0.9, 0.1)
+        Detail.FishName.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.49, 0.25) else UDim2.fromScale(0.19, 0.15)
+        Detail.RarityBadge.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.4, 0.11) else UDim2.fromScale(0.62, 0.07)
+        Detail.RarityBadge.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.44, 0.39) else UDim2.fromScale(0.1, 0.235)
+        Detail.LocationLabel.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.5, 0.075) else UDim2.fromScale(0.8, 0.047)
+        Detail.LocationLabel.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.015, 0.07) else UDim2.fromScale(0.025, 0.28)
+        Detail.FishViewport.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.4, 0.8) else UDim2.fromScale(0.95, 0.44)
+        Detail.FishViewport.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.43, 0.5) else UDim2.fromScale(0.06, 0.735)
+        Detail.EquippedLabel.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.52, 0.145) else UDim2.fromScale(0.88, 0.105)
+        Detail.EquippedLabel.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.43, 0.69) else UDim2.fromScale(0.06, 0.79)
+        Detail.EquipButton.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.52, 0.23) else UDim2.fromScale(0.88, 0.15)
+        Detail.EquipButton.Size = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.43, 0.69) else UDim2.fromScale(0.06, 0.86)
+        Detail.UnequipButton.Position = r3
+        r3 = if CurrentCamera then UDim2.fromScale(0.52, 0.23) else UDim2.fromScale(0.88, 0.105)
+        Detail.UnequipButton.Size = r3
+        ResponsiveLayout.Apply(PetsDock)
+        ViewportSize = if CurrentCamera then 2 else 3
+        local r2_arg1 = if CurrentCamera then 0.45 else 0.3
+        CurrentCamera = FishGrid.AbsoluteWindowSize
+        if CurrentCamera.X <= 0 or CurrentCamera.Y <= 0 then return end
+        local r5_p3 = math.ceil(#r13_0.fish / ViewportSize)
+        r3 = math.max(1, r5_p3)
+        local r4 = math.min(0.44, CurrentCamera.X * r2_arg1 * 1.08 / CurrentCamera.Y)
+        local r7_p3 = r3 * r4 + math.max(0, r3 - 1) * 0.035 + 0.06
+        r5_p3 = math.max(1, r7_p3)
+        r3 = Collection.AbsoluteSize.Y
+        local r6_p3 = r5_p3 - 0.06
+        local fromScale = UDim2.fromScale
+        FishGrid.CanvasSize = fromScale(0, r5_p3 * CurrentCamera.Y / r3)
+        FishGrid.GridLayout.FillDirectionMaxCells = ViewportSize
+        FishGrid.GridLayout.CellSize = UDim2.fromScale(r2_arg1, r4 / r6_p3)
+        FishGrid.GridLayout.CellPadding = UDim2.fromScale(0.022, 0.035 / r6_p3)
+        FishGrid.ContentPadding.PaddingTop = UDim.new(0.03 / r5_p3, 0)
+        FishGrid.ContentPadding.PaddingBottom = UDim.new(0.03 / r5_p3, 0)
+    end
+    local function clearPreviews() -- Line: 171 | Name: clearPreviews | Upvalues: ("FishViewportPresenter" (upval), "Detail" (copy), "r12" (copy))
+        FishViewportPresenter.Clear(Detail.FishViewport)
+        for r3, r4_arg2 in r12 do
+            FishViewportPresenter.Clear(r4_arg2.button.FishViewport)
+        end
+    end
+    local function renderSelection() -- Line: 177 | Name: renderSelection | Upvalues: ("r13_0" (ref), "r14" (ref), "r12" (copy), "FishRarity" (upval), "applyCardSkin" (upval), "r10" (upval), "Dimmer" (copy), "FishViewportPresenter" (upval), "Detail" (copy), "Header" (copy))
+        local r0
+        for r4_p5, r5 in r13_0.fish do
+            if r5.catchId == r14 then r0 = r5 end
+            local r6_p5 = r12[r5.catchId]
+            local Color = (FishRarity.Get(r5.rarity) or FishRarity.Get("Common")).Color
+            if not r6_p5 then continue end
+            applyCardSkin(r6_p5.button, r5.rarity)
+            local r9_p5 = if r5.catchId == r14 then r10 else Color
+            r6_p5.button.Outline.Color = r9_p5
+            r6_p5.button.Outline.Thickness = r5.catchId == r14 and 4 or 3
+            r6_p5.button.EquippedCheck.Visible = r5.catchId == r13_0.equippedCatchId
+            if Dimmer.Visible then FishViewportPresenter.Show(r6_p5.button.FishViewport, r5.fishId, false) end
+        end
+        Detail.EquipButton.Visible = r0 ~= nil and r14 ~= r13_0.equippedCatchId
+        Detail.UnequipButton.Visible = r0 ~= nil and r14 == r13_0.equippedCatchId
+        local r2 = r0 ~= nil and r14 == r13_0.equippedCatchId
+        Detail.EquippedLabel.Visible = r2
+        r2 = if r0 then r0.name else "Choose your companion"
+        Detail.FishName.Text = r2
+        if r0 then
+            local rarity = r0.rarity
+            local r4_p5 = FishRarity.Get(rarity)
+            local upper = string.upper
+            local r6_p5 = if r4_p5 then r4_p5.DisplayName else rarity
+            r2 = upper(r6_p5)
+        else
+            r2 = "FISH PET"
+        end
+        Detail.RarityBadge.RarityLabel.Text = r2
+        local r3 = if r0 then r0.rarity else "Common"
+        applyCardSkin(Detail, r3)
+        if r0 and r0.rarity == "Colossal" then
+            r2 = Color3.new(1, 1, 1)
+        else
+            r3 = if r0 then r0.rarity else nil
+            r2 = (FishRarity.Get(r3) or FishRarity.Get("Common")).Color
+        end
+        Detail.RarityBadge.BackgroundColor3 = r2
+        r2 = if r0 then string.upper(r0.location) else "BAG + AQUARIUM"
+        Detail.LocationLabel.Text = r2
+        if r0 and Dimmer.Visible then
+            FishViewportPresenter.Show(Detail.FishViewport, r0.fishId, true)
+        else
+            FishViewportPresenter.Clear(Detail.FishViewport)
+        end
+        Header.CountPill.CountLabel.Text = r13_0.equippedCatchId ~= "" and "1 / 1 EQUIPPED" or "0 / 1 EQUIPPED"
+    end
+    local function setOpen(r0_p6: boolean) -- Line: 211 | Name: setOpen | Upvalues: ("r16_0" (ref), "Dimmer" (copy), "PetsButton" (copy), "layout" (copy), "renderSelection" (copy), "r0_p22" (copy), "FishViewportPresenter" (upval), "Detail" (copy), "r12" (copy))
+        if not r16_0 then return end
+        Dimmer.Visible = r0_p6
+        PetsButton.OpenIndicator.Visible = r0_p6
+        if r0_p6 then
+            layout()
+            renderSelection()
+            r0_p22.onOpen()
+            return
+        end
+        FishViewportPresenter.Clear(Detail.FishViewport)
+        for r4_p6, r5 in r12 do
+            FishViewportPresenter.Clear(r5.button.FishViewport)
+        end
+    end
+    function r18_0.Render(r0, r1) -- Line: 225 | Name: Render | Upvalues: ("r16_0" (ref), "r13_0" (ref), "r12" (copy), "FishCard" (copy), "FishGrid" (copy), "r14" (ref), "renderSelection" (copy), "MenuNewsClient" (upval), "FishRarity" (upval), "FishViewportPresenter" (upval), "Collection" (copy), "layout" (copy))
+        if not r16_0 then return end
+        r13_0 = r1
+        local r2 = {}
+        for r6_arg3, r7_p8 in r13_0.fish do
+            r2[r7_p8.catchId] = true
+            if not r12[r7_p8.catchId] then
+                local button = FishCard:Clone()
+                button.Name = "Fish_" .. r7_p8.catchId
+                button.Visible = true
+                button.Parent = FishGrid
+                r12[r7_p8.catchId] = {button = button, click = button.Activated:Connect(function() -- Line: 238 | Upvalues: ("r14" (upval), "r7_p8" (copy), "renderSelection" (upval))
+                    r14 = r7_p8.catchId
+                    renderSelection()
+                end)}
+            end
+            local button = r12[r7_p8.catchId].button
+            MenuNewsClient.Register(button, "Pets", r7_p8.catchId)
+            button.LayoutOrder = r6_arg3
+            button.FishName.Text = r7_p8.name
+            local rarity = r7_p8.rarity
+            local r12_p8 = FishRarity.Get(rarity)
+            local upper = string.upper
+            local r14_p8 = if r12_p8 then r12_p8.DisplayName else rarity
+            button.RarityBadge.RarityLabel.Text = upper(r14_p8)
+            rarity = r7_p8.rarity
+            button.RarityBadge.BackgroundColor3 = (FishRarity.Get(rarity) or FishRarity.Get("Common")).Color
+            local upper_2 = string.upper
+            button.LocationLabel.Text = upper_2(r7_p8.location)
+        end
+        for r6_arg3, r7_p8 in r12 do
+            if not r2[r6_arg3] then
+                r7_p8.click:Disconnect()
+                FishViewportPresenter.Clear(r7_p8.button.FishViewport)
+                r7_p8.button:Destroy()
+                r12[r6_arg3] = nil
+            end
+        end
+        if not r2[r14] then
+            local r3 = if r2[r13_0.equippedCatchId] then r13_0.equippedCatchId else if r13_0.fish[1] then r13_0.fish[1].catchId else ""
+            r14 = r3
+        end
+        Collection.EmptyLabel.Visible = #r13_0.fish == 0
+        renderSelection()
+        layout()
+    end
+    function r18_0.SetBusy(r0: { any }, r1: boolean) -- Line: 271 | Name: SetBusy | Upvalues: ("r15_0" (ref), "Window" (copy), "r13_0" (ref))
+        r15_0 = r1
+        Window.LoadingLabel.Text = #r13_0.fish == 0 and "Loading your fish\226\128\166" or "Updating\226\128\166"
+        Window.LoadingLabel.Visible = r1
+    end
+    function r18_0.SetStatus(r0: { any }, r1: string) -- Line: 278 | Name: SetStatus | Upvalues: ("Window" (copy))
+        Window.StatusLabel.Text = r1
+    end
+    function r18_0.IsOpen(r0) -- Line: 283 | Name: IsOpen | Upvalues: ("r16_0" (ref), "Dimmer" (copy))
+        return r16_0 and Dimmer.Visible
+    end
+    function r18_0.Destroy(r0) -- Line: 288 | Name: Destroy | Upvalues: ("r16_0" (ref), "Dimmer" (copy), "PetsButton" (copy), "FishViewportPresenter" (upval), "Detail" (copy), "r12" (copy), "r17" (ref), "r11" (copy))
+        if not r16_0 then return end
+        if r16_0 then
+            Dimmer.Visible = false
+            PetsButton.OpenIndicator.Visible = false
+            FishViewportPresenter.Clear(Detail.FishViewport)
+            for r4_p12, r5 in r12 do
+                FishViewportPresenter.Clear(r5.button.FishViewport)
+            end
+        end
+        r16_0 = false
+        if r17 then r17:Disconnect() end
+        for r4_p12, r5 in r11 do
+            r5:Disconnect()
+        end
+        for r4_p12, r5 in r12 do
+            r5.click:Disconnect()
+            r5.button:Destroy()
+        end
+        table.clear(r12)
+    end
+    local function bindCamera() -- Line: 302 | Name: bindCamera | Upvalues: ("r17" (ref), "Workspace" (upval), "layout" (copy))
+        if r17 then r17:Disconnect() end
+        if Workspace.CurrentCamera then
+            r17 = Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+        end
+        layout()
+    end
+    local r26 = require(script.Parent:WaitForChild("MainMenuActions")).Bind("Pets", function() -- Line: 310 | Upvalues: ("r16_0" (ref), "Dimmer" (copy), "PetsButton" (copy), "layout" (copy), "renderSelection" (copy), "r0_p22" (copy))
+        if not r16_0 then return end
+        Dimmer.Visible = true
+        PetsButton.OpenIndicator.Visible = true
+        layout()
+        renderSelection()
+        r0_p22.onOpen()
+    end)
+    table.insert(r11, r26)
+    table.insert(r11, PetsButton.Activated:Connect(function() -- Line: 313 | Upvalues: ("Dimmer" (copy), "r16_0" (ref), "PetsButton" (copy), "layout" (copy), "renderSelection" (copy), "r0_p22" (copy), "FishViewportPresenter" (upval), "Detail" (copy), "r12" (copy))
+        local r0_0 = not Dimmer.Visible
+        if not r16_0 then return end
+        Dimmer.Visible = r0_0
+        PetsButton.OpenIndicator.Visible = r0_0
+        if r0_0 then
+            layout()
+            renderSelection()
+            r0_p22.onOpen()
+            return
+        end
+        FishViewportPresenter.Clear(Detail.FishViewport)
+        for r4_p15, r5 in r12 do
+            FishViewportPresenter.Clear(r5.button.FishViewport)
+        end
+    end))
+    table.insert(r11, Header.CloseButton.Activated:Connect(function() -- Line: 314 | Upvalues: ("r16_0" (ref), "Dimmer" (copy), "PetsButton" (copy), "FishViewportPresenter" (upval), "Detail" (copy), "r12" (copy))
+        if not r16_0 then return end
+        Dimmer.Visible = false
+        PetsButton.OpenIndicator.Visible = false
+        FishViewportPresenter.Clear(Detail.FishViewport)
+        for r3_p16, r4_p16 in r12 do
+            FishViewportPresenter.Clear(r4_p16.button.FishViewport)
+        end
+    end))
+    table.insert(r11, Dimmer.Activated:Connect(function() -- Line: 315 | Upvalues: ("r16_0" (ref), "Dimmer" (copy), "PetsButton" (copy), "FishViewportPresenter" (upval), "Detail" (copy), "r12" (copy))
+        if not r16_0 then return end
+        Dimmer.Visible = false
+        PetsButton.OpenIndicator.Visible = false
+        FishViewportPresenter.Clear(Detail.FishViewport)
+        for r3_p17, r4_p17 in r12 do
+            FishViewportPresenter.Clear(r4_p17.button.FishViewport)
+        end
+    end))
+    table.insert(r11, Detail.EquipButton.Activated:Connect(function() -- Line: 316 | Upvalues: ("r15_0" (ref), "r14" (ref), "r0_p22" (copy))
+        if not r15_0 and r14 ~= "" then r0_p22.onEquip(r14) end
+    end))
+    table.insert(r11, Detail.UnequipButton.Activated:Connect(function() -- Line: 319 | Upvalues: ("r15_0" (ref), "r0_p22" (copy))
+        if not r15_0 then r0_p22.onUnequip() end
+    end))
+    table.insert(r11, UserInputService.InputBegan:Connect(function(r0: userdata, r1: boolean) -- Line: 322 | Upvalues: ("Dimmer" (copy), "r16_0" (ref), "PetsButton" (copy), "FishViewportPresenter" (upval), "Detail" (copy), "r12" (copy))
+        if not r1 and r0.KeyCode == Enum.KeyCode.Escape and Dimmer.Visible then
+            if not r16_0 then return end
+            Dimmer.Visible = false
+            PetsButton.OpenIndicator.Visible = false
+            FishViewportPresenter.Clear(Detail.FishViewport)
+            for r5, r6 in r12 do
+                FishViewportPresenter.Clear(r6.button.FishViewport)
+            end
+        end
+    end))
+    table.insert(r11, Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(bindCamera))
+    table.insert(r11, FishGrid:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout))
+    table.insert(r11, FishPetsGui.Destroying:Connect(function() -- Line: 327 | Upvalues: ("r18_0" (copy))
+        r18_0:Destroy()
+    end))
+    FishPetsGui.IgnoreGuiInset = true
+    if r17 then r17:Disconnect() end
+    if Workspace.CurrentCamera then
+        r17 = Workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout)
+    end
+    layout()
+    if r16_0 then
+        Dimmer.Visible = false
+        PetsButton.OpenIndicator.Visible = false
+        FishViewportPresenter.Clear(Detail.FishViewport)
+        for r27, r28 in r12 do
+            FishViewportPresenter.Clear(r28.button.FishViewport)
+        end
+    end
+    return r18_0
+end
+return r9

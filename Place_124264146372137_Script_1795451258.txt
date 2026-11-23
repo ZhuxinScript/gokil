@@ -1,0 +1,1503 @@
+-- Script Path: game:GetService("Players").ciahkerencuy_8.PlayerScripts.FishRidersEffects
+-- Took 5.31s to decompile.
+-- Executor: Kawaii (1.8.4)
+
+-- Decompiled by Sabre (https://www.decompiler.lol/) - bytecode v14 types v3
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PlayerSettings = require(ReplicatedStorage:WaitForChild("PlayerSettings"))
+ReplicatedStorage = {}
+local r2 = table.freeze({WakeFoam = "rbxassetid://124031133367169", WakeEdge = "rbxassetid://103717128150564", Spray = "rbxassetid://100995726509645", Ripple = "rbxassetid://120468081483702", Crown = "rbxassetid://78054184585602", Bubble = "rbxassetid://84303832696939", Mist = "rbxassetid://122304683497788", Sparkle = "rbxassetid://82001588722457", Ink = "rbxassetid://135528178640966", Zap = "rbxassetid://74717202151134", Swirl = "rbxassetid://98026398108552"})
+local r3 = Color3.fromRGB(240, 255, 255)
+local r4 = Color3.fromRGB(112, 228, 255)
+local r5 = Color3.fromRGB(255, 222, 91)
+local r6 = Color3.fromRGB(64, 24, 118)
+local freeze, r8 = table.freeze, {}
+r8.SpinShell = {primary = Color3.fromRGB(48, 214, 186), secondary = r5}
+r8.JellyZap = {primary = Color3.fromRGB(110, 236, 255), secondary = Color3.fromRGB(205, 170, 255)}
+r8.InkSplash = {primary = Color3.fromRGB(122, 58, 214), secondary = Color3.fromRGB(196, 140, 255)}
+r8.CrabClamp = {primary = Color3.fromRGB(255, 120, 60), secondary = r5}
+r8.Whirlpool = {primary = Color3.fromRGB(70, 210, 255), secondary = r3}
+r8.AquaShield = {primary = Color3.fromRGB(110, 230, 255), secondary = r3}
+freeze = freeze(r8)
+local function curve(r0: { any }) -- Line: 198 | Name: curve
+    local r1 = table.create(#r0)
+    for r5, r6 in r0 do
+        local new = NumberSequenceKeypoint.new
+        table.insert(r1, new(r6[1], r6[2], r6[3] or 0))
+    end
+    return NumberSequence.new(r1)
+end
+local function gradient(r0: Color3, r1: Color3) -- Line: 207 | Name: gradient
+    return ColorSequence.new(r0, r1)
+end
+local r10 = table.freeze({
+    orientation = Enum.ParticleOrientation.VelocityPerpendicular,
+    direction = Enum.NormalId.Top, speed = NumberRange.new(0.05, 0.1)
+})
+local function merge(r0: { any }, r1: { any }) -- Line: 217 | Name: merge
+    local r2 = table.clone(r0)
+    for r6, r7 in r1 do
+        r2[r6] = r7
+    end
+    return r2
+end
+local freeze_2, r13 = table.freeze, {texture = r2.WakeFoam, textureLength = 9, flow = 0.55, length = 18, width0 = 0.7, width1 = 1.55, lightEmission = 0.1, zOffset = 0.1}
+local new_3 = ColorSequence.new
+r13.color = new_3({ColorSequenceKeypoint.new(0, r3), ColorSequenceKeypoint.new(0.7, r3), ColorSequenceKeypoint.new(1, r4)})
+r13.transparency = curve({{0, 0.6}, {0.12, 0.1}, {0.55, 0.3}, {1, 1}})
+freeze_2 = freeze_2(r13)
+r13 = table.freeze
+r13 = r13({
+    texture = r2.WakeEdge, textureLength = 13, flow = 0.8, length = 22, width0 = 0.9, width1 = 1.9,
+    color = ColorSequence.new(r3, r4),
+    transparency = curve({{0, 0.75}, {0.15, 0.3}, {0.6, 0.5}, {1, 1}}), lightEmission = 0.15, zOffset = 0.05
+})
+new_3 = table.freeze
+local r15 = {texture = r2.WakeFoam, textureLength = 9, lifetime = 1.1}
+local new_4 = ColorSequence.new
+r15.color = new_4({ColorSequenceKeypoint.new(0, r3), ColorSequenceKeypoint.new(0.6, r3), ColorSequenceKeypoint.new(1, r4)})
+r15.transparency = curve({{0, 0.55}, {0.12, 0.2}, {0.55, 0.62}, {1, 1}})
+r15.widthScale = curve({{0, 1}, {0.5, 1.25}, {1, 1.5}})
+new_3 = new_3(r15)
+r15 = curve({{0, 0.45}, {0.12, 0.08}, {0.6, 0.5}, {1, 1}})
+new_4 = curve({{0, 1.1}, {0.5, 1.45}, {1, 1.8}})
+local r17 = table.freeze({
+    texture = r2.WakeEdge, textureLength = 10, color = ColorSequence.new(r3, r4),
+    transparency = curve({{0, 0.08}, {0.35, 0.3}, {1, 1}}), widthScale = curve({{0, 1}, {0.5, 2.4}, {1, 3.8}}),
+    lifetime = 2
+})
+local r18 = table.freeze({
+    texture = r2.WakeEdge, textureLength = 6, color = ColorSequence.new(r3, r3),
+    transparency = curve({{0, 0.05}, {1, 1}}), widthScale = curve({{0, 1}, {1, 1.8}}), lifetime = 0.4
+})
+local r19 = table.freeze({
+    texture = r2.Spray, color = r3,
+    size = curve({{0, 1, 0.3}, {0.35, 2.6, 0.6}, {1, 3.6, 0.8}}), transparency = curve({{0, 0.08}, {0.55, 0.3}, {1, 1}}),
+    lifetime = NumberRange.new(0.35, 0.7), speed = NumberRange.new(10, 18), spread = Vector2.new(14, 24),
+    acceleration = vector.create(0, -50, 0), drag = 1.4, rotation = NumberRange.new(-25, 25),
+    rotSpeed = NumberRange.new(-40, 40), direction = Enum.NormalId.Front, lightEmission = 0.15, lightInfluence = 0.4
+})
+local r20 = table.freeze({
+    texture = r2.Spray, color = r3,
+    size = curve({{0, 0.35, 0.15}, {1, 0.15, 0.08}}), transparency = curve({{0, 0}, {0.8, 0.2}, {1, 1}}),
+    lifetime = NumberRange.new(0.4, 0.8), speed = NumberRange.new(14, 24), spread = Vector2.new(30, 30),
+    acceleration = vector.create(0, -70, 0), drag = 0.6, direction = Enum.NormalId.Front, lightEmission = 0.2
+})
+local r21 = table.freeze({
+    texture = r2.Spray, color = ColorSequence.new(r3, r4),
+    size = curve({{0, 1.4, 0.4}, {0.4, 4.2, 1}, {1, 6.5, 1.2}}), transparency = curve({{0, 0.12}, {0.5, 0.32}, {1, 1}}),
+    lifetime = NumberRange.new(0.55, 0.95), speed = NumberRange.new(15, 26), spread = Vector2.new(9, 14),
+    acceleration = vector.create(0, -40, 0), drag = 0.9, rotSpeed = NumberRange.new(-30, 30),
+    direction = Enum.NormalId.Front, lightEmission = 0.15
+})
+local r22 = table.freeze({
+    texture = r2.Mist, color = ColorSequence.new(r3, r4),
+    size = curve({{0, 1.6}, {1, 6.5}}), transparency = curve({{0, 0.25}, {1, 1}}), lifetime = NumberRange.new(0.3, 0.55),
+    speed = NumberRange.new(18, 28), spread = Vector2.new(12, 12), drag = 2, direction = Enum.NormalId.Front,
+    lightEmission = 0.45
+})
+local r23 = table.freeze({
+    texture = r2.Mist, color = ColorSequence.new(r3, r4),
+    size = curve({{0, 1.4, 0.4}, {0.5, 3.6, 0.6}, {1, 5.4, 0.6}}), transparency = curve({{0, 0.3}, {0.4, 0.45}, {1, 1}}),
+    lifetime = NumberRange.new(0.8, 1.4), speed = NumberRange.new(0.8, 2.5), spread = Vector2.new(40, 40),
+    acceleration = vector.create(0, -1.5, 0), drag = 1, rotSpeed = NumberRange.new(-20, 20), area = true
+})
+local freeze_3, r26 = table.freeze, {
+    texture = r2.Mist, color = r3,
+    size = curve({{0, 1.4, 0.4}, {0.5, 3.8, 0.8}, {1, 5.6, 0.8}}),
+    transparency = curve({{0, 0.35}, {0.45, 0.5}, {1, 1}}),
+    lifetime = NumberRange.new(0.9, 1.5), rotSpeed = NumberRange.new(-70, 70), area = true
+}
+local r25 = table.clone(r10)
+for freeze_4, r31 in r26 do
+    r25[freeze_4] = r31
+end
+freeze_3 = freeze_3(r25)
+r25 = table.freeze
+r25 = r25({
+    texture = r2.Bubble, color = r3,
+    size = curve({{0, 0.35, 0.15}, {0.8, 0.55, 0.2}, {1, 0}}), transparency = curve({{0, 0.05}, {0.8, 0.2}, {1, 1}}),
+    lifetime = NumberRange.new(0.6, 1.3), speed = NumberRange.new(0.5, 2), spread = Vector2.new(30, 30),
+    acceleration = vector.create(0, 1.5, 0), drag = 0.8, lightEmission = 0.35, area = true
+})
+r26 = table.freeze
+local r28 = {
+    texture = r2.Ripple, color = r3,
+    size = curve({{0, 1.2}, {1, 8.5}}), transparency = curve({{0, 0.2}, {0.45, 0.5}, {1, 1}}),
+    lifetime = NumberRange.new(1, 1.6), area = true
+}
+local r27 = table.clone(r10)
+for r32, r33 in r28 do
+    r27[r32] = r33
+end
+r26 = r26(r27)
+r27 = table.freeze
+local r29 = {size = curve({{0, 0.8}, {1, 5.2}}), lifetime = NumberRange.new(0.6, 1)}
+r28 = table.clone(r26)
+for r33, r34 in r29 do
+    r28[r33] = r34
+end
+r27 = r27(r28)
+r28 = table.freeze
+r28 = r28({
+    texture = r2.Crown, color = r3,
+    size = curve({{0, 2.5, 0.5}, {0.25, 7.5, 1}, {1, 9.5, 1}}), transparency = curve({{0, 0.05}, {0.55, 0.25}, {1, 1}}),
+    lifetime = NumberRange.new(0.45, 0.7), speed = NumberRange.new(0.1, 0.2), rotation = NumberRange.new(-12, 12),
+    orientation = Enum.ParticleOrientation.FacingCameraWorldUp, lightEmission = 0.15
+})
+r29 = table.freeze
+r29 = r29({
+    texture = r2.Spray, color = r3,
+    size = curve({{0, 1.2, 0.4}, {0.4, 3.4, 0.8}, {1, 4.6, 0.8}}), transparency = curve({{0, 0.05}, {0.6, 0.3}, {1, 1}}),
+    lifetime = NumberRange.new(0.5, 0.9), speed = NumberRange.new(14, 26), spread = Vector2.new(70, 40),
+    acceleration = vector.create(0, -55, 0), drag = 0.8
+})
+local freeze_4, r32 = table.freeze, {
+    texture = r2.Ripple, color = r3,
+    size = curve({{0, 3}, {1, 16}}), transparency = curve({{0, 0.1}, {0.5, 0.45}, {1, 1}}),
+    lifetime = NumberRange.new(1.1, 1.5)
+}
+local r31 = table.clone(r10)
+for r36, r37 in r32 do
+    r31[r36] = r37
+end
+freeze_4 = freeze_4(r31)
+r31 = table.freeze
+r31 = r31({
+    texture = r2.Sparkle, color = r5,
+    size = curve({{0, 1.3, 0.3}, {0.7, 1}, {1, 0}}), transparency = curve({{0, 0}, {0.8, 0.1}, {1, 1}}),
+    lifetime = NumberRange.new(0.5, 0.85), speed = NumberRange.new(7, 14), spread = Vector2.new(180, 180),
+    acceleration = vector.create(0, -12, 0), drag = 1.5, rotSpeed = NumberRange.new(-120, 120), lightEmission = 0.85,
+    lightInfluence = 0
+})
+local r33
+r32, r33 = table.freeze, {texture = r2.Ink, acceleration = vector.create(0, -34, 0), drag = 1, lightInfluence = 0.6}
+local r34 = ColorSequence.new(freeze.InkSplash.primary, r6)
+r33.color = r34
+r33.size = curve({{0, 1.6, 0.6}, {0.3, 3.2, 0.8}, {1, 2.6, 0.6}})
+r33.transparency = curve({{0, 0}, {0.7, 0.15}, {1, 1}})
+r33.lifetime = NumberRange.new(0.55, 0.95)
+r33.speed = NumberRange.new(9, 17)
+r33.spread = Vector2.new(180, 90)
+r32 = r32(r33)
+local r36
+r33, r34, r36 = table.freeze, {texture = r2.Zap, lightEmission = 1, lightInfluence = 0, brightness = 2}, freeze.JellyZap.primary
+local r35 = ColorSequence.new(r3, r36)
+r34.color = r35
+r34.size = curve({{0, 4.5, 1.2}, {1, 6.5, 1}})
+r34.transparency = curve({{0, 0}, {0.6, 0.2}, {1, 1}})
+r34.lifetime = NumberRange.new(0.12, 0.26)
+r34.speed = NumberRange.new(0, 0.5)
+r34.spread = Vector2.new(180, 180)
+r33 = r33(r34)
+r34, r36 = table.freeze, {
+    texture = r2.Swirl, color = ColorSequence.new(r4, r3),
+    size = curve({{0, 3}, {1, 14}}), transparency = curve({{0, 0.15}, {0.6, 0.4}, {1, 1}}),
+    lifetime = NumberRange.new(0.9, 1.3), rotSpeed = NumberRange.new(260, 380), lightEmission = 0.3
+}
+r35 = table.clone(r10)
+for r40, r41 in r36 do
+    r35[r40] = r41
+end
+r34 = r34(r35)
+r35 = table.freeze
+r10 = r35({
+    texture = r2.Bubble, color = r3,
+    size = curve({{0, 0.6, 0.3}, {1, 1.2, 0.4}}), transparency = curve({{0, 0}, {0.75, 0.2}, {1, 1}}),
+    lifetime = NumberRange.new(0.6, 1.1), speed = NumberRange.new(8, 16), spread = Vector2.new(180, 180), drag = 2.5,
+    lightEmission = 0.4
+})
+local r37
+r35, r37 = table.freeze, {
+    size = curve({{0, 1.2, 0.3}, {0.5, 3.2, 0.6}, {1, 4, 0.6}}),
+    lifetime = NumberRange.new(0.35, 0.6), speed = NumberRange.new(18, 30), spread = Vector2.new(22, 22),
+    acceleration = vector.create(0, -45, 0), drag = 1.2
+}
+r36 = table.clone(r19)
+for r41, r42 in r37 do
+    r36[r41] = r42
+end
+r35 = r35(r36)
+r36 = table.freeze
+r36 = r36({
+    texture = r2.Sparkle, color = r5,
+    size = curve({{0, 1.4, 0.3}, {1, 0}}), transparency = curve({{0, 0}, {1, 0.4}}),
+    lifetime = NumberRange.new(0.4, 0.7), speed = NumberRange.new(10, 18), spread = Vector2.new(40, 40), drag = 2,
+    direction = Enum.NormalId.Front, lightEmission = 0.9, lightInfluence = 0
+})
+r37 = table.freeze
+local r39 = {size = curve({{0, 2}, {1, 11}}), lifetime = NumberRange.new(0.7, 1)}
+local r38 = table.clone(freeze_4)
+for r43, r44 in r39 do
+    r38[r43] = r44
+end
+r37 = r37(r38)
+r38 = table.freeze
+r38 = r38({
+    texture = r2.Sparkle, color = r5, size = curve({{0, 1.1}, {1, 0.6}}),
+    transparency = curve({{0, 0}, {1, 0.5}}), lifetime = NumberRange.new(0.2, 0.35), speed = NumberRange.new(0, 0),
+    lightEmission = 0.8, lightInfluence = 0
+})
+local r41
+r39, r41 = table.freeze, {size = curve({{0, 2.5, 0.8}, {1, 3.5, 0.8}}), lifetime = NumberRange.new(0.08, 0.16), lockedToPart = true}
+local r40 = table.clone(r33)
+for r45, r46 in r41 do
+    r40[r45] = r46
+end
+r39 = r39(r40)
+local r43
+r40, r41, r43 = table.freeze, {texture = r2.Ink, acceleration = vector.create(0, -30, 0), lightInfluence = 0.6}, freeze.InkSplash.primary
+local r42 = ColorSequence.new(r43, r6)
+r41.color = r42
+r41.size = curve({{0, 0.9, 0.3}, {1, 0.5}})
+r41.transparency = curve({{0, 0}, {0.8, 0.2}, {1, 1}})
+r41.lifetime = NumberRange.new(0.6, 1)
+r41.speed = NumberRange.new(0.5, 2)
+r41.spread = Vector2.new(60, 60)
+r41.direction = Enum.NormalId.Bottom
+r40 = r40(r41)
+r41 = table.freeze
+r6 = r41({
+    texture = r2.Mist, textureLength = 1, color = ColorSequence.new(r3, r3),
+    transparency = curve({{0, 0.25}, {0.4, 0.6}, {1, 1}}), widthScale = curve({{0, 1}, {1, 0.15}}), lifetime = 0.45,
+    lightEmission = 0.9, faceCamera = true, stretch = true
+})
+r41 = table.freeze
+r41 = r41({
+    texture = r2.Sparkle, color = r5,
+    size = curve({{0, 1.1, 0.3}, {1, 0}}), transparency = curve({{0, 0}, {1, 0.3}}),
+    lifetime = NumberRange.new(0.35, 0.7),
+    speed = NumberRange.new(2, 6), spread = Vector2.new(180, 180), drag = 2, lightEmission = 0.9, lightInfluence = 0
+})
+local r44
+r42, r44 = table.freeze, {size = curve({{0, 3.5, 1}, {1, 4.5, 1}}), lifetime = NumberRange.new(0.08, 0.18), lockedToPart = true}
+r43 = table.clone(r33)
+for r48, r49 in r44 do
+    r43[r48] = r49
+end
+r42 = r42(r43)
+local r45
+r43, r45 = table.freeze, {
+    size = curve({{0, 1.4, 0.5}, {1, 0.7}}),
+    lifetime = NumberRange.new(0.45, 0.8), speed = NumberRange.new(1, 4), spread = Vector2.new(70, 70),
+    acceleration = vector.create(0, -40, 0)
+}
+r44 = table.clone(r40)
+for r49, r50 in r45 do
+    r44[r49] = r50
+end
+r43 = r43(r44)
+r44 = table.freeze
+r44 = r44({
+    texture = r2.Bubble, color = r3,
+    size = curve({{0, 0.5, 0.2}, {0.8, 0.9}, {1, 0}}), transparency = curve({{0, 0.1}, {0.8, 0.25}, {1, 1}}),
+    lifetime = NumberRange.new(1, 1.8), speed = NumberRange.new(1, 3), spread = Vector2.new(30, 30),
+    acceleration = vector.create(0, 2.5, 0), lightEmission = 0.4, area = true
+})
+r45 = table.freeze
+local r47 = {
+    speed = NumberRange.new(5.5, 6.5),
+    lifetime = NumberRange.new(0.9, 1.1), drag = 0, size = curve({{0, 0.2}, {0.8, 1.2}, {1, 0}})
+}
+local r46 = table.clone(r41)
+for r51, r52 in r47 do
+    r46[r51] = r52
+end
+r45 = r45(r46)
+r46 = table.freeze
+r46 = r46({
+    texture = r2.WakeFoam, textureLength = 10, color = ColorSequence.new(r3, r4),
+    transparency = curve({{0, 0.1}, {0.5, 0.5}, {1, 1}}), widthScale = curve({{0, 1}, {1, 2.4}}), lifetime = 1.1
+})
+local r49
+r47, r49 = table.freeze, {speed = NumberRange.new(8, 15)}
+local r48 = table.clone(r19)
+for r53, r54 in r49 do
+    r48[r53] = r54
+end
+r4 = r47(r48)
+r47, r49 = table.freeze, {size = curve({{0, 1.5}, {1, 9}}), lifetime = NumberRange.new(0.9, 1.3)}
+r48 = table.clone(r26)
+for r53, r54 in r49 do
+    r48[r53] = r54
+end
+r2 = r47(r48)
+r47, r49 = table.freeze, {
+    size = curve({{0, 6}, {1, 15}}),
+    transparency = curve({{0, 0.3}, {0.5, 0.45}, {1, 1}}), lifetime = NumberRange.new(1.4, 1.8),
+    rotSpeed = NumberRange.new(200, 300)
+}
+r48 = table.clone(r34)
+for r53, r54 in r49 do
+    r48[r53] = r54
+end
+r47 = r47(r48)
+local function socket(r0: userdata, r1: string, r2: vector) -- Line: 404 | Name: socket
+    local Attachment = Instance.new("Attachment")
+    Attachment.Name = r1
+    Attachment.Position = r2
+    Attachment.Parent = r0
+    return Attachment
+end
+local function aimed(r0: userdata, r1: string, r2: vector, r3: vector) -- Line: 412 | Name: aimed
+    local Attachment = Instance.new("Attachment")
+    Attachment.Name = r1
+    Attachment.Position = r2
+    Attachment.Parent = r0
+    Attachment.CFrame = CFrame.lookAt(r2, r2 + r3)
+    return Attachment
+end
+local function emitter(r0: userdata, r1: string, r2: { any }) -- Line: 421 | Name: emitter
+    local ParticleEmitter = Instance.new("ParticleEmitter")
+    ParticleEmitter.Name = r1
+    ParticleEmitter.Enabled = false
+    ParticleEmitter.Rate = 0
+    ParticleEmitter.Texture = r2.texture
+    local r4
+    if typeof(r2.color) == "ColorSequence" then
+        r4 = r2.color
+    else
+        r4 = ColorSequence.new
+        r4 = r4(r2.color)
+    end
+    ParticleEmitter.Color = r4
+    ParticleEmitter.Size = r2.size
+    ParticleEmitter.Transparency = r2.transparency
+    ParticleEmitter.Lifetime = r2.lifetime
+    ParticleEmitter.Speed = r2.speed
+    ParticleEmitter.SpreadAngle = r2.spread or Vector2.zero
+    ParticleEmitter.Acceleration = r2.acceleration or vector.create(0, 0, 0)
+    ParticleEmitter.Drag = r2.drag or 0
+    ParticleEmitter.Rotation = r2.rotation or NumberRange.new(-180, 180)
+    ParticleEmitter.RotSpeed = r2.rotSpeed or NumberRange.new(0, 0)
+    ParticleEmitter.Orientation = r2.orientation or Enum.ParticleOrientation.FacingCamera
+    ParticleEmitter.EmissionDirection = r2.direction or Enum.NormalId.Top
+    ParticleEmitter.LightEmission = r2.lightEmission or 0.1
+    ParticleEmitter.LightInfluence = r2.lightInfluence or 0.35
+    ParticleEmitter.Brightness = r2.brightness or 1
+    ParticleEmitter.LockedToPart = r2.lockedToPart == true
+    if r2.area then
+        r4 = Enum.ParticleEmitterShape.Box
+        ParticleEmitter.Shape = r4
+        ParticleEmitter.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+    end
+    ParticleEmitter.Parent = r0
+    return ParticleEmitter
+end
+local function ribbon(r0: userdata, r1: string, r2: vector, r3: vector, r4: { any }) -- Line: 448 | Name: ribbon
+    local Trail = Instance.new("Trail")
+    Trail.Name = r1
+    local r7 = r1 .. "A"
+    local Attachment = Instance.new("Attachment")
+    Attachment.Name = r7
+    Attachment.Position = r2
+    Attachment.Parent = r0
+    local r8 = r1 .. "B"
+    r7 = Instance.new("Attachment")
+    r7.Name = r8
+    r7.Position = r3
+    r7.Parent = r0
+    Trail.Attachment0 = Attachment
+    Trail.Attachment1 = r7
+    Trail.Enabled = false
+    Trail.FaceCamera = r4.faceCamera == true
+    Trail.Lifetime = r4.lifetime
+    Trail.MinLength = 0.15
+    Trail.Texture = r4.texture
+    Attachment = if r4.stretch then Enum.TextureMode.Stretch else Enum.TextureMode.Wrap
+    Trail.TextureMode = Attachment
+    Trail.TextureLength = r4.textureLength
+    Trail.Color = r4.color
+    Trail.Transparency = r4.transparency
+    Trail.WidthScale = r4.widthScale
+    Trail.LightEmission = r4.lightEmission or 0.08
+    Trail.LightInfluence = 0.3
+    Trail.Parent = r0
+    return Trail
+end
+local function flowBeam(r0: userdata, r1: string, r2: number, r3: number, r4: { any }) -- Line: 468 | Name: flowBeam
+    local function anchorAt(r0_p7: string, r1_p7: number) -- Line: 470 | Name: anchorAt | Upvalues: ("r1" (copy), "r0" (copy))
+        local Attachment = Instance.new("Attachment")
+        Attachment.Name = r1 .. r0_p7
+        local fromMatrix = CFrame.fromMatrix
+        Attachment.CFrame = fromMatrix(Vector3.new(0, 0, r1_p7), vector.create(0, 0, 1), vector.create(1, 0, 0))
+        Attachment.Parent = r0
+        return Attachment
+    end
+    local Beam = Instance.new("Beam")
+    Beam.Name = r1
+    local Attachment = Instance.new("Attachment")
+    Attachment.Name = r1 .. "A"
+    local fromMatrix = CFrame.fromMatrix
+    Attachment.CFrame = fromMatrix(Vector3.new(0, 0, r2), vector.create(0, 0, 1), vector.create(1, 0, 0))
+    Attachment.Parent = r0
+    local r9 = r2 + r4.length
+    fromMatrix = Instance.new("Attachment")
+    fromMatrix.Name = r1 .. "B"
+    local fromMatrix_2 = CFrame.fromMatrix
+    fromMatrix.CFrame = fromMatrix_2(Vector3.new(0, 0, r9), vector.create(0, 0, 1), vector.create(1, 0, 0))
+    fromMatrix.Parent = r0
+    Beam.Attachment0 = Attachment
+    Beam.Attachment1 = fromMatrix
+    Beam.Enabled = false
+    Beam.FaceCamera = false
+    Beam.Segments = 16
+    Beam.Texture = r4.texture
+    Beam.TextureMode = Enum.TextureMode.Wrap
+    Beam.TextureLength = r4.textureLength
+    Beam.TextureSpeed = 0
+    Beam.Width0 = r3 * r4.width0
+    Beam.Width1 = r3 * r4.width1
+    Beam.CurveSize0 = r4.length * 0.45
+    Beam.CurveSize1 = 0
+    Beam.Color = r4.color
+    Beam.Transparency = r4.transparency
+    Beam.LightEmission = r4.lightEmission
+    Beam.LightInfluence = 0.3
+    Beam.ZOffset = r4.zOffset
+    Beam.Parent = r0
+    return {spec = r4, beam = Beam, far = Beam.Attachment1, start = r2}
+end
+local function steerFlow(r0: { any }, r1: number, r2: number, r3: number, r4: number, r5: boolean, r6: number, r7: number) -- Line: 495 | Name: steerFlow
+    local spec = r0.spec
+    local r9 = if r5 then 1.25 else 1
+    local r10_0 = spec.length * (math.min(r3, 1) * 0.55 + 0.45) * r9
+    local r11 = math.clamp(r4 * 0.5 * r10_0 * r10_0, r10_0 * -0.35, r10_0 * 0.35)
+    r0.far.Position = Vector3.new(r11, 0, r0.start + r10_0)
+    r0.beam.CurveSize0 = r10_0 * 0.45
+    r0.beam.Width1 = r1 * spec.width1 * r9 * (math.sin(r6 * 4.3 + r7) * 0.07 + 1)
+    r0.beam.TextureSpeed = spec.flow * r2 / spec.textureLength
+end
+local function resize(r0: userdata, r1: number) -- Line: 509 | Name: resize
+    local r2 = table.create(#r0.Size.Keypoints)
+    for r6, r7 in r0.Size.Keypoints do
+        local new_2 = NumberSequenceKeypoint.new
+        table.insert(r2, new_2(r7.Time, r7.Value * r1, r7.Envelope * r1))
+    end
+    r0.Size = NumberSequence.new(r2)
+    local new = NumberRange.new
+    r0.Speed = new(r0.Speed.Min * r1, r0.Speed.Max * r1)
+    r0.Acceleration *= r1
+end
+local r53 = {}
+local function styleOf(r0: string) -- Line: 522 | Name: styleOf | Upvalues: ("freeze" (copy), "r53" (copy))
+    local r1_0 = freeze[r0]
+    if not r1_0 and not r53[r0] then
+        r53[r0] = true
+        warn("FishRidersEffects has no VFX style for race item " .. r0)
+    end
+    return r1_0
+end
+local function hullOf(r0: userdata) -- Line: 533 | Name: hullOf
+    local VisualOffset = r0:GetAttribute("VisualOffset")
+    local r3 = typeof(VisualOffset) == "CFrame"
+    assert(r3, "Fish Riders wake requires the mount VisualOffset attribute")
+    local BoundingBox, r3 = r0:GetBoundingBox()
+    local r4 = VisualOffset * r0:GetPivot():ToObjectSpace(BoundingBox)
+    local r5, r6 = vector.create(1, 1, 1) * (1/0), vector.create(-1, -1, -1) * (1/0)
+    for r10, r11 in {-0.5, 0.5} do
+        for r15, r16 in {-0.5, 0.5} do
+            for r20, r21 in {-0.5, 0.5} do
+                local r24 = r3 * Vector3.new(r11, r16, r21)
+                BoundingBox = r4:PointToWorldSpace(r24)
+                r5, r6 = r5:Min(BoundingBox), r6:Max(BoundingBox)
+            end
+        end
+    end
+    return {bow = r5.Z, stern = r6.Z, halfWidth = math.max(- r5.X, r6.X)}
+end
+function ReplicatedStorage.new(r0: userdata, r1_p32: userdata, r2_p32: number, r3_p32: any, r4_p32: CFrame?) -- Line: 552 | Name: new | Upvalues: ("PlayerSettings" (copy), "emitter" (copy), "resize" (copy), "freeze" (copy), "r31" (copy), "r5" (copy), "r32" (copy), "r33" (copy), "r34" (copy), "r10" (copy), "r28" (copy), "r29" (copy), "freeze_4" (copy), "r53" (copy), "r45" (copy), "r41" (copy), "r44" (copy), "ribbon" (copy), "r6" (copy), "r3" (copy), "r42" (copy), "r43" (copy), "r46" (copy), "r4" (copy), "r2" (copy), "r47" (copy), "hullOf" (copy), "flowBeam" (copy), "r13" (copy), "freeze_2" (copy), "new_3" (copy), "r17" (copy), "r18" (copy), "r19" (copy), "r20" (copy), "r38" (copy), "freeze_3" (copy), "r21" (copy), "r22" (copy), "r23" (copy), "r25" (copy), "r26" (copy), "r27" (copy), "r35" (copy), "r36" (copy), "r37" (copy), "r39" (copy), "r40" (copy), "steerFlow" (copy), "r15" (copy), "new_4" (copy))
+    local function surfaceAt(r0: vector) -- Line: 555 | Name: surfaceAt | Upvalues: ("r3_p32" (copy), "r4_p32" (copy), "r2_p32" (copy))
+        if r3_p32 and r3_p32.Kind == "Ribbon" and r4_p32 then
+            local r1 = r4_p32 * r3_p32.Surface(r4_p32:PointToObjectSpace(r0))
+            return r1.Rotation + (r0 - r1.UpVector * (r0 - r1.Position):Dot(r1.UpVector)) + r1.UpVector * 0.14
+        end
+        return CFrame.new(r0.X, r2_p32 + 0.14, r0.Z)
+    end
+    local FishRidersWaterVFX = Instance.new("Folder")
+    FishRidersWaterVFX.Name = "FishRidersWaterVFX"
+    FishRidersWaterVFX.Parent = workspace
+    local r7_p32, r8, r9_0 = {}, {}, {}
+    local r10_0, r11_0, r12_0 = {}, {}, {}
+    local r13_0 = true
+    local r14_p32 = PlayerSettings.Get(r1_p32, "VfxEnabled")
+    local r15_p32 = (-1/0)
+    local r16_p32 = {}
+    local function remember(r0) -- Line: 580 | Name: remember | Upvalues: ("r10_0" (copy), "r11_0" (copy), "r12_0" (copy))
+        if r0:IsA("ParticleEmitter") then
+            r10_0[r0] = true
+            return r0
+        end
+        if r0:IsA("Trail") then
+            r11_0[r0] = true
+            return r0
+        end
+        if r0:IsA("Beam") then r12_0[r0] = true end
+        return r0
+    end
+    local function forget(r0: userdata) -- Line: 592 | Name: forget | Upvalues: ("r10_0" (copy), "r11_0" (copy), "r12_0" (copy))
+        r10_0[r0] = nil
+        r11_0[r0] = nil
+        r12_0[r0] = nil
+        local Descendants, r2, r3 = r0:GetDescendants()
+        for r4, r5 in Descendants, r2, r3 do
+            r10_0[r5] = nil
+            r11_0[r5] = nil
+            r12_0[r5] = nil
+        end
+    end
+    local function clear() -- Line: 600 | Name: clear | Upvalues: ("r10_0" (copy), "r11_0" (copy), "r12_0" (copy))
+        for r3 in r10_0 do
+            if r3.Parent then
+                r3.Enabled = false
+                r3:Clear()
+            end
+        end
+        for r3 in r11_0 do
+            if r3.Parent then
+                r3.Enabled = false
+                r3:Clear()
+            end
+        end
+        for r3 in r12_0 do
+            if r3.Parent then r3.Enabled = false end
+        end
+    end
+    local function waterPart(r0: string, r1: vector) -- Line: 619 | Name: waterPart | Upvalues: ("FishRidersWaterVFX" (copy))
+        local Part = Instance.new("Part")
+        Part.Name = r0
+        Part.Size = r1
+        Part.Transparency = 1
+        Part.Anchored = true
+        Part.CanCollide = false
+        Part.CanTouch = false
+        Part.CanQuery = false
+        Part.CastShadow = false
+        Part.Parent = FishRidersWaterVFX
+        return Part
+    end
+    local r21_p32 = r1_p32:GetAttributeChangedSignal(PlayerSettings.AttributeName("VfxEnabled"))
+    r21_p32 = r21_p32:Connect(function() -- Line: 629 | Upvalues: ("r14_p32" (ref), "PlayerSettings" (upval), "r1_p32" (copy), "clear" (copy))
+        r14_p32 = PlayerSettings.Get(r1_p32, "VfxEnabled")
+        if not r14_p32 then clear() end
+    end)
+    local function burst(r0: vector, r1: { any }) -- Line: 639 | Name: burst | Upvalues: ("r14_p32" (ref), "r13_0" (ref), "FishRidersWaterVFX" (copy), "emitter" (upval), "resize" (upval), "r9_0" (copy))
+        if not r14_p32 or not r13_0 then return end
+        local Burst = Instance.new("Part")
+        Burst.Name = "Burst"
+        Burst.Size = vector.create(1, 0.20000000298023224, 1)
+        Burst.Transparency = 1
+        Burst.Anchored = true
+        Burst.CanCollide = false
+        Burst.CanTouch = false
+        Burst.CanQuery = false
+        Burst.CastShadow = false
+        Burst.Parent = FishRidersWaterVFX
+        Burst.CFrame = CFrame.new(r0)
+        local Burst_2 = Instance.new("Attachment")
+        Burst_2.Name = "Burst"
+        Burst_2.Position = vector.create(0, 0, 0)
+        Burst_2.Parent = Burst
+        for r7, r8 in r1 do
+            local r9, r10, r11, r12 = r8[1], r8[2], r8[3], r8[4]
+            local r14_p20 = if r9.area then Burst else Burst_2
+            local r13 = emitter(r14_p20, "Burst" .. r7, r9)
+            if r11 then r13.Color = ColorSequence.new(r11) end
+            if r12 then resize(r13, r12) end
+            r13:Emit(r10)
+        end
+        r9_0[Burst] = true
+        task.delay(2.5, function() -- Line: 652 | Upvalues: ("r9_0" (upval), "Burst" (copy))
+            r9_0[Burst] = nil
+            Burst:Destroy()
+        end)
+    end
+    local function kindBurst(r0: string, r1: number) -- Line: 659 | Name: kindBurst | Upvalues: ("freeze" (upval), "r31" (upval), "r5" (upval), "r32" (upval), "r33" (upval), "r34" (upval), "r10" (upval))
+        local r2_0 = freeze[r0]
+        local r7_arg1 = if r2_0 then r2_0.secondary else r5
+        local r3 = {{r31, math.round(r1 * 12), r7_arg1}}
+        if r0 == "InkSplash" then
+            table.insert(r3, {r32, math.round(r1 * 20)})
+            return r3
+        end
+        if r0 == "JellyZap" then
+            table.insert(r3, {r33, math.round(r1 * 9)})
+            return r3
+        end
+        if r0 == "Whirlpool" then
+            local r10_arg2 = math.round(r1 * 2)
+            table.insert(r3, {r34, math.max(1, r10_arg2)})
+            return r3
+        end
+        if r0 == "AquaShield" then table.insert(r3, {r10, math.round(r1 * 30)}) end
+        return r3
+    end
+    local function waterBurst(r0: number) -- Line: 675 | Name: waterBurst | Upvalues: ("r28" (upval), "r29" (upval), "freeze_4" (upval))
+        local r1_0, r6 = {}, math.round(r0 * 3)
+        local r2_0 = {r28, math.max(1, r6), nil, r0}
+        local r3 = {r29, math.round(r0 * 30), nil, r0}
+        local r8 = math.round(r0 * 2)
+        r1_0[1] = r2_0
+        r1_0[2] = r3
+        r1_0[3] = {freeze_4, math.max(1, r8), nil, r0}
+        return r1_0
+    end
+    local function retire(r0: userdata) -- Line: 684 | Name: retire | Upvalues: ("r8" (copy), "kindBurst" (copy), "waterBurst" (copy), "burst" (copy), "surfaceAt" (copy), "r10_0" (copy), "r11_0" (copy), "r12_0" (copy))
+        local r1_0 = r8[r0]
+        if not r1_0 then return end
+        r8[r0] = nil
+        r1_0.ancestry:Disconnect()
+        r1_0.marked:Disconnect()
+        if r0.Parent then r0.LocalTransparencyModifier = 1 end
+        local RaceImpact = r0:GetAttribute("RaceImpact")
+        local r3 = (if RaceImpact == "Hit" then 1 else if RaceImpact == "Absorbed" then 1 else 0.55) * r1_0.scale
+        RaceImpact = r1_0.lastCFrame.Position
+        local r4 = kindBurst(r1_0.kind, r3)
+        if r1_0.kind ~= "AquaShield" then
+            for r8_p23, r9 in waterBurst(r3) do
+                table.insert(r4, r9)
+            end
+        end
+        local r6 = if r1_0.kind == "AquaShield" then RaceImpact else surfaceAt(RaceImpact).Position
+        burst(r6, r4)
+        for r8_p23, r9 in r1_0.owned do
+            r10_0[r9] = nil
+            r11_0[r9] = nil
+            r12_0[r9] = nil
+            local Descendants, r11, r12 = r9:GetDescendants()
+            for r13, r14 in Descendants, r11, r12 do
+                r10_0[r14] = nil
+                r11_0[r14] = nil
+                r12_0[r14] = nil
+            end
+            r9:Destroy()
+        end
+    end
+    local function track(r0_p26: userdata) -- Line: 708 | Name: track | Upvalues: ("r13_0" (ref), "r8" (copy), "freeze" (upval), "r53" (upval), "emitter" (upval), "r45" (upval), "r41" (upval), "r10_0" (copy), "r11_0" (copy), "r12_0" (copy), "resize" (upval), "r44" (upval), "ribbon" (upval), "r6" (upval), "r3" (upval), "r42" (upval), "r43" (upval), "FishRidersWaterVFX" (copy), "surfaceAt" (copy), "r46" (upval), "r4" (upval), "r2" (upval), "r47" (upval), "r0" (copy), "retire" (copy), "r14_p32" (ref))
+        if not r13_0 or r8[r0_p26] or not r0_p26:IsA("BasePart") then return end
+        local r1 = r0_p26.Name:match("^(%w+)Effect$")
+        local r2_arg3 = r1
+        if r2_arg3 then
+            r2_arg3 = freeze[r1]
+            if not r2_arg3 and not r53[r1] then
+                r53[r1] = true
+                warn("FishRidersEffects has no VFX style for race item " .. r1)
+            end
+        end
+        if not r1 or not r2_arg3 then return end
+        local r3_arg4 = math.max(r0_p26.Size.X, r0_p26.Size.Z)
+        local r4_arg5 = r3_arg4 / 11
+        local r5 = {}
+        local RaceItemVfx = r0_p26:GetAttribute("RaceLaunchAt")
+        local r8_p26 = typeof(RaceItemVfx) == "number"
+        assert(r8_p26, "Race item " .. r0_p26.Name .. " is missing RaceLaunchAt")
+        local r7_arg6 = {
+            part = r0_p26,
+            kind = r1,
+            style = r2_arg3,
+            scale = r4_arg5,
+            owned = r5,
+            skim = {},
+            launch = r0_p26.CFrame,
+            launchAt = RaceItemVfx,
+            velocity = r0_p26:GetAttribute("RaceVelocity") or vector.create(0, 0, 0),
+            owner = r0_p26:GetAttribute("RaceOwner"),
+            lastPosition = r0_p26.Position,
+            lastCFrame = r0_p26.CFrame,
+            idle = {},
+            ribbons = {}
+        }
+        RaceItemVfx = Instance.new("Attachment")
+        RaceItemVfx.Name = "RaceItemVfx"
+        RaceItemVfx.Position = vector.create(0, 0, 0)
+        RaceItemVfx.Parent = r0_p26
+        table.insert(r5, RaceItemVfx)
+        local r11 = if r1 == "AquaShield" then r45 else r41
+        r8_p26 = emitter(RaceItemVfx, "ItemGlint", r11)
+        if r8_p26:IsA("ParticleEmitter") then
+            r10_0[r8_p26] = true
+        elseif r8_p26:IsA("Trail") then
+            r11_0[r8_p26] = true
+        elseif r8_p26:IsA("Beam") then
+            r12_0[r8_p26] = true
+        end
+        local new = ColorSequence.new
+        r8_p26.Color = new(r2_arg3.secondary)
+        r8_p26.Rate = if r1 == "AquaShield" then 8 else 18
+        if r1 ~= "AquaShield" then resize(r8_p26, r4_arg5) end
+        table.insert(r7_arg6.idle, r8_p26)
+        local r13
+        if r1 == "AquaShield" then
+            r8_p26 = emitter(r0_p26, "ShieldBubbles", r44)
+            if r8_p26:IsA("ParticleEmitter") then
+                r10_0[r8_p26] = true
+            elseif r8_p26:IsA("Trail") then
+                r11_0[r8_p26] = true
+            elseif r8_p26:IsA("Beam") then
+                r12_0[r8_p26] = true
+            end
+            r8_p26.Rate = 10
+            table.insert(r5, r8_p26)
+            table.insert(r7_arg6.idle, r8_p26)
+        else
+            new = r0_p26.Size.Y * 0.35
+            r13 = Vector3.new(0, new, 0)
+            local r10 = ribbon(r0_p26, "ItemStreak", r13, Vector3.new(0, - new, 0), r6)
+            if r10:IsA("ParticleEmitter") then
+                r10_0[r10] = true
+            elseif r10:IsA("Trail") then
+                r11_0[r10] = true
+            elseif r10:IsA("Beam") then
+                r12_0[r10] = true
+            end
+            local primary = r2_arg3.primary
+            r13 = r3
+            r11 = ColorSequence.new(primary, r13)
+            r10.Color = r11
+            table.insert(r5, r10)
+            table.insert(r5, r10.Attachment0)
+            table.insert(r5, r10.Attachment1)
+            table.insert(r7_arg6.idle, r10)
+            table.insert(r7_arg6.ribbons, r10)
+            if r1 == "JellyZap" then
+                r10 = emitter(RaceItemVfx, "ItemZap", r42)
+                if r10:IsA("ParticleEmitter") then
+                    r10_0[r10] = true
+                elseif r10:IsA("Trail") then
+                    r11_0[r10] = true
+                elseif r10:IsA("Beam") then
+                    r12_0[r10] = true
+                end
+                r10.Rate = 14
+                resize(r10, r4_arg5)
+                table.insert(r7_arg6.idle, r10)
+            elseif r1 == "InkSplash" then
+                new = emitter(RaceItemVfx, "ItemInk", r43)
+                if new:IsA("ParticleEmitter") then
+                    r10_0[new] = true
+                elseif new:IsA("Trail") then
+                    r11_0[new] = true
+                elseif new:IsA("Beam") then
+                    r12_0[new] = true
+                end
+                new.Rate = 18
+                resize(new, r4_arg5)
+                table.insert(r7_arg6.idle, new)
+            end
+            primary, r13 = r1 .. "Skim", Vector3.new(r3_arg4 * 0.7, 0.2, r3_arg4 * 0.7)
+            r11 = Instance.new("Part")
+            r11.Name = primary
+            r11.Size = r13
+            r11.Transparency = 1
+            r11.Anchored = true
+            r11.CanCollide = false
+            r11.CanTouch = false
+            r11.CanQuery = false
+            r11.CastShadow = false
+            r11.Parent = FishRidersWaterVFX
+            r11.CFrame = surfaceAt(r0_p26.Position)
+            table.insert(r5, r11)
+            r7_arg6.carrier = r11
+            primary = ribbon(r11, "SkimWake", Vector3.new(- r3_arg4 * 0.4, 0, 0), Vector3.new(r3_arg4 * 0.4, 0, 0), r46)
+            if primary:IsA("ParticleEmitter") then
+                r10_0[primary] = true
+            elseif primary:IsA("Trail") then
+                r11_0[primary] = true
+            elseif primary:IsA("Beam") then
+                r12_0[primary] = true
+            end
+            r7_arg6.skimTrail = primary
+            table.insert(r7_arg6.ribbons, r7_arg6.skimTrail)
+            primary = {-1, 1}
+            for r15, r16 in primary do
+                local r19, r20 = "SkimSpray" .. r16, Vector3.new(r16 * r3_arg4 * 0.35, 0.3, - r3_arg4 * 0.2)
+                local r21 = Vector3.new(r16 * 0.75, 0.6, 0.55)
+                local Attachment = Instance.new("Attachment")
+                Attachment.Name = r19
+                Attachment.Position = r20
+                Attachment.Parent = r11
+                Attachment.CFrame = CFrame.lookAt(r20, r20 + r21)
+                r19, r20 = "SkimSpray", r4
+                local r17 = emitter(Attachment, r19, r20)
+                if r17:IsA("ParticleEmitter") then
+                    r10_0[r17] = true
+                elseif r17:IsA("Trail") then
+                    r11_0[r17] = true
+                elseif r17:IsA("Beam") then
+                    r12_0[r17] = true
+                end
+                resize(r17, r4_arg5)
+                table.insert(r7_arg6.skim, r17)
+            end
+            primary = emitter(r11, "SkimRipples", r2)
+            if primary:IsA("ParticleEmitter") then
+                r10_0[primary] = true
+            elseif primary:IsA("Trail") then
+                r11_0[primary] = true
+            elseif primary:IsA("Beam") then
+                r12_0[primary] = true
+            end
+            r7_arg6.ripples = primary
+            resize(r7_arg6.ripples, r4_arg5)
+            if r1 == "Whirlpool" then
+                primary = emitter(r11, "TrapSwirl", r47)
+                if primary:IsA("ParticleEmitter") then
+                    r10_0[primary] = true
+                elseif primary:IsA("Trail") then
+                    r11_0[primary] = true
+                elseif primary:IsA("Beam") then
+                    r12_0[primary] = true
+                end
+                primary.Rate = 2.5
+                resize(primary, r4_arg5)
+                table.insert(r7_arg6.idle, primary)
+            end
+        end
+        r7_arg6.ancestry = r0_p26.AncestryChanged:Connect(function() -- Line: 782 | Upvalues: ("r0_p26" (copy), "r0" (upval), "retire" (upval))
+            if not r0_p26:IsDescendantOf(r0) then retire(r0_p26) end
+        end)
+        r7_arg6.marked = r0_p26:GetAttributeChangedSignal("RaceImpact"):Connect(function() -- Line: 786 | Upvalues: ("retire" (upval), "r0_p26" (copy))
+            retire(r0_p26)
+        end)
+        r8[r0_p26] = r7_arg6
+        for r12, r13 in r7_arg6.idle do
+            r13.Enabled = r14_p32
+        end
+    end
+    local function advanceItems(r0: number, r1: number) -- Line: 796 | Name: advanceItems | Upvalues: ("r15_p32" (ref), "r8" (copy), "r14_p32" (ref), "surfaceAt" (copy), "r3_p32" (copy))
+        if r0 == r15_p32 then return end
+        r15_p32 = r0
+        for r5, r6 in r8 do
+            if not r5.Parent then continue end
+            if r6.owner == nil then
+                local Position = math.max(0, r0 - r6.launchAt)
+                r5.CFrame = (r6.launch + r6.velocity * Position) * CFrame.Angles(0, Position * 4, 0)
+            end
+            local Position = r5.Position
+            local r8_p27 = Vector3.new(Position.X - r6.lastPosition.X, 0, Position.Z - r6.lastPosition.Z)
+            local r9 = if r1 > 0 then r8_p27.Magnitude / r1 else 0
+            local r10 = r8_p27.Magnitude > 30
+            r6.lastPosition = Position
+            r6.lastCFrame = r5.CFrame
+            for r14_p27, r15_p27 in r6.idle do
+                r15_p27.Enabled = r14_p32
+            end
+            local r15_p27
+            if r6.carrier then
+                local r11 = surfaceAt(Position)
+                local Position_2 = r11.Position
+                local r13 = r14_p32 and (if r9 > 8 then not r10 else false)
+                r15_p27 = if r8_p27.Magnitude > 0.001 and (not r3_p32 or r3_p32.Kind ~= "Ribbon") then CFrame.lookAt(Position_2, Position_2 + r8_p27) else r11
+                r6.carrier.CFrame = r15_p27
+                r6.skimTrail.Enabled = r13
+                for r17, r18 in r6.skim do
+                    r18.Enabled = r13
+                    r18.Rate = 26
+                end
+                r6.ripples.Enabled = r14_p32
+                r6.ripples.Rate = if r13 then 10 else 3
+            end
+            if r10 then
+                for r14_p27, r15_p27 in r6.ribbons do
+                    r15_p27:Clear()
+                end
+            end
+        end
+    end
+    local r28_p32 = r0.ChildAdded:Connect(track)
+    local Children, r30_p32, r31_p32 = r0:GetChildren()
+    for r32_p32, r33_p32 in Children, r30_p32, r31_p32 do
+        track(r33_p32)
+    end
+    function r16_p32.Add(r0: number, r1: userdata) -- Line: 838 | Name: Add | Upvalues: ("r13_0" (ref), "r7_p32" (copy), "hullOf" (upval), "FishRidersWaterVFX" (copy), "flowBeam" (upval), "r13" (upval), "freeze_2" (upval), "r10_0" (copy), "r11_0" (copy), "r12_0" (copy), "ribbon" (upval), "new_3" (upval), "r17" (upval), "r18" (upval), "emitter" (upval), "r19" (upval), "r20" (upval), "r38" (upval), "freeze_3" (upval), "r21" (upval), "r22" (upval), "r23" (upval), "r25" (upval), "r26" (upval), "r27" (upval), "r28" (upval), "r29" (upval), "freeze_4" (upval), "r31" (upval), "r32" (upval), "r33" (upval), "r34" (upval), "r10" (upval), "r35" (upval), "r36" (upval), "r37" (upval), "r39" (upval), "r40" (upval))
+        assert(r13_0 and not r7_p32[r0], "Invalid Fish Riders wake ownership")
+        local r2 = hullOf(r1)
+        local halfWidth = r2.halfWidth
+        local bow, stern = r2.bow, r2.stern
+        r2 = (bow + stern) / 2
+        local r7_p28 = "Wake" .. r0
+        local Part = Instance.new("Part")
+        Part.Name = r7_p28
+        Part.Size = vector.create(1, 0.20000000298023224, 1)
+        Part.Transparency = 1
+        Part.Anchored = true
+        Part.CanCollide = false
+        Part.CanTouch = false
+        Part.CanQuery = false
+        Part.CastShadow = false
+        Part.Parent = FishRidersWaterVFX
+        local r8, r9 = "WakeStern" .. r0, Vector3.new(halfWidth * 1.6, 0.2, 4.5)
+        r7_p28 = Instance.new("Part")
+        r7_p28.Name = r8
+        r7_p28.Size = r9
+        r7_p28.Transparency = 1
+        r7_p28.Anchored = true
+        r7_p28.CanCollide = false
+        r7_p28.CanTouch = false
+        r7_p28.CanQuery = false
+        r7_p28.CastShadow = false
+        r7_p28.Parent = FishRidersWaterVFX
+        r9 = "WakeBow" .. r0
+        local r10_arg7 = Vector3.new(halfWidth * 1.8, 0.2, 2.6)
+        r8 = Instance.new("Part")
+        r8.Name = r9
+        r8.Size = r10_arg7
+        r8.Transparency = 1
+        r8.Anchored = true
+        r8.CanCollide = false
+        r8.CanTouch = false
+        r8.CanQuery = false
+        r8.CastShadow = false
+        r8.Parent = FishRidersWaterVFX
+        r9, r10_arg7 = halfWidth * 2, stern - 0.8
+        local r11 = flowBeam(Part, "FlowDrift", r10_arg7, r9, r13)
+        local r12_arg8 = flowBeam(Part, "FlowCore", r10_arg7, r9, freeze_2)
+        local beam = r11.beam
+        if beam:IsA("ParticleEmitter") then
+            r10_0[beam] = true
+        elseif beam:IsA("Trail") then
+            r11_0[beam] = true
+        elseif beam:IsA("Beam") then
+            r12_0[beam] = true
+        end
+        beam = r12_arg8.beam
+        if beam:IsA("ParticleEmitter") then
+            r10_0[beam] = true
+        elseif beam:IsA("Trail") then
+            r11_0[beam] = true
+        elseif beam:IsA("Beam") then
+            r12_0[beam] = true
+        end
+        beam = r10_arg7 + freeze_2.length * 0.6
+        local r14_arg9 = ribbon(Part, "FoamCore", Vector3.new(- halfWidth, 0, beam), Vector3.new(halfWidth, 0, beam), new_3)
+        if r14_arg9:IsA("ParticleEmitter") then
+            r10_0[r14_arg9] = true
+        elseif r14_arg9:IsA("Trail") then
+            r11_0[r14_arg9] = true
+        elseif r14_arg9:IsA("Beam") then
+            r12_0[r14_arg9] = true
+        end
+        local r16 = ribbon(Part, "KelvinPort", Vector3.new(- halfWidth - 1.9, 0, bow + 2.2), Vector3.new(- halfWidth + 0.7, 0, bow + 2.2), r17)
+        if r16:IsA("ParticleEmitter") then
+            r10_0[r16] = true
+        elseif r16:IsA("Trail") then
+            r11_0[r16] = true
+        elseif r16:IsA("Beam") then
+            r12_0[r16] = true
+        end
+        local Tail = ribbon(Part, "KelvinStarboard", Vector3.new(halfWidth - 0.7, 0, bow + 2.2), Vector3.new(halfWidth + 1.9, 0, bow + 2.2), r17)
+        if Tail:IsA("ParticleEmitter") then
+            r10_0[Tail] = true
+        elseif Tail:IsA("Trail") then
+            r11_0[Tail] = true
+        elseif Tail:IsA("Beam") then
+            r12_0[Tail] = true
+        end
+        local RaceStatus = Vector3.new(- halfWidth * 0.85, 0, bow + 0.9)
+        local Nose = ribbon(Part, "BowCollar", RaceStatus, Vector3.new(halfWidth * 0.85, 0, bow + 0.9), r18)
+        if Nose:IsA("ParticleEmitter") then
+            r10_0[Nose] = true
+        elseif Nose:IsA("Trail") then
+            r11_0[Nose] = true
+        elseif Nose:IsA("Beam") then
+            r12_0[Nose] = true
+        end
+        beam = {
+            r14_arg9, r16, Tail, Nose
+        }
+        local r15 = {}
+        r16 = {}
+        Tail = {-1, 1}
+        for Center, RaceStatus in Tail do
+            local r23_arg10, r24_arg11, r25_arg12 = "BowShoulder" .. RaceStatus, Vector3.new(RaceStatus * halfWidth * 0.8, 0.35, bow + 1.6), Vector3.new(RaceStatus * 0.8, 0.6, 0.55)
+            local Attachment = Instance.new("Attachment")
+            Attachment.Name = r23_arg10
+            Attachment.Position = r24_arg11
+            Attachment.Parent = Part
+            Attachment.CFrame = CFrame.lookAt(r24_arg11, r24_arg11 + r25_arg12)
+            r25_arg12 = emitter(Attachment, "BowSpray", r19)
+            if r25_arg12:IsA("ParticleEmitter") then
+                r10_0[r25_arg12] = true
+            elseif r25_arg12:IsA("Trail") then
+                r11_0[r25_arg12] = true
+            elseif r25_arg12:IsA("Beam") then
+                r12_0[r25_arg12] = true
+            end
+            r24_arg11 = r15
+            table.insert(r24_arg11, r25_arg12)
+            r25_arg12 = emitter(Attachment, "Spatter", r20)
+            if r25_arg12:IsA("ParticleEmitter") then
+                r10_0[r25_arg12] = true
+            elseif r25_arg12:IsA("Trail") then
+                r11_0[r25_arg12] = true
+            elseif r25_arg12:IsA("Beam") then
+                r12_0[r25_arg12] = true
+            end
+            r24_arg11 = r16
+            table.insert(r24_arg11, r25_arg12)
+        end
+        Nose = Vector3.new(0, 0.5, stern - 0.4)
+        Tail = Instance.new("Attachment")
+        Tail.Name = "Tail"
+        Tail.Position = Nose
+        Tail.Parent = Part
+        Tail.CFrame = CFrame.lookAt(Nose, Nose + vector.create(0, 0.8500000238418579, 1))
+        local NoseFlat = Vector3.new(0, 0.6, bow - 0.5)
+        Nose = Instance.new("Attachment")
+        Nose.Name = "Nose"
+        Nose.Position = NoseFlat
+        Nose.Parent = Part
+        Nose.CFrame = CFrame.lookAt(NoseFlat, NoseFlat + vector.create(0, 0.3499999940395355, -1))
+        local Center = Vector3.new(0, 0.2, bow - 0.5)
+        NoseFlat = Instance.new("Attachment")
+        NoseFlat.Name = "NoseFlat"
+        NoseFlat.Position = Center
+        NoseFlat.Parent = Part
+        RaceStatus = Vector3.new(0, 0.2, r2)
+        Center = Instance.new("Attachment")
+        Center.Name = "Center"
+        Center.Position = RaceStatus
+        Center.Parent = Part
+        r2 = assert(r1:FindFirstChild("Body", true), "Fish Riders wake requires Body Bone")
+        RaceStatus = Instance.new("Attachment")
+        RaceStatus.Name = "RaceStatus"
+        RaceStatus.Position = vector.create(0, 0, 0)
+        RaceStatus.Parent = r2
+        local r22_arg13 = {}
+        for i_0 = 1, 2 do
+            local r27_arg14 = "DizzyOrbit" .. i_0
+            local Attachment = Instance.new("Attachment")
+            Attachment.Name = r27_arg14
+            Attachment.Position = vector.create(0, 0, 0)
+            Attachment.Parent = r2
+            local r29_arg15, r30_arg16 = {socket = Attachment}, emitter(Attachment, "DizzyStars", r38)
+            if r30_arg16:IsA("ParticleEmitter") then
+                r10_0[r30_arg16] = true
+            elseif r30_arg16:IsA("Trail") then
+                r11_0[r30_arg16] = true
+            elseif r30_arg16:IsA("Beam") then
+                r12_0[r30_arg16] = true
+            end
+            r29_arg15.emitter = r30_arg16
+            table.insert(r22_arg13, r29_arg15)
+        end
+        local r24_arg11 = {
+            carrier = Part, sternArea = r7_p28, bowArea = r8,
+            sternOffset = CFrame.new(0, 0.05, stern + 1.5), bowOffset = CFrame.new(0, 0.05, bow + 1.2),
+            ribbons = beam, core = r14_arg9, spray = r15, spatter = r16,
+            flows = {r11, r12_arg8}, flowCore = r12_arg8, flowStart = r10_arg7, hullWidth = r9, half = halfWidth,
+            curvature = 0
+        }
+        local r25_arg12 = emitter(r7_p28, "FoamFlecks", freeze_3)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.flecks = r25_arg12
+        r25_arg12 = emitter(Tail, "RoosterTail", r21)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.rooster = r25_arg12
+        r25_arg12 = emitter(Tail, "BoostMist", r22)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.boostMist = r25_arg12
+        r25_arg12 = emitter(r7_p28, "SternChurn", r23)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.churn = r25_arg12
+        r25_arg12 = emitter(r7_p28, "Bubbles", r25)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.bubbles = r25_arg12
+        r25_arg12 = emitter(r7_p28, "WakeRipples", r26)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.ripples = r25_arg12
+        r25_arg12 = emitter(r8, "BowRipples", r27)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.bowRipples = r25_arg12
+        r25_arg12 = emitter(Center, "SplashCrown", r28)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.crown = r25_arg12
+        r25_arg12 = emitter(Center, "SplashSpray", r29)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.splash = r25_arg12
+        r25_arg12 = emitter(Center, "SplashRing", freeze_4)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.ring = r25_arg12
+        r25_arg12 = emitter(Center, "ImpactStars", r31)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.stars = r25_arg12
+        r25_arg12 = emitter(Center, "InkBurst", r32)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.ink = r25_arg12
+        r25_arg12 = emitter(Center, "ZapBurst", r33)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.zap = r25_arg12
+        r25_arg12 = emitter(Center, "SwirlBurst", r34)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.swirl = r25_arg12
+        r25_arg12 = emitter(Center, "ShieldPop", r10)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.pop = r25_arg12
+        r25_arg12 = emitter(Nose, "LaunchSpray", r35)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.launchSpray = r25_arg12
+        r25_arg12 = emitter(Nose, "LaunchSparkle", r36)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.launchSparkle = r25_arg12
+        r25_arg12 = emitter(NoseFlat, "LaunchRing", r37)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.launchRing = r25_arg12
+        r24_arg11.status = RaceStatus
+        r25_arg12 = emitter(RaceStatus, "ZapCrackle", r39)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.crackle = r25_arg12
+        r25_arg12 = emitter(RaceStatus, "InkDrip", r40)
+        if r25_arg12:IsA("ParticleEmitter") then
+            r10_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Trail") then
+            r11_0[r25_arg12] = true
+        elseif r25_arg12:IsA("Beam") then
+            r12_0[r25_arg12] = true
+        end
+        r24_arg11.inkDrip = r25_arg12
+        r24_arg11.orbits = r22_arg13
+        r24_arg11.body = r2
+        r24_arg11.forward = vector.create(0, 0, -1)
+        r24_arg11.lastPosition = nil
+        r24_arg11.speed = 0
+        r24_arg11.wasAirborne = false
+        r24_arg11.boosting = false
+        r24_arg11.primed = false
+        r24_arg11.hitSerial = nil
+        r24_arg11.shotSerial = nil
+        r7_p32[r0] = r24_arg11
+    end
+    local function fire(r0: userdata, r1: number, r2: Color3?) -- Line: 913 | Name: fire
+        if r2 then r0.Color = ColorSequence.new(r2) end
+        r0:Emit(r1)
+    end
+    function r16_p32.Update(r0: number, r1: CFrame, r2_p30: any, r3_p30: number, r4: number, r5_arg17: string) -- Line: 920 | Name: Update | Upvalues: ("r13_0" (ref), "advanceItems" (copy), "r7_p32" (copy), "r8" (copy), "surfaceAt" (copy), "r3_p32" (copy), "r2_p32" (copy), "r14_p32" (ref), "steerFlow" (upval), "r15" (upval), "new_3" (upval), "new_4" (upval), "freeze" (upval), "r5" (upval))
+        if not r13_0 then return end
+        advanceItems(r3_p30, r4)
+        local r6 = assert(r7_p32[r0], "Missing Fish Riders wake")
+        for Position_2, r11 in r8 do
+            if not (r11.owner ~= r0 or not Position_2.Parent) then Position_2.CFrame = r1 end
+        end
+        local Position = r1.Position
+        local r8_p30 = if r6.lastPosition and r4 > 0 then (Position - r6.lastPosition).Magnitude / r4 else r2_p30.speed
+        r6.lastPosition = Position
+        local r12 = math.min(r8_p30, 100)
+        local r11 = r12 - r6.speed
+        r6.speed += r11 * (1 - math.exp(r4 * -9))
+        r8_p30 = Vector3.new(r1.LookVector.X, 0, r1.LookVector.Z)
+        local forward = r6.forward
+        if r8_p30.Magnitude > 0.001 then r6.forward = r8_p30.Unit end
+        if r4 > 0 then
+            r12 = math.clamp(forward:Cross(r6.forward).Y, -1, 1)
+            r8_p30 = - math.asin(r12) / r4
+        else
+            r8_p30 = 0
+        end
+        forward = surfaceAt(Position)
+        local Position_2 = forward.Position
+        if r3_p32 and r3_p32.Kind == "Ribbon" then
+            r11 = forward
+        else
+            r11 = CFrame.lookAt
+            r11 = r11(Position_2, Position_2 + r6.forward)
+        end
+        r6.carrier.CFrame = r11
+        r6.sternArea.CFrame = r11 * r6.sternOffset
+        r6.bowArea.CFrame = r11 * r6.bowOffset
+        if r3_p32 and r3_p32.Kind == "Ribbon" then
+            r12 = (Position - Position_2):Dot(forward.UpVector)
+            r11 = not not (r12 > 3)
+        else
+            r11 = r2_p32 + 3 < Position.Y
+        end
+        Position_2 = r14_p32
+        if Position_2 then
+            Position_2 = false
+            if r5_arg17 == "Racing" then
+                Position_2 = not r2_p30.finish
+                if Position_2 then
+                    Position_2 = not r11
+                    if Position_2 then Position_2 = r6.speed > 5 end
+                end
+            end
+        end
+        forward = math.clamp(r6.speed / 54, 0, 1.6)
+        Position = r3_p30 < (r2_p30.boostUntil or 0) and not r2_p30.finish
+        for __up7, new in r6.spray do
+            new.Enabled = Position_2
+            new.Rate = forward * 16 + (if Position then 18 else 0)
+        end
+        for __up7, new in r6.spatter do
+            new.Enabled = Position_2
+            new.Rate = forward * 20
+        end
+        local r14_p30 = Position and 34 or forward * 9
+        r6.rooster.Enabled = Position_2
+        r6.rooster.Rate = r14_p30
+        r6.boostMist.Enabled = Position_2 and Position
+        r6.boostMist.Rate = 30
+        r6.churn.Enabled = Position_2
+        r6.churn.Rate = forward * 26
+        r6.flecks.Enabled = Position_2
+        r6.flecks.Rate = forward * 12
+        r6.bubbles.Enabled = Position_2
+        r6.bubbles.Rate = forward * 14
+        r6.ripples.Enabled = Position_2
+        r6.ripples.Rate = forward * 7
+        r6.bowRipples.Enabled = Position_2
+        r6.bowRipples.Rate = forward * 5
+        for __up7, new in r6.ribbons do
+            new.Enabled = Position_2
+        end
+        local r13
+        if Position_2 then
+            r13 = r8_p30 / math.max(r6.speed, 5)
+            local __up7
+            r14_p30, __up7 = -0.06, 0.06
+            r12 = math.clamp(r13, r14_p30, __up7)
+        else
+            r12 = 0
+        end
+        r6.curvature += (r12 - r6.curvature) * (1 - math.exp(r4 * -6))
+        for new, r17 in r6.flows do
+            r17.beam.Enabled = Position_2
+            steerFlow(r17, r6.hullWidth, r6.speed, forward, r6.curvature, Position, r3_p30, r0 * 1.7 + new * 2.3)
+        end
+        r12 = (r6.flowCore.far.Position.Z - r6.flowStart) * 0.6
+        forward = math.clamp(0.5 * r6.curvature * r12 * r12, -0.35 * r12, 0.35 * r12)
+        r6.core.Attachment0.Position = Vector3.new(forward - r6.half, 0, r6.flowStart + r12)
+        r6.core.Attachment1.Position = Vector3.new(forward + r6.half, 0, r6.flowStart + r12)
+        if Position ~= r6.boosting then
+            r14_p30 = if Position then r15 else new_3.transparency
+            r6.core.Transparency = r14_p30
+            r14_p30 = if Position then new_4 else new_3.widthScale
+            r6.core.WidthScale = r14_p30
+        end
+        if r6.primed and r14_p32 then
+            local r13
+            if r6.wasAirborne and not r11 and r5_arg17 == "Racing" then
+                r13 = r6.crown
+                r13:Emit(3)
+                r13 = r6.splash
+                r13:Emit(36)
+                r13 = r6.ring
+                r13:Emit(2)
+            end
+            if Position and not r6.boosting and Position_2 then
+                r6.splash:Emit(18)
+                r6.ring:Emit(1)
+                r6.boostMist:Emit(14)
+            end
+            if r2_p30.hitSerial and r2_p30.hitSerial ~= r6.hitSerial then
+                r12 = r2_p30.hitKind and freeze[r2_p30.hitKind]
+                r6.crown:Emit(2)
+                r6.splash:Emit(22)
+                r6.ring:Emit(1)
+                local stars = r6.stars
+                r14_p30 = if r12 then r12.secondary else r5
+                if r14_p30 then stars.Color = ColorSequence.new(r14_p30) end
+                stars:Emit(14)
+                if r2_p30.hitKind == "InkSplash" then
+                    stars = r6.ink
+                    stars:Emit(22)
+                elseif r2_p30.hitKind == "JellyZap" then
+                    stars = r6.zap
+                    stars:Emit(10)
+                elseif r2_p30.hitKind == "Whirlpool" then
+                    stars = r6.swirl
+                    stars:Emit(2)
+                end
+            end
+            if r2_p30.shotSerial and r2_p30.shotSerial ~= r6.shotSerial then
+                forward = r2_p30.shotKind and freeze[r2_p30.shotKind]
+                local r13
+                if r2_p30.shotKind == "AquaShield" then
+                    r13 = r6.pop
+                    r13:Emit(30)
+                    r13 = r6.ring
+                    r13:Emit(1)
+                else
+                    r13 = r6.launchSpray
+                    r13:Emit(16)
+                    r13 = r6.launchRing
+                    r13:Emit(1)
+                    r13 = r6.launchSparkle
+                    r14_p30 = if forward then forward.primary else r5
+                    if r14_p30 then r13.Color = ColorSequence.new(r14_p30) end
+                    r13:Emit(12)
+                end
+            end
+        end
+        r6.primed = true
+        r6.wasAirborne = r11
+        r6.boosting = Position
+        r6.hitSerial = r2_p30.hitSerial
+        r6.shotSerial = r2_p30.shotSerial
+        r11 = r6.body.TransformedWorldCFrame
+        local new = CFrame.new
+        r6.status.CFrame = r11:ToObjectSpace(new(r11.Position + vector.create(0, 3.200000047683716, 0)))
+        r6.crackle.Enabled = r14_p32 and r3_p30 < (r2_p30.stunUntil or 0)
+        r6.crackle.Rate = 16
+        local __up7 = r14_p32
+        if __up7 then __up7 = r3_p30 < (r2_p30.inkUntil or 0) end
+        r6.inkDrip.Enabled = __up7
+        r6.inkDrip.Rate = 14
+        for new, r17 in r6.orbits do
+            Position_2 = r3_p30 * 7 + new * 3.141592653589793
+            local r20, r22 = math.cos(Position_2) * 3.2, math.sin(Position_2) * 3.2
+            r8_p30 = r11.Position + Vector3.new(r20, 3.7, r22)
+            local r21 = CFrame.new(r8_p30)
+            r17.socket.CFrame = r11:ToObjectSpace(r21)
+            r20 = r14_p32
+            if r20 then r20 = r3_p30 < (r2_p30.slowUntil or 0) end
+            r17.emitter.Enabled = r20
+            r17.emitter.Rate = 12
+        end
+    end
+    function r16_p32.Destroy() -- Line: 1023 | Name: Destroy | Upvalues: ("r13_0" (ref), "r21_p32" (copy), "r28_p32" (copy), "clear" (copy), "r8" (copy), "r7_p32" (copy), "r9_0" (copy), "FishRidersWaterVFX" (copy), "r10_0" (copy), "r11_0" (copy), "r12_0" (copy))
+        if not r13_0 then return end
+        r13_0 = false
+        r21_p32:Disconnect()
+        r28_p32:Disconnect()
+        clear()
+        for r3, r4 in r8 do
+            r4.ancestry:Disconnect()
+            r4.marked:Disconnect()
+            for r8_p31, r9 in r4.owned do
+                r9:Destroy()
+            end
+        end
+        for r3, r4 in r7_p32 do
+            r4.status:Destroy()
+            for r8_p31, r9 in r4.orbits do
+                r9.socket:Destroy()
+            end
+        end
+        for r3 in r9_0 do
+            r3:Destroy()
+        end
+        FishRidersWaterVFX:Destroy()
+        table.clear(r7_p32)
+        table.clear(r8)
+        table.clear(r9_0)
+        table.clear(r10_0)
+        table.clear(r11_0)
+        table.clear(r12_0)
+    end
+    return r16_p32
+end
+return table.freeze(ReplicatedStorage)
